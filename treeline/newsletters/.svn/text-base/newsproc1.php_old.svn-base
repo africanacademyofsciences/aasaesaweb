@@ -1,0 +1,75 @@
+<?php
+//ini_set("display_errors", "yes");
+//error_reporting(E_ALL);
+
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");
+	//include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/functions.php");
+	//include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/ezSQL.class.php");
+	include ($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/newsletter.class.php");
+
+	session_start();
+
+
+	$nextPage = "../newsedit/?id = ".$_POST['id'];
+
+	if($_POST["hidden_save"] == "save"){
+
+		$nid = ($_POST['id']) ? $_POST['id'] : "";
+		$newsletter = new newsletter($nid);
+		
+		// 1 Validate subject && text
+		$newsletter->subject = $_POST['nl_subject'];
+		$newsletter->validateSubject();
+		$newsletter->html_text = $_POST['nl_text'];
+		$newsletter->validateHTMLText();
+		$newsletter->html_text2 = $_POST['nl_text2'];
+		$newsletter->html_text3 = $_POST['nl_text3'];
+		$newsletter->preferences = $_POST["preference"];
+		$newsletter->event_id = $_POST['guid'];
+		$newsletter->header = $_POST["header"];
+		
+		// Update an existing Newsletter
+		if($nid > 0){
+			$newsletter->update();
+			if ($newsletter->validate()) {
+				$nextPage = "/newsbrowse/"; 
+			}
+		}
+
+		// Create a new newsletter
+		else {
+			$newsletter->createNew();
+			if ($newsletter->validate()) {
+				if ($user->drawGroup()=="Superuser") {
+					$nextPage = "/newsbrowse/"; 
+				}
+			}
+			else $nextPage .= $newsletter->id;
+		}
+
+	}
+	else if ($_GET['action'] == "delete") {
+		$query = "DELETE FROM newsletter WHERE id = ".$_GET['id'];
+		if($db->query($query)){
+			$feedback = 'success';
+			$message = 'Newsletter was successfully deleted';
+		}
+		else{
+			$feedback = 'error';
+			$message = 'Newsletter was not deleted due to a technical error';
+		}
+		redirect('/treeline/newsletters/newsbrowse/?'.createFeedbackURL($feedback,$message));
+		//$nextPage = "../newsbrowse/?msg=41";
+	}
+	else{
+		//$nextPage = "../newsbrowse/";
+		redirect('/treeline/newsletters/newsbrowse/?'.createFeedbackURL('error','No action was selected so action was taken'));
+	}
+
+
+	$location = 'http://' . $_SERVER['HTTP_HOST']. dirname($_SERVER['PHP_SELF']) . (dirname($_SERVER['PHP_SELF']) == "/" ? "" : "/") . $nextPage;
+	//print "got to $location<br>"; 
+	redirect('/treeline/newsletters/'.$nextPage);
+	
+
+?>

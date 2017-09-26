@@ -1,0 +1,281 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+/* Standard text and link colours */
+body {
+	background-color: #6A913E;
+	color: #253710;
+}
+a {
+	color: #ED1B48;
+}
+a:hover {
+	color: #703B97;
+}
+a:active {
+	color: #703B97;
+}
+h1, h2, h3, h4, h5 {
+	color: #57237E;
+}
+
+
+/* ******************************************* */
+/* Access menu bar along the top of every page */
+div#access-menu {
+	background-color: #4B1970;
+}
+	/* Access menu text colour */
+	div#access-menu ul#accessMenu {
+		color: #FFF;
+	}
+		/* Access menu link colours */
+		div#access-menu ul#accessMenu li a {
+			color: #FFF;
+		}
+		div#access-menu ul#accessMenu li a:hover {
+			color: #B0D68B;
+		}
+		div#access-menu ul#accessMenu li a:active {
+			color: #B0D68B;
+		}
+/* ******************************************* */
+
+
+/* Banner tagline colours */
+div#header_img p,h1 a {
+	color: #fff;	
+}
+	div#header_img p,h1 a:hover { color: #EE3D63; }
+	div#header_img p,h1 a:active { color: #EE3D63; }
+
+/* Forum bar colours colours */
+/* these mimic the main menu colours so have put them here */
+div#primarycontent table.treeline caption.title,
+div#primarycontent table.treeline td.title {
+    background-color: #5A406E;
+    color: #FFF;
+}
+
+
+/* Main menu colours */
+ul#menu {
+	background-color: #4D7421;
+}
+ul#menu li {
+}
+	ul#menu li a {
+		color: #79C141;
+	}
+	ul#menu li a:hover {
+		color: #BC92DC;
+	}
+	ul#menu li a:active {
+		color: #BC92DC;
+	}
+ul#menu li.selected {
+	background-color: #4D7421;
+}
+	ul#menu li.selected a {
+		color: #FFF;
+	}
+	ul#menu li.selected a:hover {
+		color: #BC92DC;
+	}
+	ul#menu li.selected a:active {
+		color: #BC92DC;
+	}
+
+
+/* News ticker */
+li.update-title {
+	color: #F21848;
+}
+
+
+/* Line below the title on the home page and content pages */
+div#mainNews h2,
+h1.pagetitle {
+	border-bottom-color: #989898;
+}
+
+
+
+/* Landing panels + Normal panels*/
+div#primarycontent div.landing-panel,
+div#secondarycontent div.panel
+{
+	background-color: #BEED99;
+	color: #300B4C;
+}
+	div#primarycontent div.landing-panel h3,
+	div#secondarycontent div.panel h3
+	{
+		background-color: #4D7421;
+		color: #FFF;
+	}
+
+
+/* Extra CSS for workstream panels */
+/* Fonts/sizes are inherited from normal panels */
+div#secondarycontent div.workpanel {
+	background-color: #5A406E;
+	color: #FFF;
+}
+	div#secondarycontent div.workpanel p a {
+		color: #58247E;
+	}
+	div#secondarycontent div.workpanel p a:hover {
+		color: #1C3302;
+	}
+	div#secondarycontent div.workpanel p a:active {
+		color: #1C3302;
+	}
+	div#secondarycontent div.workpanel p a.level-1 {
+		background-color: #79C141;
+	}
+		div#secondarycontent div.workpanel p a.level-1:hover {
+			background-color: #79C141;
+		}
+	div#secondarycontent div.workpanel p a.level-2 {
+		background-color: #8ACE55;
+	}
+		div#secondarycontent div.workpanel p a.level-2:hover {
+			background-color: #79C141;
+		}
+	div#secondarycontent div.workpanel p a.level-3 {
+		background-color: #9ADC68;
+	}
+		div#secondarycontent div.workpanel p a.level-3:hover {
+			background-color: #79C141;
+		}
+	div#secondarycontent div.workpanel p a.level-4 {
+		background-color: #ABE87C;
+	}
+		div#secondarycontent div.workpanel p a.level-4:hover {
+			background-color: #79C141;
+		}
+	div#secondarycontent div.workpanel p.level-5 {
+		background-color: #BAF38E;
+	}
+		div#secondarycontent div.workpanel p a.level-5:hover {
+			background-color: #79C141;
+		}
+	div#secondarycontent div.workpanel p.level-6up {
+		background-color: #C8FBA0;
+	}
+		div#secondarycontent div.workpanel p a.level-6up:hover {
+			background-color: #79C141;
+		}
+	
+	
+	
+/* Calendar */
+/* Calendar header */
+ul#calendar-header li {
+	background-color: #A0DF6E;
+}
+	ul#calendar-header li a {
+		color: #4B1970;
+	}
+	ul#calendar-header li a:hover {
+		color: #EF1A48;
+	}
+	ul#calendar-header li a:active {
+		color: #EF1A48;
+	}
+	ul#calendar-header li.header-month {
+		color: #4B1970;
+	}
+	
+/* Calendar body */
+table#calendar td {
+	background-color: #A0DF6E;
+}
+	table#calendar td.inactive {
+		color: #FFFCFF;
+	}
+	table#calendar td.active {
+		color: #3A3320;
+	}
+		table#calendar td.active a {
+			color: #4B1970;
+		}
+		table#calendar td.active a:hover {
+			color: #EF1A48;
+		}
+		table#calendar td.active a:active {
+			color: #EF1A48;
+		}
+	table#calendar td p.today {
+		background-color: #CDA7E8;
+	}
+
+
+/* And finally some nice footer stuff we can change */
+div#footer div#copyright {
+	color: #FFF;
+	background-color: #5A406E;
+}
+	div#footer div#copyright a {
+		color: #FFF;
+	}
+	div#footer div#copyright a:hover {
+		color: #F994AA;
+	}
+	div#footer div#copyright a:active {
+		color: #F994AA;
+	}
+
+/* We suggest you ensure the footerMenu background colour is the same as the body above. */
+div#footerMenu {
+	background-color: #6A913E;
+}
+	div#footerMenu p {
+		color: #DEB8FA;
+	}
+		div#footerMenu p a {
+			color: #FFF;
+		}
+		div#footerMenu p a:hover {
+			color: #F89DB0;
+		}
+		div#footerMenu p a:active {
+			color: #F89DB0;
+		}
+		
+		
+	
+/* Content page stuff */
+
+/* Left hand menu */
+div#sidebar ul li a {
+	background-color: #B0D68B;
+	border-color: #B0D68B;
+	color: #7F49A7;
+}
+	div#sidebar ul li a:hover {
+		color: #4B721F;
+	}
+	div#sidebar ul li a:active {
+		color: #4B721F;
+	}
+div#sidebar ul li.subon a {
+	background-color: #7AC141;
+	border-color: #7AC141;
+	color: #fff;
+}
+
+/* Content forms */
+form#sendfriend fieldset.border,
+form.contact fieldset.border ,
+form#f-add-comment fieldset.border
+{
+        border-color: #999;
+}
+form#sendfriend,
+form.conact,
+form#f-add-comment {
+        background-color: #DEB9FA;
+}

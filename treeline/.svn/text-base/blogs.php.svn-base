@@ -1,0 +1,228 @@
+<?
+
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.init.php");
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/abuse.class.php");
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/blogs.class.php");
+
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/newsletter.class.php");
+	include ($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+	include ($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+
+	if ($_SESSION['treeline_user_group']=="Author") redirect("/treeline/");
+	
+	$abuse = new Abuse();
+
+	$action = read($_REQUEST,'action','');
+	$guid = read($_REQUEST,'guid','');
+	$blog_id = read($_REQUEST,'bid','');
+		
+		
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+
+	$title = read($_POST,'title','');
+
+	$keywords = read($_REQUEST,'keywords',false);
+	$category = read($_REQUEST,'category','xx');
+	$thispage = read($_REQUEST,'page',1);
+
+	$blogs = new Blog();
+	$blogs->setPerPage(10);
+	
+	if ($_SERVER['REQUEST_METHOD'] == "POST") {
+
+		if ($action=="delete") {
+			if ($blogs->delete($blog_id)) {
+				$mesage="Blog has been deleted";
+				$feedback="success";
+			}
+			$action="list";
+		}
+
+	}
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+	
+		//if ($action) print "acction($action)<br>\n";
+		
+		if ($action == 'suspend') {
+		
+			$blogs->suspend($blog_id, true);
+
+			// Need to clear any abuse reports affecting this post
+			$abuse->update($blog_id, "blogs", "ADMIN-SUSPEND");
+
+			$message[]="This blog has been suspended";
+			$feedback="success";
+			
+			$action = "list";
+		}
+		
+		// Delete a blog either from treeline list or abuse reporter
+		else if ($action=="abuse-delete" || $action=="delete") {
+			if ($blogs->delete($blog_id)) {
+				$abuse->update($blog_id, "blogs", ($action=="abuse-delete"?"DELETED":"ADMIN-DELETED"));
+			}
+			else $message[]="Failed to delete this post";
+			$action="";
+		}
+		
+		// Ignore an abuse report
+		else if ($action == "abuse-restore" || $action=="unsuspend") {
+			if ($blog_id>0) {
+				$blogs->suspend($blog_id, false);
+				$abuse->update($blog_id, "blogs", ($action=="abuse-restore"?"RESTORED":"ADMIN-UNSUSPEND"));
+			}
+			else $message[]="No blog ID passed";
+			$action="";
+			$actoin="list";
+		}
+
+		// Blogs page not yet created for this site.
+		else if ($action=="generate") {
+			$forum=new Page();
+			$forum->setParent($site->id);
+			$forum->setTitle('Blogs');
+			if (!$forum->generateName()) {
+				$message[]="A page already exists called blogs";
+			}
+			else {
+				$forum->setHidden(0);
+				$forum->setLocked(0);	
+				$forum->setSiteID($site->id);
+				$forum->setSortOrder(4);					
+				$forum->setTemplate(29);
+				$forum->setMetaDescription('Main blogs index page');
+				$forum->setMetaKeywords('Blogs');
+				
+				$forum->create(1);
+				
+				// Need to force publish
+				$db->query("UPDATE pages SET date_published=NOW() WHERE guid = '".$forum->getGUID()."'");
+				
+				//$nextsteps.= '<li><a href="/treeline/blogs/">Manage blogs</a></li>';
+				$message[]="A new blogs page has been created for this site.";
+				$message[]='You can access your blogs page at <a href="'.$site->link.'blogs" target="_blank">'.$site->name.'/blogs</a> or you can <a href="/treeline/pages/?action=edit&amp;guid='.$forum->getGUID().'">edit the blogs page attributes</a> and select a section of the site for blogs to appear in';
+				$action = '';
+			}
+		}
+		
+	}
+
+
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = '
+
+	
+';
+
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Blogs : '.ucwords(str_replace("-", " ", $action)) : 'Personal pages';
+	$pageTitle =  $pageTitleH2;
+	$pageClass = 'blogs';
+
+
+
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');
+
+
+
+
+?>
+
+
+<div id="primarycontent">
+<div id="primary_inner">
+<?php
+
+echo drawFeedback($feedback,$message);
+if ($nextsteps) echo treelineList($nextsteps, "Next steps", "blue");
+
+
+	if (!$action) {
+		
+		// Lets check there is really a forum?
+		if (!$db->get_var("SELECT guid FROM pages where template=29 AND msv=".$site->id)) {
+			$page_html='<p>This site does not have a blogs page.</p>';
+			if ($_SESSION['treeline_user_group']=="Superuser") $page_html.='<p>Press <a href="/treeline/blogs/?action=generate">here</a> if you would like to create a blogs index for this site.</p>';
+			$page_title = 'Blogs page does not exist';
+			echo treelineBox($page_html, $page_title, "blue");
+		}
+		else $action="list";	
+	}
+
+	if ($action=="list") {
+
+		$page_html='
+		<form id="treeline" action="/treeline/blogs/'.($DEBUG?'?debug':"").'" method="post">
+		<fieldset>
+			<input type="hidden" name="action" value="'.$action.'" />
+			<label for="keywords">Search for: </label>
+			<input type="text" name="keywords" id="keywords" value="'.$keywords.'" /><br />
+			<label for="category">Search by:</label>
+			<select name="category" id="category">
+				<option value="xx">Select</option>
+				<option value="title" '.($category=='title'?'selected="selected"':"").'>Title</option>
+				<option value="author" '.($category=='author'?'selected="selected"':"").'>Author</option>
+				<!-- <option value="abuse" '.($category=='abuse'?'selected="selected"':"").'>Reported as abuse</option> -->
+			</select><br />
+			<input type="hidden" name="findcat" value="1" />
+			<fieldset class="buttons">
+				<input name="filter" type="submit" class="submit" value="Search" />
+			</fieldset>
+		</fieldset>
+		</form>
+		';
+		echo treelineBox($page_html, "Find existing blogs to manage", "blue");
+		
+		$category = ($category == 'xx') ? '' : $category;
+		
+		if(!$category && $keywords) $category="title";
+		else if(!$keywords && $category ) {
+			$feedback = 'error';
+			$message = 'You need to specify keywords to search with.';
+			echo drawFeedback($feedback,$message);
+		}
+		
+		if( (!$category && !$keywords) || ($category && $keywords) ) {
+			
+			if (!$category && !$keywords) {
+				echo treelineBox($abuse->manage("blogs"), "Manage abuse reports");
+			}
+
+			$blog_list = $blogs->drawBlogsList($thispage,$category,$keywords);
+			if ($blog_list) echo $blog_list;
+			else {
+				echo '<p>No blogs have been created yet.</p>';
+			}
+		}
+		
+
+	}
+	else if ($action=="delete") { 
+
+		$page_html = '
+			<form id="treeline" action="'.$_SERVER['PHP_SELF'].($DEBUG?'?debug':'').'" method="post">
+				<fieldset>
+					<input type="hidden" name="action" value="'.$action.'" />
+					<input type="hidden" name="bid" value="'.$blog_id.'" />
+					</legend>
+					<p class="instructions">You are about to delete this blog. <strong>Are you sure?</strong></p>
+					<p class="instructions">To <strong>preview</strong> this page first, <a class="thickbox" href="'.$site->link.'blogs/?bid='.$blog_id.'&amp;mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=520&amp;width='.$site->getConfig("site_page_width").'" target="_blank">click here</a>.</p>
+					<fieldset class="buttons">
+						<button type="submit" class="submit">Delete</button>
+					</fieldset>
+				</fieldset>
+			</form>
+			';
+		$page_title = 'Delete blog: '.$db->get_var("SELECT title FROM blogs where id=".$blog_id);
+		echo treelineBox($page_html, $page_title, "blue");
+	}
+	
+
+?>
+</div>
+</div>
+<?php 
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); 
+?>

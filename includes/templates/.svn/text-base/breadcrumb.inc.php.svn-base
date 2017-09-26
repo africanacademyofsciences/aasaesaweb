@@ -1,0 +1,29 @@
+<div id="breadcrumb">
+<?php
+	if($pageGUID == $siteID) {
+		//print "running homepage";
+		//$breadcrumb = $breadcrumb->draw();
+	}
+	else if( isset($storeBreadcrumb) && $storeBreadcrumb>'' ){
+		$breadcrumb = '<a href="/">Home</a> | <a href="'. $storeURL .'">Shop</a>'.$storeBreadcrumb;
+	}else if( $location[0]=='shopping-basket' ){
+		$mode = read($_REQUEST,'mode',false);
+		if( !$mode ){
+			$breadcrumb = '<a href="/">Home</a> | <a href="'. $storeURL .'">Shop</a> | Shopping Basket';
+		}else{
+			$modeTxt = str_replace('_',' ',$mode);
+			$modeTxt = ucwords($modeTxt);
+			$breadcrumb = '<a href="/">Home</a> | <a href="'. $storeURL .'">Shop</a> | ';
+			$breadcrumb .= '<a href="'. $storeURL .'/shopping-basket">Shopping Basket</a> | ';
+			$breadcrumb .= $modeTxt;
+		}
+	}
+	else{
+		$breadcrumb = $page->drawBreadcrumb($pageGUID);
+	}
+	
+	
+	if ($mode=="edit" || $mode=="preview") $breadcrumb = ' <a href="#">section</a> > <a href="#">page title</a>';
+?>
+<p>You are here | <?= $breadcrumb ?></p>
+</div>

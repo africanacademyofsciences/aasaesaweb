@@ -1,0 +1,13 @@
+<?php
+	if ($mode=="preview" && $showPreviewMsg) {
+		$previewMsgShown=true;
+		?>
+        <p id="preview_msg">
+        	<span>
+            	This is a live preview. Please <a href="javascript:self.close();">close this page</a> when you are ready to continue.
+            </span>
+        </p>
+		<?php
+	}
+
+?>

@@ -1,0 +1,208 @@
+<?php	
+
+	class News {
+		public $config;
+		private $totalresults;
+	
+		public function __construct() {
+			// This is loaded when the class is created	
+			return;
+		}
+		
+		public function getNews($guid,$per_page,$current_page=''){
+			global $db;
+			//print "gN($guid, $per_page, $current_page)<br>\n";
+			if($current_page == 0 || $current_page == 1 || !$current_page){
+					$limit = '0,'.$per_page;
+			} else{
+				$limit = ($current_page-1)*$per_page.','.$per_page;
+			}
+			
+			$query = "FROM pages p
+				INNER JOIN content c ON p.guid = c.parent
+				AND p.parent = '$guid' 
+				AND p.offline = 0
+				AND c.placeholder = 'content' AND c.revision_id = 0 
+				GROUP BY c.guid ORDER BY p.date_created 
+				";
+			//print "SELECT COUNT(*) ".$query."<br>\n";
+			if ($results = $db->get_results("SELECT COUNT(*) ".$query)) {
+				$this->totalresults = sizeof($results);
+
+				$query = "SELECT p.guid, p.title, c.content, p.meta_description, 
+					p.date_created, 
+					date_format(p.date_created, '%D') as day, 
+					date_format(p.date_created, '%d') as nday, 
+					date_format(p.date_created, '%b') as month, 
+					date_format(p.date_created, '%m') as nmon, 
+					date_format(p.date_created, '%Y') as year,
+					c.revision_date
+					$query 
+					DESC LIMIT $limit";
+				//print "$query<br> \n";
+				$results = $db->get_results($query);
+				return $results;
+			}
+			return '';
+		}
+		
+		public function createSummary($content,$meta_desc=''){
+			// create a sumamry beased on a subsection of the content or the meta tag
+			global $db;
+			
+			if($meta_desc){
+				$html = $meta_desc;
+			}
+			else{
+				$html = $this->limitWords($content, 50);
+			}
+			
+			return $html;
+			
+		}
+		
+		public function drawNews($parent, $per_page, $current_page = 1){
+			// draw out news summaries, blog style with headings,dates & links
+			//print "dn($parent, $per_page, $current_page)<br>";
+			global $db, $labels;
+			
+			if(!$per_page || $per_page == 0){
+				$per_page = 5;
+			}
+			
+			if(!$current_page || $current_page == 0){
+				$current_page = 1;
+			}
+			//print "getNews($parent, $per_page, $current_page)<br>";
+			$items = $this->getNews($parent, $per_page, $current_page);
+			
+			if($items){
+				$html = '';
+				foreach($items as $item){
+					//page (for links)
+					$img = $this->firstImg($item->content);
+					$style = ($img?"background: url('/$img') no-repeat; padding-left: 110px;":"");
+					
+					$page = new Page();
+					
+					$html .= '<div class="item" style="'.$style.'">'."\n\t";
+					$html .= '<h3><a href="'.$page->drawLinkByGUID($item->guid).'">'.$item->title."</a></h3>\n\t";
+					// show revision date (if it exists)
+					//if(getUFDate($item->date_created) != getUFDate($item->revision_date) && 0){
+					//	$html .= ' | <em class="modified">Modified: '.getUFDate($item->revision_date)."</em>";
+					//}					
+					$html .= "</p>\n\t";
+					$html .= '<div class="summary">'."\n\t";
+					$html .= '<p>'.$this->createSummary($item->content, $item->meta_description)."</p>\n\t";
+					//$html .= '<p class="readmore"><a href="'.$page->drawLinkByGUID($item->guid).'" title="Continue reading '.$item->title.'">'.$labels['more_link']['txt'].'</a></p>'."\n\t";
+					//$html .= "<hr />\n\t";
+					$html .= "</div>\n\t";
+					$html .= '<p class="date">'.$labels['POSTED']['txt'].': '.$item->day.' '.$labels[strtoupper($item->month)]['txt'].' '.$item->year;
+					$html .= "</div>\n\t";
+				}
+				//$html .= drawPagination($parent,$per_page,$current_page);
+				$html .= drawPagination($this->totalresults, $per_page, $current_page, "");
+			}
+			else{
+				$html = '<p>There is no news currently</p>';
+			}
+			
+			return $html;
+		}
+		
+		public function drawLatestPanel() {
+			global $db, $siteData, $page, $labels;
+			$html = $ticker = '';
+			// Need to find the first news section for this microsite
+			$query="SELECT guid AS news_parent FROM pages WHERE msv=".$siteData->msv." AND template=4 ORDER BY date_created LIMIT 1";
+			$items = $this->getNews($db->get_var($query), 5, 0);
+			if($items){
+				foreach($items as $item){
+					$html.='<li class="news"><a href="'.$page->drawLinkByGUID($item->guid).'"><span class="date">'.$item->nday.'/'.$item->nmon.'/'.$item->year.'</span> '.addslashes($item->title)."</a></li>";
+				}
+			}
+			return $html;
+		}
+		
+		public function drawLatestTicker() {
+			global $db, $siteData, $page, $labels;
+			$html = $ticker = '';
+			// Need to find the first news section for this microsite
+			$query="SELECT guid AS news_parent FROM pages WHERE msv=".$siteData->msv." AND template=4 ORDER BY date_created LIMIT 1";
+			$items = $this->getNews($db->get_var($query), 5, 0);
+			if($items){
+		  	 	$ticker_script = file_get_contents($_SERVER['DOCUMENT_ROOT'].'/behaviour/pause_marquee.js'); 
+				foreach($items as $item){
+					$ticker.='<a href="'.$page->drawLinkByGUID($item->guid).'" style="padding-right:50px;">'.addslashes($item->title)."</a>";
+				}
+				$html = '<table cellpadding="0" cellspacing="0"><tr><td>';
+//				$html .= '<marquee width="820">'.$html.'</marquee>';
+				$html .= str_replace("@@TICKER@@", $ticker, $ticker_script);
+				$html .= '</td></tr></table>';
+			}
+			return $html;
+		}
+		
+		// Collect bit for the content for the main news story
+		public function drawMainNews($content, $show) {
+			switch($show) {
+				case "TITLE" : 
+					if (preg_match("/<h3>(.*)<\/h3>/", $content, $reg)) {
+						return '<h1>'.$reg[1].'</h1>';
+					}
+					return "";
+					break;
+				// Just strip the title from the start of the body
+				case "BODY" : 
+					$copy = preg_replace("/<h3>(.*?)<\/h3>/", '', $content, 1);
+					if (!$copy) $copy="";
+					return $copy;
+					break;
+				default :
+					break;
+			}
+			
+		}
+		
+		public function drawMainStory($n) {
+			global $db;
+			// Collect the story and return stufff.
+			$query="select * from pages p left join content c on p.guid=c.parent where p.guid = (select value from config where name='home_story_".$n."') and c.revision_id=0 and c.placeholder='content'";
+			if ($story=$db->get_row($query)) {
+				$html='<h'.$n.'>'.$story->title.'</h'.$n.'><p>'.$this->limitWords($story->content, 1000)."</p>";			
+				return $html;
+			}
+			else return $query;
+			
+		}
+
+		private function firstImg($content, $new_size="100x100") {
+			$newsimg = pullImage($content);
+			// Try to get the correctly sized image if it exists
+			if (preg_match("/(\d*)x(\d*)\.(.*)$/", $newsimg, $reg)) {
+				$newsimg = str_replace($reg[1].'x'.$reg[2], $new_size, $newsimg);
+			}
+			if (!file_exists($_SERVER['DOCUMENT_ROOT']."/".$newsimg)) {
+				$newsimg="/img/layout/news-default.gif";
+				$newsimg = '';
+			}
+			return $newsimg;
+		}
+
+		
+		public function limitWords($content,$cutoff){
+			///strip tags...
+			$content = strip_tags(nl2br(html_entity_decode($content))); //this prevents line breaks, images, etc from being counted...
+			$wordcount = str_word_count($content);
+			$wordindex = str_word_count($content, 1,'.,-\'"\\/?&!£$%^*()_-+=#~{[]}:;|1234567890');
+			$wordlimit = ($wordcount<$cutoff) ? $wordcount : $cutoff-1;
+			
+			if($wordcount > $wordlimit){
+				$wordindex = array_slice($wordindex,0,$wordlimit);
+				$content = implode(' ',$wordindex).'...';
+			}
+			return $content;	
+		}
+	}
+	
+?>

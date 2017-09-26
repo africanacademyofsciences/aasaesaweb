@@ -1,0 +1,533 @@
+<?php	
+	class Placeholder {
+	
+		// A couple of conventions:
+		
+		// load() loads an object
+		// save() saves an object
+		// get() gets a value
+		// put() updates a value ?
+		// draw() outputs data as HTML, or a string usable in an HTML page
+	
+		public $guid; // Should this be private? Should ALL these be private because we access them via functions?
+		public $content;
+		public $name;
+		public $title;
+		public $revision_id;
+		public $revision_date;
+		public $blog_date;
+		public $age;
+		public $mode;
+		public $parent;
+				
+		public function __construct() {
+			// This is loaded when the class is created	
+			$this->setMode('view'); // set the default mode
+		}	
+		
+		public function setMode($mode) {
+			$this->mode = $mode;
+		}
+		
+		public function setContent($content) {
+			$this->content = $content;
+		}
+		
+		public function getMode() {
+			return $this->mode;
+		}
+		
+		public function getGUID(){
+			return $this->guid;
+		}
+		
+	}
+	
+	class HTMLPlaceholder extends Placeholder {
+
+		public $height;
+		public $width;
+
+		public function __construct() {
+			// This is loaded when the class is created
+			// Set some default dimensions for a WYSIWYG area:
+			$this->height = '500px';
+			$this->width = '100%';			
+		}	
+
+		function setHeight($height) {
+			$this->height = $height;
+		}
+		
+		function setWidth($width) {
+			$this->width = $width;
+		}		
+
+		public function load($parent,$name,$restore_id = 0, $revision_id=0) {
+				
+			global $db, $page, $mode, $siteData;
+			//print "load in mode($mode) this mode(".$this->mode.")<br>\n";
+			// If we're editing or previewing the page, we want to look at the very latest version, so:
+			$query = "SELECT c.*,
+				date_format(c.revision_date, '%D %M %Y') as blog_date, datediff(now(), c.revision_date) as age 
+				FROM content c WHERE parent = '$parent' AND placeholder = '$name'";
+			if ($mode == 'edit' || $mode == 'preview' || 
+				$mode == 'save' || 
+				$this->mode=="inline-preview" || $this->mode=="inline-edit") 
+			{
+				$query .= ' ORDER BY revision_id DESC LIMIT 1';	
+			}
+			else if($mode == 'restore' ){ // restore mode shows content based on id (from query string)
+				$query .= ' AND id = '.$restore_id;	
+			}
+			else {
+				$query .= ' AND revision_id = '.($revision_id+0);	
+			}
+			//print "Load placeholder ($query)<br>";
+			
+			$data = $db->get_row($query);	
+			if ($db->num_rows == 0) {
+				//print "failed to load($query)<br>";
+				if ($mode == 'edit' || $this->getMode()=="inline-edit") {
+					// If the placeholder doesn't appear in the content table, and we're trying to editing it, insert it into the database
+					// This situation arises when we're editing a newly created page for the first time
+					$guid = uniqid();
+					$query = "INSERT INTO content (guid, parent, content, revision_id, revision_date, placeholder)
+										VALUES ('$guid','$parent', '', 1, NOW(), '$name')";
+					//print "insert ($query)<br>";
+					$db->query($query);
+					$this->loadByGUID($guid);				
+				}
+			}
+			else {
+				$this->guid = $data->guid;
+				$this->parent = $data->parent;
+				//$this->content = html_entity_decode($data->content);
+				//print "got conent(".$data->content.")<br>\n";
+				$this->content = html_entity_decode($data->content, ENT_QUOTES, $siteData->encoding);
+				//print "decoded(".$this->content.")<br>\n";
+				$this->name = $data->placeholder;
+				$this->revision_id = $data->revision_id;
+				$this->revision_date = $data->revision_date;
+				$this->blog_date = $data->blog_date;
+				$this->age = $data->age;
+				$this->title = $data->title;
+				
+				$request = read($_REQUEST,'treeline_'.$name,false);
+				//echo "REQUEST['treeline_$name']: " . $request;
+				if ($request !== false) {
+					// If we've passed the content in via a $_REQUEST, that overrules the database
+					// This is used when we're updating the panels on the page
+					// Although it may also be used with $_SESSION when previewing the page
+					$this->content = $request;
+				}
+			}
+		}
+		
+		public function loadByGUID($guid) {
+			global $db, $page;
+			$query = "SELECT c.*, 
+				date_format(c.revision_date, '%D %M %Y') as blog_date, datediff(now(), c.revision_date) as age 
+				FROM content c WHERE guid = '$guid'";
+			// If we're editing or previewing the page, we want to look at the very latest version, so:
+			if ($page->getMode() == 'edit' || $page->getMode() == 'preview' || 
+				$page->getMode() == 'save' ||
+				$this->getMode()=="inline-edit" || $this->getMode=="inline-preview") {
+				$query .= ' ORDER BY revision_id DESC LIMIT 1';	
+			}
+			else {
+				$query .= ' AND revision_id = 0';	
+			}
+			//print "load content($query)<br>\n";			
+			$data = $db->get_row($query);				
+			if ($db->num_rows > 0) {
+				$this->guid = $data->guid;
+				$this->parent = $data->parent;
+				$this->content = html_entity_decode($data->content);
+				$this->name = $data->placeholder;
+				$this->revision_id = $data->revision_id;
+				$this->revision_date = $data->revision_date;
+				$this->blog_date = $data->blog_date;
+				$this->age = $data->age;
+				$this->title = $data->title;
+			}
+		}		
+		
+		public function draw($class="") {
+			// This draws a placeholder that will contain a chunk of HTML content
+			// OR draws the TinyMCE editor if we're in EDIT mode
+			
+			//print "show content (".$this->content.")<br>\n";
+			
+			if ($class=="MCElandingPanel") $this->setHeight("250px");
+			$html = '';
+			if (!$class) $class="treeline_".$this->name;
+			if ($this->getMode() == 'edit' || $this->getMode()=="inline-edit") {
+				$html .= '<textarea name="treeline_'.$this->name.'" id="treeline_'.$this->name.'" rows="5" cols="5" class="'.$class.'" style="width: '.$this->width.'; height: '.$this->height.'">';
+				$html .= $this->content;
+				$html .= '</textarea>';
+				// describe yellow background feature to user
+				/*$html .= '<p><strong>Why is it yellow?</strong></p>
+				<p>Incorrectly formatted content (or content to which a format has not yet been applied) appears on a yellow background. Before saving your changes, ensure all content is on a white background.</p>
+				<p>It is normal for spaces between paragraphs to appear yellow.</p>';*/
+			}
+			else {
+				$html .= $this->content;
+			}
+			return $html;
+		}
+		
+		public function save($revID=1) {
+			// This should read in the $_POSTed treeline_[name] variable and save it in the content table
+			global $db, $site, $siteData;
+			$html = read($_POST,"treeline_".$this->name,'');
+			//print "got treeline_".$this->name." html($html)<br>\n";
+			// First strip out al the absolute links to this site
+			//$html = str_replace($site->link, "/", $html);
+		 	$html = href_replace($html);	
+			$html = htmlentities($html,ENT_QUOTES,$siteData->encoding);
+			//print "entities ($html)<br>\n";
+			$html = $db->escape($html);
+			//print "escaped ($html)<br>\n";
+			$title = $db->escape( htmlentities($this->title,ENT_QUOTES,$siteData->encoding) );
+			//print "save html($html)<br>"; exit();
+			if ($this->revision_id == $revID) {
+				// If we're editing an edit
+				$query = "UPDATE content SET content = '$html', title='$title', revision_date = NOW() WHERE guid = '{$this->guid}' AND revision_id = $revID";
+			}
+			else {
+				// If this is the first time this content has been edited since it was last approved
+				$query = "INSERT INTO content(guid,parent, content, revision_id, revision_date, placeholder, title)
+									VALUES ('{$this->guid}','{$this->parent}','$html', $revID, NOW(), '{$this->name}', '$title')";
+			}
+			//print "$query<br>";
+			$db->query($query);
+		}			
+		
+		public function delete($revID='') {
+			global $db;
+			$query="delete from content where guid='{$this->guid}'";
+			if ($revID) $query.=" and revision_id=$revID";
+			//print "QRY - $query<br>";
+			return $db->query($query);
+		}
+		
+		
+		// Bit of a fix.
+		// Need to strip out text and background image and change content
+		public function formatAsBranding() {
+			global $site, $browser;
+			//print "fAB(".$this->content.")<br>\n";
+			$browser_version = browser_detection("number");
+			$browser_name = browser_detection("browser");
+			
+			// Find the first image and pull it out as a background. 
+			if (preg_match_all("/<img src=\"(.*?)\"/", $this->content, $reg, PREG_SET_ORDER)) {
+				//print "match count(".count($reg).") ".print_r($reg, true)."<br>\n";
+				$tmp=rand(0, (count($reg)-1));
+				$css.= '
+					div#header_img {
+						background-image: url(\''.$reg[$tmp][1].'\');
+					}	
+				';
+			}
+			
+			// This is a bit of a nightmare but we need to apply the alpha filter to ie6,
+			// even though the image can change so have to do this here.
+			if ($site->logo>0 && $site->logo_filename) {
+				$logo_file=$_SERVER['DOCUMENT_ROOT']."/img/logos/".$site->logo_filename;
+				if (file_exists($logo_file)) {
+					$logo_size = getimagesize($logo_file);
+					if ($browser_name=="ie" && ($browser_version=="6" || $browser_version=="6.0" || $browser_version=="5.5")) {
+						$css.='
+							div#header_img div#branding {
+								background-image: none;
+								height:'.$logo_size[1].'px;
+								width:'.$logo_size[0].'px;
+								filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\'/img/logos/'.$site->logo_filename.'\',sizingMethod=\'crop\'); 
+								position: relative;
+							}
+						';
+					}
+					else {
+						$css.='
+						div#header_img div#branding {
+							'.($logo_size[0]>0?"width: ".$logo_size[0]."px;":"").'
+							'.($logo_size[1]>0?"height: ".$logo_size[1]."px;":"").'
+							background-image: url(\'/img/logos/'.$site->logo_filename.'\');
+						}
+						';
+					}
+										
+					// We should really now check if we are using internet explorer v6 or below
+					// and add PNG stuff for that too!!!
+				}
+				//else print "logo file($logo_file) does not exist<br>\n";
+			}
+				
+			// Stick the branding and tagline on top
+			$this->content='';
+			if ($site->logo>0) $this->content = '<div id="branding">'.$site->properties['tagline'].'</div>';
+			$this->content.= '<h1><a href="'.$site->link.'">'.$site->properties['tagline'].'</a></h1>';
+				
+			// If we cant find an image then just leave the content alone
+			return $css;
+		}
+
+	}		
+
+	class PanelsPlaceholder extends Placeholder {
+		
+		public $panels = array();
+
+		public function __toString(){
+			return Placeholder::getMode() .' - '. $this->panels[1];
+		}
+
+		public function drawSelectablePanels($include=array(), $exclude=array(), $order_by="p.title") {
+			
+			global $db, $site;
+			
+			if (count($include)) {
+				foreach($include as $tmp) $tmp_style.=$tmp.",";
+				$style=" AND style IN(".substr($tmp_style,0,-1).")";
+			}
+			if (count($exclude)) {
+				foreach($exclude as $tmp) $tmp_style.=$tmp.",";
+				$style.=" AND style NOT IN(".substr($tmp_style,0,-1).")";
+			}
+
+			// Set this up for the qu
+			$select = "SELECT p.*,
+			IF(pt.template_php='panel.php', 'Panel Library', 
+			IF(pt.template_php='panelrss.php', 'RSS Panels', 
+			IF(pt.template_php='panel.poll.php', 'Poll Panels','Function Panels'))) as paneltype
+			";
+			// Have to fudge a little for left/right panels
+			$query = $select."
+						from pages p
+						left join content c on p.guid=c.parent
+						left join pages_templates pt ON p.template=pt.template_id
+						WHERE c.revision_id=0 AND p.parent='".$site->id."'
+						AND pt.template_type=2 
+						AND pt.template_title <> 'Custom panel'
+						".(($style!="")?$style:"")."
+						GROUP BY p.guid
+						ORDER BY ".$order_by;
+			//print "$query<br>";
+			// Now, we need to select all "panels" -- but we don't actually track content-type
+			// What this needs to say is, select all children of the "panels" page in this page's CMS
+			// Hardcode this for now:
+			//$panels = $db->get_results("SELECT * FROM pages WHERE parent = '44c246a6751e2' AND name!='footer'");
+			//$query = "select p.* from pages p left join content c on p.guid=c.parent where c.revision_id=0 and p.parent=$siteID AND (c.placeholder = 'panelcontent' OR c.placeholder = 'question') group by p.guid"
+			$panels = $db->get_results($query,"ARRAY_A");
+
+			if ($db->num_rows > 0) {
+				//echo '<pre>'. print_r($panels,true) .'</pre>';
+				$tmp = array();
+				foreach ($panels as $panel) {
+					$tmp[$panel['paneltype']][] = $panel;
+				}
+				foreach ($tmp as $key => $item) {
+					$opthtml .= '<optgroup label="'. $key .'">'."\n";
+					foreach( $item as $panel ){
+						$opthtml .= '<option value="'.$panel['guid'].'">'.$panel['title'].'</option>'."\n";
+					}
+					$opthtml .= '</optgroup>'."\n";
+				}
+			}
+			return $opthtml;
+		}	
+	
+	
+		public function load($parent,$name,$revID=1) {
+
+			// This function loads in a series of comma-delimited GUIDs that refer to the page table
+			global $db, $page, $mode;
+			$this->name = $name;
+			$this->parent = $parent;			
+			$request = read($_REQUEST,'treeline_'.$name,false);
+			
+			// If we're editing or previewing the page, we want to look at the very latest list of panels, so:
+			$query = "SELECT guid, content, revision_id FROM content WHERE parent = '$parent' AND placeholder = '$name'";
+			
+			if ($mode=='edit' || $mode=='preview' || $mode=='save') {
+				$query .= ' ORDER BY revision_id DESC LIMIT 1';	
+			}
+			else if($page->getMode() == 'restore'){
+				$query .= ' AND id = '.$_GET['version'];	
+			}
+			else {
+				$query .= ' AND revision_id = 0';	
+			}			
+//			print "$query<br>";			
+
+			if ($data = $db->get_row($query)) {
+				$this->guid = $data->guid;
+				$this->panels = explode(",",$data->content);
+				$this->revision_id = $data->revision_id;
+			}
+			else {
+				if ($page->getMode() == 'edit') {
+					// If the placeholder doesn't appear in the content table, and we're trying to editing it, insert it into the database
+					// This situation arises when we're editing a newly created page for the first time
+					$guid = uniqid();
+					$query = "INSERT INTO content (guid, parent, content, revision_id, revision_date, placeholder)
+										VALUES ('$guid','$parent', '', $revID, NOW(), '$name')";
+					$db->query($query);
+					$this->guid = $guid;
+					$this->panels = array();
+					$this->revision_id = $revID;			
+				}
+			}			
+			if ($request !== false) {
+				// If we've passed the panels in via a $_REQUEST, that overrules the database
+				// This is used when we're updating the panels on the page
+				// Note use of boolean matching -- if we delete all panels on a page, the QS will be present but empty
+//				echo "FOUND UPDATED PANELS: " . $request;
+				$this->panels = explode(",",$request);
+//				echo "QS";
+			}
+
+//			echo "There are " . count($this->panels) , " panels in this placeholder";
+
+		}
+	
+		public function draw($include=array(), $exclude=array()) {
+			
+			// This function loops through all the GUIDs we've loaded
+			// and draws out each "page" [panel] according to its template
+			// In edit mode, we need to add a drop-down list above each one to allow the panel to be changed
+			// and an additional drop-down list to allow a new panel to be added
+			// How are we going to do this without repeatedly $_POSTing the page? Can we use Ajax here? I suspect that's over-complicating it...
+			// Ah, but we can surely just "get" the page with a new list of comma-delimited panels, can't we?
+			global $db, $site, $mode, $labels, $siteLink, $previewMsgShown;
+			
+			$html = '';
+
+			$panel_width=224;
+			$order_by="p.title";
+			// Have to fudge a little for left/right panels
+			if (count($include)==1 && $include[0]==13) {
+				$panel_width=204;
+			}
+
+			// Generate the panel options list
+			$style="";
+			
+			/*
+			if ($mode=="edit") {
+				$opthtml = $this->drawSelectablePanels($include, $exclude, $order_by);
+			}
+			*/
+			
+			if ($this->mode == 'edit' ) {
+				// If we're editing the containing page, we need to add a hidden value that tracks what panels we've added in this section:
+				$html .= '<input type="hidden" name="treeline_'.$this->name.'" id="treeline_'.$this->name.'" value="'.implode(',',$this->panels).'" />'."\n";
+			}
+		
+			foreach ($this->panels as $panel) {
+				// This needs to read the panel from the PAGE table
+				// and then dynamically include the panel within the page
+				ob_start();
+
+				$page = new Page();
+				//echo "loading panel: $panel<br />";
+				if ($page->loadByGUID($panel)) {
+			
+					// This checks that the page exists before we load it
+					if ($mode == 'edit') {
+						$page->setMode('inline'); // If we're editing the containing page, we need to put the panel in 'inline' mode:
+						// We now need to add the dropdown list to each panel:
+
+						/*
+						//$panels = $db->get_results("SELECT * FROM pages WHERE parent = '{$page->getParent()}' AND name!='footer'");
+						$query = $select."
+							from pages p 
+							left join content c on p.guid=c.parent 
+							left join pages_templates pt ON p.template=pt.template_id
+							where c.revision_id=0 and p.parent=".$site->id."
+							AND pt.template_type=2
+							".(($style!="")?$style:"")."
+							GROUP BY p.guid
+							ORDER BY $order_by"; //AND p.site_id=$siteID
+						echo $query .'<br />';
+						$panels = $db->get_results($query);
+						*/
+						
+						/*
+						if(strtolower(trim($page->getTemplate())) != 'panel.stream.php') {
+							$list = "\n";
+							$list .= '<fieldset>'."\n";
+							$list .= '<label for="treeline_'.$this->name.'_'.$panel.'" class="hide">Panels</label>'."\n";
+							$list .= '<select style="width:'.$panel_width.'px;" name="treeline_'.$this->name.'_'.$panel.'" id="treeline_'.$this->name.'_'.$panel.'" class="panelUpdate" onchange="updatePanels(\''.$this->name.'\',this)">'."\n";
+							*/
+							/*
+							foreach ($panels as $panel) {
+								$selected = ($page->getGUID() == $panel->guid)?'selected="selected"':'';
+								$list .= '<option value="'.$panel->guid.'" '.$selected.'>'.$panel->title.'</option>'."\n";
+							}
+							*/
+							
+							// alexph: Restrict list of options to 'Delete Panel' if panel is of
+							// a particular template
+							// in this case the 'workstreams' panel
+							/*
+							$list .= str_replace('value="'.$page->getGUID().'"', 'value="'.$page->getGUID().'" selected="selected"', $opthtml);
+							$list .= '<option value="DELETE" style="color: #f00">Delete this panel</option>'."\n";
+							$list .= '</select>'."\n";
+							$list .= '</fieldset>'."\n";
+							
+							echo $list;
+						}	*/
+						
+					}
+					else {
+						$page->setMode('view');
+					}
+					include($_SERVER['DOCUMENT_ROOT'].'/'.$page->getTemplate());
+
+					$html .= ob_get_contents();
+				}
+				ob_end_clean();
+				
+			}
+			
+
+			// We also need to add the "Add a panel here" option, if we're editing the page:
+			/*
+			if ($this->mode == 'edit') {
+				$html .= '<fieldset>'."\n";
+				$html .= '<label for="treeline_'.$this->name.'_add" class="hide">Add a panel</label>'."\n";
+				$html .= '<select name="treeline_'.$this->name.'_add" style="width:'.$panel_width.'px;" id="treeline_'.$this->name.'_add" onchange="addPanel(\''.$this->name.'\',this)">'."\n";
+				if ($opthtml) $html .= '<option value="xx" style="color: #f00">Add a panel</option>'.$opthtml."\n";
+				else $html .= '<option value="" style="color: #f00">--no panels--</option>'."\n";
+				$html .= '</select>'."\n";
+				$html .= '</fieldset>'."\n";
+			}
+			*/
+			return $html;
+		}
+
+
+		public function save($revID=1) {
+//			echo read($_POST,'treeline_'.$this->name,'');
+			// This should read in the $_POSTed treeline_[name] variable and save it in the content table
+			global $db,$site,$siteData;
+			$html = read($_POST,"treeline_".$this->name,'');
+			$html  = htmlentities($html,ENT_QUOTES,$siteData->encoding);
+			if ($this->revision_id == $revID) {
+				// If we're editing an edit
+				$query = "UPDATE content SET content = '$html', revision_date = NOW() WHERE guid = '{$this->guid}' AND revision_id = $revID";
+			}
+			else {
+				// If this is the first time this content has been edited since it was last approved
+				$query = "INSERT INTO content(guid,parent, content, revision_id, revision_date, placeholder)
+									VALUES ('{$this->guid}','{$this->parent}','$html', $revID, NOW(), '{$this->name}')";
+			}
+			$db->query($query);			
+			
+		}
+		
+	}		
+?>

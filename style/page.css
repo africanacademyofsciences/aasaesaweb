@@ -1,0 +1,33 @@
+/* 
+
+	AMREF CONTENT PAGE CSS
+
+	Description: To be included on all AMREF content pages - page.php
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 11/09/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+			
+
+*/
+
+
+
+div#breadcrumb p {
+}
+
+
+	div#primarycontent img.left{
+		float: left;
+		margin: 0 10px 10px 0;
+	}
+	div#primarycontent img.right{
+		float: right;
+		margin: 0 0 10px 10px;
+	}
+	
+

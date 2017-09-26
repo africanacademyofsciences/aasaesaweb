@@ -1,0 +1,20 @@
+Dear [[name]] 
+
+Thank you very much for purchasing from the shop! Your order number is [[orderID]]. 
+
+We will endeavor to dispatch within three working days. In the meantime if you have any questions or comments relating to your order please do not hesitate to get in touch [[shopEmail]]
+
+We regularly introduce new products, so why not make the Shop one of your favorites and visit us again soon? 
+
+Thank you. 
+
+If you wish to review our delivery and returns policy click: [[deliveryLink]]
+
+Order summary:
+
+[[basket]]
+
+Total changed to your credit card: £[[total]]
+
+
+[[footerText]]

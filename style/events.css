@@ -1,0 +1,20 @@
+
+
+p.evt-tickets,
+p.evt-price {
+	display: none;
+}
+
+
+
+	
+#primarycontent {
+	margin-top: 25px;
+}
+
+
+div.feedback,
+div.feedback.success,
+div.feedback.error {
+	margin-bottom: 25px;
+}

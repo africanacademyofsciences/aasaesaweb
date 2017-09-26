@@ -1,0 +1,97 @@
+<?php
+
+include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.class.php");
+include($_SERVER['DOCUMENT_ROOT'] . "/treeline/newsletters/includes/newsletter.class.php");
+
+$curPage = "newsletters_edit";
+$nid = ($_REQUEST['id'])?$_REQUEST['id']:"";
+
+// Choices for action: "create", "edit" and "reuse".
+$action = read($_REQUEST,'action','');
+	//if (!$action) header("Location: /treeline/"); // only for action pages
+	$guid = read($_REQUEST,'guid','');
+		
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+	
+	
+if (!$action && $nid>0) $action = "edit";
+
+switch($action){
+	case "edit":
+		$pageTitle = "Newsletters - Edit Newsletter";
+		$newsletter = new newsletter(addslashes($_REQUEST["id"]));
+		break;
+	case "reuse":
+		$pageTitle = "Newsletters - Edit Newsletter";
+		$newsletter = new newsletter(null);
+		$newsletter->reuse(addslashes($_REQUEST["id"]));
+		break;
+	default:
+		$pageTitle = "Newsletters - Create Newsletter";
+		$action = "create";
+		$newsletter = new newsletter(null);
+		break;
+}
+
+if ($newsletter->id) {
+	$newsletter->validate();
+	$message = $newsletter->errMsg;
+}
+
+	
+	// PAGE specific HTML settings
+	
+	$css = array('forms'); // all CSS needed by this page
+	$extraCSS = '
+	table select{width: auto;} table.mceEditor{width: 500px;}
+	'; // extra on page CSS
+	
+	$js = array('tiny_mce/tiny_mce_newsletters'); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+
+	$pageClass = 'newsletters';
+		
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+
+
+?>
+<div id="primarycontent">
+        <div id="primary_inner">
+		<?=drawFeedback($feedback,$message)?>
+
+<?php 
+if($action == "edit" && !$newsletter->id){ 
+			$feedback = 'error';
+			$message = 'Cannot find the newsletter you are trying to use.';
+			echo drawFeedback($feedback,$message);
+} else{ 
+?>
+
+			<p>Use the editor below to create your newsletter.</p>
+			<p>Click &quot;Save&quot; to continue to the next screen where you can test, send or save your email or &quot;Cancel&quot; to start again.</p>
+
+			
+
+				<form action="/treeline/newsletters/newsproc1.php" method="post" id="frmNewsletter">
+				  <fieldset>
+                  <p class="instructions">Fields marked * are required.</p>
+                  <input type="hidden" name="id" value="<?php echo $newsletter->id; ?>" />
+						<label for="subject" class="requried">Subject:</label>
+						<input type="text" id="subject" name="nl_subject" maxlength="255" size="40" value="<?php echo $newsletter->subject; ?>" class="requried" /><br />
+						<label for="copy" class="requried">Newsletter Copy:</label><br />
+						<textarea id="copy" class="mceEditor required" name="nl_text" rows="20" cols="20"><?php echo $newsletter->html_text; ?></textarea>
+						<?php $newsletter->drawAdminPreferences($newsletter->id); ?>
+				<input type="hidden" name="hidden_save" value="save" />
+				<fieldset class="buttons">
+                	<button name="cancel" class="button cancel">Cancel</button>
+                    <button type="submit" name="save" class="button submit">Save</button>
+				</fieldset>
+
+                </fieldset>
+                </form>
+           <?php } ?>
+</div>
+</div>
+<script type="text/javascript" src="/treeline/includes/tiny_mce/tiny_mce.js"></script>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>

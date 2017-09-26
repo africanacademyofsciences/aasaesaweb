@@ -1,0 +1,104 @@
+<?php
+
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/functions.php");
+	include_once($_SERVER['DOCUMENT_ROOT']."/treeline/includes/image.class.php");
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/user.class.php");
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/website.class.php");
+
+	include_once($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/browserinfo.php");
+
+	// Set the debugging on
+	$DEBUG = (read($_GET,'debug',false) !== false) ? true : false;
+	
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/ezSQL.class.php");
+	
+	$message = read($_REQUEST,'message','');	
+	$feedback = read($_GET,'feedback','generic');
+
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		$website = new Website();
+		$website->getSiteConfig();
+		$email = read($_POST,'email','');
+		$user = new User();		
+
+		if($email){
+
+			// check person has an account
+			if ($results = $user->getDetailsFromEmail($email)) {
+				foreach ($results as $details) { 
+					//print_r($details);
+					//$message = $user->sendPasswordReminder($email);
+					$sendParams = array("FULLNAME"=>$details->full_name,
+						"USERNAME"=>$details->name,
+						"PASSWORD"=>$details->password,
+						"SITENAME"=>$details->name
+						);
+					include_once($_SERVER['DOCUMENT_ROOT']."/treeline/includes/site.class.php");
+					include_once($_SERVER['DOCUMENT_ROOT']."/treeline/includes/page.class.php");
+					include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+					unset($site);
+					//print "load site (".$details->msv).")<br>\n";
+					$site = new Site($details->msv);
+					$newsletter = new Newsletter();
+					if ($newsletter->sendText($email, "PWD_REMIND", $sendParams)) {
+						$feedback = "success";
+						$message[]="You login details have been sent to your email address";
+					}
+				}
+			} 
+			else {
+				$feedback = 'error';
+				$message = 'Your email address is not registered with Treeline';
+			}
+		} 
+		else {
+			$feedback = 'error';
+			$message = 'You must enter an email address';
+		}
+	}
+	
+	// PAGE specific HTML settings
+	
+	$css = array('forms','login'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = 'Forgot your password';
+	$pageTitle = 'Forgot your password';
+	
+	$pageClass = 'login';
+	
+	$noUserInfo = true;
+	$noMenu = true;
+
+	$loginboxheight=220;
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+
+<div id="primarycontent">
+	<div id="primary_inner">
+    <?php 
+	echo drawFeedback($feedback,$message);
+    echo treelineBox('
+<form id="forgotPasswordForm" action="/treeline/forgot/" method="post">
+	<fieldset>
+		<label for="username">Email address</label>
+		<input type="text" value="" id="email" name="email" />
+		<button type="submit" class="submit">Send password</button>
+		<span class="reminder"><a href="/treeline/login/">Login</a></span>
+	</fieldset>
+</form>
+', 'Get your password back', 'blue', 450, $loginboxheight, 'login', "newbox", "tl-box-left");
+	//echo treelineBox($formhtml, "Enter your username and password", "", 450, $loginboxheight, 'login', "newbox", "dood hello");
+    echo treelineBox($browserhtml, "Supported browsers", "", 450, $loginboxheight, 'login', "newbox", "dood hello");
+	?>
+	</div>
+</div>
+
+<?php 
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); 
+?>

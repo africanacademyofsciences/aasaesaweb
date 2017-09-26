@@ -1,0 +1,174 @@
+
+
+#zoneone div.content {
+	padding:0px 0px 1px 0px !important;
+}
+#zoneone div.content p {
+	padding:0px 22px;
+}
+
+
+div#worldmapmanager {
+}
+
+
+pre {
+	color:#999;
+}
+
+
+ul.formlist li {
+	list-style:none inside none;
+	float:left;
+	clear:both;
+}
+
+ul.formlist li span {
+	float:left;
+	margin:0.5em 0;
+}
+
+ul.menu {
+	padding:5px 0;
+	margin:0 0 10px 0;
+	border-top:1px solid #aaa;
+	border-bottom:1px solid #aaa;
+	list-style:none outside none;
+	float:left;
+	clear:both;
+	width:500px;
+	line-height:1.5em;
+}
+	ul.menu li {
+		float:left;
+		width:125px;
+	}
+
+
+form,div.formholder {
+	margin:0;
+	padding-top:20px;
+	width:650px;
+	clear:both;
+	background-color:transparent;
+	border: 0;
+}
+
+
+	form fieldset {
+		margin:0;
+		padding:0;
+		clear:left;
+		border:1px solid #dedede;
+	}
+	
+		form fieldset legend {
+			font-weight:bold;
+			margin-left:20px;
+		}
+		
+		form label {
+			width: 120px;
+			display: block;
+			float: left;
+		}
+	
+		form input.submit {
+			margin:0 0 10px 40px;
+		}
+
+		form#country2region ul {
+			list-style:none inside none;
+		}
+		form#country2region ul li{
+			float:left;
+			clear:none;
+			margin-top:10px;
+		}
+		form#country2region ul li select {
+			width:150px;
+		}
+
+		form#country2region ul li a{
+			margin:0 15px;
+			display:block;
+			padding:5px;
+			background:#eeeeee;
+			border:1px solid #ccc;
+			text-decoration:none;
+			text-align:center;
+		}
+		
+		form#country2region input.submit {
+			margin:20px 0 10px 215px;
+		}
+
+
+
+		form fieldset p {
+			margin-left:10px;
+		}
+
+
+		form#regions input.textfield {
+			width:220px;
+			margin-bottom:2px;
+		}
+		
+		form#regions input.delete {
+			border:1px solid #aaa;
+			font-size:90%;
+			padding:2px;
+			margin-bottom:2px;
+		}
+
+
+
+table#entities{
+	width:98%;
+	border:1px solid #dedede;
+	margin:10px 0;
+	margin-left:1%;
+}
+
+	table#entities th {
+		font-size:80%;
+		background-color:#efefef;
+		padding:3px;
+	}
+	
+	table#entities td {
+		font-size:80%;
+	}
+	
+	table#entities td.entityFunctions {
+		text-align:center;
+	}
+
+	table#entities td.entityTitle{
+		padding-right:10px;
+	}
+	
+	table#entities td.entityItem{
+		background:#fff;
+		border:1px solid #dedede;
+		padding:2px 5px;
+	}
+
+	
+	
+ul.message {
+	background-color:#DFE6F4;
+	border:1px dashed #666;
+	margin-bottom:20px;
+	padding-left:0;
+	float:left;
+	width:500px;
+	list-style:none inside none;
+}
+
+	ul.message li {
+		padding:10px;
+	}
+
+

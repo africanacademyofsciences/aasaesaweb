@@ -1,0 +1,52 @@
+/* 
+
+	VANILLA TREELINE WEBSITE CSS
+	
+	description: 2 columns
+	
+	media: screen, projection
+	
+	written by: Phil Thompson phil.thompson@ichameleon.com July 2007
+	last edited: Phil Thompson 11/07/07 by Phil Thompson
+	
+	
+	ToC
+	sidebar
+	primary content
+	secondary content
+	
+	
+
+*/
+
+h1.pagetitle {
+	width: 711px;
+}
+
+div#contentholder {
+	width: 751px;
+}
+div#primarycontent{
+	float: left;
+	width: 711px;
+	padding-right:0px;
+	margin-bottom:20px;
+}
+div#secondarycontent{
+	float: left;
+	display: none;
+}
+
+div#sidebar{
+}
+		
+
+
+div#row2 div#landing-block-1 {
+	display: block;
+	width: 467px;
+}
+div#row2 div#landing-block-2 {
+	display: block;
+}
+

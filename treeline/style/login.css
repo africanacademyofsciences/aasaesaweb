@@ -1,0 +1,101 @@
+/* 
+
+	Treeline Login CSS
+
+	Description: Note: forms on this are quite tricky as they have a fuzzy rounded border which is an image
+
+	written by: Phil Thompson => phil.thompson@ichameleon.com
+	
+	last edited on:
+	last edited by: 
+
+	Table of Contents
+		
+	midholder
+	primary content
+	login form
+		form elements
+
+*/
+
+div#midholder{
+	background-image: none;
+}
+
+div#primarycontent{
+	margin: 15px 0 50px 20px;
+	width: 920px;
+}
+
+
+table#browserinfo {
+	color: #606F74;
+	width: 400px;
+}
+	table#browserinfo td {
+		padding: 10px 0 20px 20px;
+		border-top: 1px solid #606F74;
+		line-height: 100%;
+	}
+	table#browserinfo td.opsys {
+		font-size: 140%;
+		font-weight: bold;
+		border-right: 1px solid #606F74;
+		padding: 20px 20px 20px 0  !important;
+		width: 90px;
+	}
+	table#browserinfo td.top {
+		border-top: none;
+		padding-top: 5px;
+	}
+	table#browserinfo td.single {
+		padding-top: 20px !important;
+	}
+
+form{
+	border: none;
+	clear: both;
+	padding: 0;
+	margin: 0;
+	width: 370px;
+}
+	form fieldset{
+		margin: 0;
+		padding: 0;
+	}
+		form fieldset label {
+			width: 90px;
+			margin-bottom: 12px;
+			margin-top: 0px;
+			font-weight: normal;
+		}
+		form fieldset input{
+			width: 272px;
+			margin-bottom: 12px;
+			margin-top: 0px;
+		}
+		form fieldset span.reminder {
+			float: right;
+			margin-right: 0px;
+			font-size: 90%;
+		}		
+		form button.submit{
+			float: right;
+			margin: 0;
+		}
+	
+	form p#forgot{
+		clear: both;
+		font-weight: bold;
+		margin-left: 130px;
+	}
+	
+		form p#forgot a{
+			color: #AB0D54;
+			text-decoration: none;
+		}
+		
+div#contentcurve{		
+	margin: -15px 0 0 10px;
+}
+	

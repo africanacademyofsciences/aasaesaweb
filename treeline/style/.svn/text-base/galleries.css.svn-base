@@ -1,0 +1,86 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+#uploader {
+}
+	#uploader div#upload-info {
+		min-height: 150px;
+		border: 1px solid #DDDDDD;
+		background-color: #F0F0F0;
+		margin-bottom: 10px;
+		padding: 5px;
+	}
+		#uploader div#upload-info p {
+			padding: 0;
+			line-height: 150%;
+		}
+	#uploader div#upload-buttons {
+		margin: 0;
+		padding: 0;
+	}
+		#uploader div#upload-buttons object {
+			float: left;
+		}
+		#uploader div#upload-buttons .uploader-button {
+			height: 24px;
+			float: left;
+			width: 100px;
+			margin: 0;
+		}
+		#uploader div#upload-buttons div#progress-bar {
+			float: right;
+			width: 400px;
+			height: 16px;
+			padding: 2px;
+			border: 1px solid #DDD;
+		}
+			#uploader div#upload-buttons div#progress-bar span#progress-span {
+				width: 0px;
+				height: 16px;
+				background-image: url('/treeline/img/layout/progress.gif');
+				background-repeat: repeat-x;
+				float: left;
+			}
+
+
+
+
+
+div.gimg {
+	clear:both;
+	padding-top:2em
+}
+div.gimg img {
+	float:left;
+	margin-right:15px;
+	border:1px solid #dce1e1;
+	padding:2px
+}
+div.fields p.sort_order input {
+	width:auto
+}
+div.fields label {
+	width:100px
+}
+div.fields {
+	float:left
+}
+div.fields * {
+	padding:0;
+	margin:0 0 .6em 0;
+	font-size:11px
+}
+div.fields input, div.fields textarea {
+	padding:2px
+}
+div.fields input.checkbox {
+	margin-left:100px;
+	font-size:110% !important
+}
+#gallery_form p {
+	clear:both
+}
+form fieldset fieldset.wider {
+	padding-left: 215px;
+}

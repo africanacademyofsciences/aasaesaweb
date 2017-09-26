@@ -1,0 +1,101 @@
+<?php
+
+/*
+	Members functions
+	-----------------
+	
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	when: 15/07/2007
+	
+	edited by:
+	when:	
+	
+	
+	
+*/
+
+
+function drawOrderByDropDownOptions($current = 'surname_az', $type = 'members'){
+
+	//
+	if($type == 'members'){
+		$options = array(
+		'surname_az' => 'Surname (A-Z)',
+		'surname_za' => 'Surname (Z-A)',
+		'firstname_az' => 'First name (A-Z)',
+		'firstname_za' => 'First name (Z-A)',
+		'email_az' => 'Email (A-Z)',
+		'email_za' => 'Email (Z-A)',
+		);
+	}
+	else{
+		$options = array(
+		'title_az' => 'Name (A-Z)',
+		'title_za' => 'Name (Z-A)',
+		'newest' => 'Date added (newest)',
+		'oldest' => 'Date added (oldest)'
+		);
+	}
+	
+	$html = '';
+	
+	foreach($options as $value => $text){
+		unset($preSelected);
+		
+		if($current == $value){
+			$preSelected = ' selected="selected"';
+		}
+		$html .= '<option value="'.$value.'"'.$preSelected.'>'.$text.'</option>'."\n";
+	}
+	
+	return $html;
+}
+
+function drawStatusDropDownOptions($current = 'all'){
+	//
+	return "";
+	
+	$options = array(
+	'all' => 'All',
+	'approved' => 'Approved members',
+	'unapproved' => 'Unapproved members'
+	);
+	
+	$html = '';
+	
+	foreach($options as $value => $text){
+		unset($preSelected);
+		
+		if($current == $value){
+			$preSelected = ' selected="selected"';
+		}
+		$html .= '<option value="'.$value.'"'.$preSelected.'>'.$text.'</option>'."\n";
+	}
+	
+	return $html;
+}
+
+function drawPreferencesCheckboxes($options, $current = NULL){
+	//
+	global $db;
+	$html = '';
+	
+	if($current){
+		foreach($current as $pref => $value){
+			$currentArray[] = $value;
+		}
+	}
+	
+	
+	foreach($options as $option){
+		unset($preSelected);
+		
+		if(is_array($currentArray) && in_array($option->preference_id, $currentArray)){
+			$preSelected = ' checked="checked"';
+		}
+		$html .= '<input type="checkbox" class="checkbox" name="preference[]" id="preference_'.$option->preference_id.'" value="'.$option->preference_id.'"'.$preSelected.' />'."\n".'
+		<label for="preference_'.$option->preference_id.'" class="checklabel" >'.$option->preference_title.'</label><br />'."\n";
+	}
+	
+	return $html;
+}

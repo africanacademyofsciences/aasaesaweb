@@ -1,0 +1,31 @@
+/* 
+
+	VANILLA TREELINE WEBSITE CSS
+	
+	description: 1 column
+	
+	media: screen, projection
+	
+	written by: Phil Thompson phil.thompson@ichameleon.com July 2007
+	last edited: Phil Thompson 11/07/07 by Phil Thompson
+	
+	
+	ToC
+	sidebar, secondary content
+	primary content
+	
+*/
+
+div#sidebar, 
+div#secondarycontent {
+	display: none;
+}
+div#primarycontent{
+}
+
+div#row2 div#landing-block-1 {
+}
+div#row2 div#landing-block-2 {
+	display: none;
+}
+

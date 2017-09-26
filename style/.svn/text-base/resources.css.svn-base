@@ -1,0 +1,137 @@
+/* 
+
+	AMREF RESOURCES CSS
+
+	Description: To be included on the AMREF Resources page
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 24/08/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+
+
+*/
+
+h1.pagetitle {
+	margin-bottom: 0;
+}
+div#primarycontent {
+	width: 711px;
+}
+form#resource-filters {
+	float: left;
+	height: 39px;
+	padding-bottom: 5px;
+	width: 711px;
+	background: #e5e5e5 url('/img/layout/resource-bg.gif') bottom left repeat-x;
+}
+
+div#primarycontent ul#member-options,
+ul#member-options {
+	width: 711px;
+	border-bottom: 1px solid #999;
+	padding: 5px 0px !important;
+}
+div#primarycontent ul#member-options,
+ul#member-options,
+div#primarycontent ul#filters,
+ul#filters {
+	list-style: none;
+	float: left;
+	padding: 10px 0 0 0
+}
+	div#primarycontent ul#member-options li ,
+	ul#member-options li ,
+	div#primarycontent ul#filters li,
+	ul#filters li {
+		float: left;
+		margin-left: 10px;
+		border-right: 1px solid #ccc;
+		padding-right: 10px;
+		line-height: 150%;
+		font-weight: bold;
+	}
+		div#primarycontent ul#filters li a,
+		ul#filters li a {
+			font-weight: bold;
+		}
+	div#primarycontent ul#filters li.right,
+	ul#filters li.right {
+		float: right;
+		margin-right: 10px;
+		margin-left: 0;
+		padding-right: 0;
+		border-right: none;
+		font-weight: normal;
+	}
+	
+
+
+
+div#primarycontent ul#serp{
+	list-style: none;
+	float: left;
+	width: 710px;
+}
+
+	ul#serp li{
+		margin-left: 0;
+		float: left;
+		border-bottom: 1px solid #CCC;
+	}
+	
+	
+		ul#serp span{
+			display: block;
+		}
+		
+		ul#serp span.title{
+		}
+			ul#serp span.title a {
+			}
+
+		ul#serp span.lastUpdated{
+		}
+		ul#serp span.breadcrumb{
+		}
+		ul#serp span.description{
+			font-size: 11px;
+		}
+		
+
+
+		ul#serp li.mp3,
+		ul#serp li.audio,
+		ul#serp li.podcast,
+		ul#serp li.wav,
+		ul#serp li.aac{
+			background-image: url("/images/icons/resources/audio.gif");
+		}
+
+		ul#serp li.gif,
+		ul#serp li.jpg {
+			background-image: url("/images/icons/resources/image.gif");
+		}
+		
+		ul#serp li.txt,
+		ul#serp li.doc{
+			background-image: url("/images/icons/resources/doc.gif");
+		}
+		ul#serp li.pdf{
+			background-image: url("/images/icons/resources/pdf.gif");
+		}
+		ul#serp li.ppt{
+			background-image: url("/images/icons/resources/ppt.gif");
+		}
+		ul#serp li.xls,
+		ul#serp li.csv{
+			background-image: url("/images/icons/resources/csv.gif");
+		}	
+		ul#serp li.mpg,
+		ul#serp li.flv{
+			background-image: url("/images/icons/resources/video.gif");
+		}
+

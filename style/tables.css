@@ -1,0 +1,53 @@
+/* TABLES */
+table{
+	border: 1px solid #BBB;
+	border-collapse: collapse;
+	clear: left;
+	margin: 1em auto 1em;
+}
+
+	table caption{
+		background: #DDD;
+		border: 1px solid #BBB;
+		font-size: 110%;
+		letter-spacing: .1em;
+		margin: 1em auto;
+		padding: .5em;
+	}
+	
+	th{
+		background: #CCC;
+		border: 1px solid #BBB;
+		font-weight: normal;
+		padding: .4em;
+		text-align: left;
+		text-transform: capitalize;
+	}
+	
+		th[scope="col"]{
+			background: #CCC;
+		}
+		
+		th[scope="row"]{
+			background: #CCC;
+		}
+	
+		th a:hover, td a:hover{
+			text-decoration: none;
+		}
+	
+	
+	td{
+		background: #FFF;
+		border: 1px solid #BBB;
+		padding: .4em;
+	}
+	
+	tr.odd td{
+		background: #DDD;
+	}
+	
+	tfoot th, tfoot td{
+		background: #DDD;
+		text-align: center;
+	}

@@ -1,0 +1,58 @@
+<?php
+
+class Captcha {
+
+	public $errmsg = array();
+	public $valid = true;		// Default to always valid, only changes if we submit a captcha form
+		
+	
+	public function Captcha($test) {
+		global $site;
+		
+		if ($test) {
+			$this->valid = false;
+			//print "C(".$_POST['captcha'].") sess(".$_SESSION['securimage_code_value'].")<br>\n";	
+			// Check if a capture has been initiated for this session
+			if ($_SESSION['securimage_code_value']) {
+				require_once($_SERVER['DOCUMENT_ROOT'] . '/treeline/includes/securimage.class.php');
+				$secur = new securimage();
+				if (!$secur->check($_POST['captcha'])) {
+					$this->errmsg[]="You have not entered the correct comparison code, please try again";
+					//print "captcha comp failed<br>\n";
+				}
+				else $this->valid = true;
+			}
+		}		
+	}
+	
+	
+	
+	public function drawForm() {
+	
+        $captcha_style = '';
+        if(!$this->valid) {
+            $captcha_style = 'border:2px solid red';
+        }
+
+		$html = '
+		
+    <fieldset id="f-captcha">
+	    <label for="captcha">Confirm text below</label>
+        <input name="captcha" id="captcha" class="text" maxlength="5" style="'.$captcha_style.'" />
+	    <!-- <label for="securimage" style="visibility:hidden;">captcha text</label> -->
+	    <img src="/behaviour/ajax/securimage_show.php?sid='.md5(uniqid(time())).'" id="securimage" align="absmiddle" />
+	    <!-- <label for="f_repeat" style="visibility:hidden;">captcha msg</label> -->
+    	<span id="f_repeat">Cannot read text? <a href="#" onclick="document.getElementById(\'securimage\').src = \'/behaviour/ajax/securimage_show.php?sid=\'+Math.random(); return false">Show another</a></span>
+    </fieldset>
+		
+';
+
+		return $html;
+		
+	}
+
+
+
+}
+
+?>

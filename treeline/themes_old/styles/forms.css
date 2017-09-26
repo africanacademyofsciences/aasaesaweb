@@ -1,0 +1,42 @@
+form label {
+	display:block;
+	float:left;
+	font-size:80%;
+	padding-top:0.3em;
+	width:90px;
+}
+
+form input,
+form select,
+form textarea {
+	width:275px;
+}
+
+form div.formField {
+	margin:10px 20px;
+}
+form div.formField.buttons {
+margin-left:220px;
+}
+
+form input.submit {
+	background:#AB0E55 url(/treeline/themes/img/btn_red.gif) repeat-x left center;
+	border:1px solid #AB0E55;
+	color:#fff;
+	font-weight:bold;
+	overflow:visible;
+	padding:2px 10px;
+	_padding:2px 1em;
+	width:auto;
+}
+
+form input.cancel {
+	background:#336799 url(/treeline/themes/img/btn_grey.gif) repeat-x left center;
+	border:1px solid #336799;
+	color:#333;
+	font-weight:bold;
+	overflow:visible;
+	padding:2px 10px;
+	_padding:2px 1em;
+	width:auto;
+}

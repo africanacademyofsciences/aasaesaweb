@@ -1,0 +1,1 @@
+<h1 id="logo"><a href="/treeline/" title="return to your Treeline home-page"><?=$page->drawLabel("tl_head_treeline", "Treeline")?></a></h1>

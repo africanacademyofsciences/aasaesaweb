@@ -1,0 +1,511 @@
+/* 
+
+	Forms CSS
+
+	Description: CSS for (tableless forms)
+
+	written by: Phil Thompson => phil.thompson@ichameleon.com
+	
+	last edited on: 09/05/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+		form
+		fieldset
+		legend
+		feedback message
+		labels
+		data entry
+		buttons
+
+*/
+
+/* Standard Treeline forms */
+form {
+	border: 0;
+	margin:0;
+	padding: 0;
+}
+form#treeline {
+	clear: left;
+}
+form.tl_form {
+	background: #FFF;
+	border: 1px solid #E9EDED;	
+	font-size: 110%;
+	margin: 1em 0;
+	padding: 10px 0 0 0;
+}
+form#f-event-form {
+	clear: left;
+}
+
+form#f_options {
+	border: none;
+	padding:0;
+	margin: 0;
+}
+	form fieldset {
+		border: 0;
+		margin: 0;
+		padding: 0;
+	}
+	form fieldset.field,
+	form fieldset div.field {
+		clear: left;
+	}
+	form.tl_form fieldset{
+		border: none;
+		margin: 1em 0 1em 4px;
+		padding: 0 20px; 
+	}
+
+
+
+		/* Create/Edit page attributes forms */
+		div#dtemplate_holder {
+		}
+		div.dtemplate {
+			float: left;
+			display: inline;
+			width: 127px;
+			height: 122px;		
+			margin-right: 10px;
+			margin-bottom: 10px;
+			background: url('/treeline/img/forms/template_content.gif') no-repeat top left;
+		}
+		div#dtemplate19 {
+			background: url('/treeline/img/forms/template_events.gif') no-repeat top left;
+		}
+		div#dtemplate3,
+		div#dtemplate33 {
+			background: url('/treeline/img/forms/template_contact.gif') no-repeat top left;
+		}
+		div#dtemplate67 {
+			background: url('/treeline/img/forms/template_landing.gif') no-repeat top left;
+		}
+		div#dtemplate68 {
+			background: url('/treeline/img/forms/template_multimedia.gif') no-repeat top left;
+		}
+
+		form fieldset label.rtemplate {
+			clear:left;
+			font-size: 90%;
+			position: relative;
+			left: 10px;
+			top: -28px;
+			_top: -32px;
+		}
+		form input.rtemplate {
+			clear:none;
+			width:auto;
+			position: relative;
+			top: 96px;
+			left: 98px;
+			border:0;
+		}
+
+		/* Page layout stuff */
+		div.styleOption {
+			float: left;
+			margin: 10px 0px 10px 0;
+			padding: 82px 0 0;
+			width: 122px;
+		}
+			div.styleOption label {
+				width: auto;
+				clear: none;
+			}
+			form fieldset div.styleOption input.style_radio {
+				padding-right: 5px;
+				margin-left: 0;
+			}
+
+		form#f_options fieldset.main-tasks {
+			margin-bottom: 20px;
+		}
+		form#f_options fieldset.common-tasks {
+			background-image: url('/treeline/img/buttons/options_bg.gif');
+			background-repeat: no-repeat;
+			width: 735px;
+			height: 101px;
+			padding-bottom: 20px;
+		}
+	
+		form fieldset legend{
+			color: #669;
+			font-size: 165%;
+			margin-bottom: 10px;
+			line-height: 120%;
+		}
+		
+		form fieldset fieldset{
+			background-image: none;
+			border: 0px solid #E9EDED;
+			clear: both;
+			padding: .5em 0px;
+		}
+		
+		/* HELP & FEEDBACK */
+		
+		p.instructions{
+			background: #EDF1F1;
+			clear: both;
+			color: #000;
+			margin: .5em 0; 
+			padding: .5em 10px;	
+		}
+		
+		p.help{/* all dependent upon size of form elements and whether they're floated or not*/
+			clear: none;
+			float: right;
+			padding: 0;
+			margin: -1.5em 0 0;
+			width: auto;
+		}
+		
+		span.help{
+			background: #EDF1F1 url('/treeline/img/forms/arrow.gif') 5px 8px no-repeat; 
+			color: #000; 
+			float: left; 
+			margin: .45em 10px; 
+			max-width: 284px;
+			padding: 2px 5px 2px 20px;
+		}
+
+form div.ckeditor-holder {
+    float: left;
+}
+
+
+div#eggTimerHolder {
+	width: 30px; 
+	height: 30px; 
+	float: left;
+}
+
+		form fieldset span.private{
+			float: left;
+		}
+		
+		form fieldset span.private input{
+			clear: none;
+			margin-left: 5px;
+			margin-top: .6em;
+		}
+		
+		span.hint{
+			display: block;
+			font-weight: normal;
+		}
+		
+		/* LABELS */
+		
+		form fieldset label {
+			clear: left;
+			color: #669;
+			float: left;
+			font-weight: bold;
+			margin: .5em 0;
+			width: 140px;
+		}
+		form fieldset span.poll-percent {
+			margin: .5em 0;
+			width: 140px;
+			float: left;
+		}
+
+			form fieldset label.required {
+				background: url('/treeline/img/forms/star.gif') no-repeat top right;
+			}
+			form fieldset label.formdate-label {
+				clear: none;
+			}
+			
+		/* DATA ENTRY */
+		
+		form fieldset input{
+			background: #FFF;
+			border: 1px solid #CED3E0;
+			float: left;
+			margin: 5px 0;
+			padding: 0 3px;
+			width: 282px;
+		}
+		
+			form fieldset input.int{
+				width: 5em;
+			}
+			
+			form fieldset input[disabled="disabled"],
+			form fieldset input.disabled,
+			form fieldset textarea[disabled="disabled"],
+			form fieldset textarea.disabled{
+				background: transparent;
+				border: none;
+				color: inherit;
+				font-style: italic;
+			}
+		
+			form fieldset input:focus{
+				background: #FFB;
+				color: #000;
+			}
+		
+		form fieldset textarea{
+			background: #FFF;
+			border: 1px solid #CED3E0;
+			float: left;
+			margin: 5px 0;
+			padding: 0 3px;
+			width: 282px;
+		}
+		
+			form fieldset textarea:focus{
+				background: #FFB;
+				color: #000;
+			}
+			
+			form fieldset textarea.lessText{
+				height: 2.5em;
+			}
+			
+		/* CHECKBOXES/RADIO BUTTONS */
+		form fieldset input.checkbox {
+			background: #FFF;
+			border: 1px solid #CED3E0;
+			clear: left;
+			float: left;
+			margin: .5em 10px .5em 140px;
+			width: 1em;
+		}
+		
+		form input[type="checkbox"].right {
+			clear:none;
+			margin-left:0px;
+			width:auto;
+			border:0;
+		}
+		
+		form input.right {
+			clear:none;
+			margin-left:0px;
+			width:auto;
+			border:0;
+		}
+		
+		form fieldset label.checklabel{
+			clear: none;
+			float: left;
+			margin: .4em 0;
+			width: 180px;
+		}
+		
+			form fieldset div.checkbox{
+				float: left;
+				margin-right: 20px;
+				padding: 0 1px;
+				width: 150px;
+			}
+			
+			form fieldset div.checkbox:hover{
+				background: #EDF1F1;
+			}
+			
+			form fieldset div.checkbox label{
+				width: auto;
+			}
+		
+			form fieldset div.checkbox input.checkbox{
+				clear: none;
+				margin-left: 0;
+				margin-right: 2px;
+			}
+		
+		/* DROP DOWNS*/
+		
+		form fieldset select{
+			background: #FFF;
+			border: 1px solid #CED3E0;
+			float: left;
+			margin: 5px 0;
+			width: 290px;/* width should be slightly wider than textareas and inputs */
+		}
+		
+			form fieldset select option{
+				margin-right: .5em;
+			}
+		
+				form fieldset select option[selected="selected"]{
+					background: #FFB;
+				}
+				
+		/* date drop downs */
+		form fieldset select.day{
+			width: 50px;
+		}
+		
+		form fieldset select.month{
+			margin-left: 10px;
+			margin-right: 10px;
+			width: 130px;
+		}
+		
+		form fieldset select.year, input.year{
+			clear: none;
+			display: inline;
+			width: 52px;
+		}
+		
+		form fieldset select.time{
+			margin-right: 10px;
+			width: 4em;
+		}
+		
+		/* BUTTONS */
+		
+		form fieldset fieldset.buttons{
+			border: none;
+			clear: both;
+			margin: .5em 0;
+			padding-left: 140px;
+		}
+		
+/* A few extra rules for event preview pages */
+form#f-event-preview fieldset.event_form {
+	border:1px solid #666666;
+	margin-bottom:20px;
+	padding:10px;
+}
+form#f-event-preview fieldset p input.checkbox {
+	margin: 1px;
+	margin-right: 5px;
+}
+		
+/* All these rules apply to the nice pretty Treeline buttons */
+.big_button {
+	background-repeat: no-repeat;
+	border: none;
+	width: 160px;
+	height: 187px;
+	margin: 0;
+	padding: 124px 10px 0 10px;
+	color: #0066CB;
+	font-size: 120%;
+	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;
+	white-space: normal;
+}
+input#bbtn_create {	background-image: url('/treeline/img/buttons/bbtn_create.gif'); margin-right: 31px; }
+input#bbtn_edit {	background-image: url('/treeline/img/buttons/bbtn_edit.gif'); margin-right: 31px; }
+input#bbtn_assets {	background-image: url('/treeline/img/buttons/bbtn_assets.gif'); margin-right: 31px; }
+input#bbtn_structure {	background-image: url('/treeline/img/buttons/bbtn_structure.gif'); }
+
+.small_button {
+	border: none;
+	width: 110px;
+	height: 99px;
+	margin: 0;
+	padding: 70px 5px 0 5px;
+	font-size: 85%;
+	color: #0066CB;
+	margin-left:10px;
+}
+
+input#sbtn_newsletter {	background-image: url('/treeline/img/buttons/sbtn_newsletter.gif'); }
+input#sbtn_microsite {	background-image: url('/treeline/img/buttons/sbtn_microsite.gif'); }
+input#sbtn_language {	background-image: url('/treeline/img/buttons/sbtn_language.gif'); }
+input#sbtn_event {	background-image: url('/treeline/img/buttons/sbtn_events.gif'); }
+input#sbtn_access {	background-image: url('/treeline/img/buttons/sbtn_access.gif'); }
+input#sbtn_stats {	background-image: url('/treeline/img/buttons/sbtn_stats.gif'); }
+
+/* ----------------------------------- */
+	
+form fieldset input#ssearchTag {
+	width:160px !important;
+}
+form fieldset input#tagbutton {
+	width:120px !important;
+	clear:none;
+	height:17px;
+	font-size:85%;
+	font-weight: normal;
+	padding:0;
+	margin-left: 4px;
+}
+	
+ul.formlist li {
+	list-style:none;
+	float:left;
+}
+	ul.formlist li select {
+		width:auto;
+	}
+	
+fieldset#evt_config {
+	
+}
+	fieldset#evt_config h4, fieldset#evt_config p {
+		float:left;
+		clear:left;
+	}
+	fieldset#evt_config fieldset.noborder {
+		border:none;
+		padding:0 10px;
+		margin:0;
+	}
+		fieldset#evt_config fieldset.noborder label {
+			clear:none;
+		}
+	fieldset#evt_config input.check {
+		margin-left:0;
+	}
+			
+table.mceEditor{
+	width: auto !important;
+}
+
+
+
+
+	form fieldset input.cancel
+	{
+		background: #ACBDD3  url("/treeline/img/layout/button-cancel-bg.gif") left top repeat-x !important;
+		border: 1px solid #878E95;
+		color: #000 !important;
+		margin-right: 13px;
+	}
+		
+	form fieldset input.submit {
+		background: #CB417F url("/treeline/img/layout/button-submit-bg.gif") left top repeat-x !important;
+		border: 1px solid #AB0D54;
+		color: #FFF !important;
+		
+	}
+			
+			
+			
+			
+table.mceEditor{
+	width: auto !important;
+}
+input.empty {
+	clear:none;
+	float:none;
+	border:none;
+	background: transparent url('/treeline/img/icons/delete.gif') no-repeat;
+	width:14px;
+	text-indent:-1000px;
+	color: #AB0D54 !important;
+	font-weight:bold;
+	margin:0;
+	padding:0;
+}
+
+form fieldset input.submit,
+form fieldset input.cancel {
+	width:auto;
+	padding: 1px 25px;
+	font-weight:bold;
+	font-size: 90%;
+}

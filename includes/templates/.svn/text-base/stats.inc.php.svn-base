@@ -1,0 +1,13 @@
+<?php
+	//<!-- STATS GO HERE -->
+	if($google_analytics_extra){
+		echo $google_analytics_extra;
+	}
+
+
+	if($site->google_js){
+		echo $site->google_js;
+	}
+	
+	
+?>

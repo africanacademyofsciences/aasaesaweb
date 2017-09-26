@@ -1,0 +1,101 @@
+div#toolbar {
+background:url(/treeline/themes/img/bk_toolbar_border.gif) repeat-x bottom;
+border-bottom:1px solid #000;
+float:left;
+padding-bottom:10px;
+position:static;
+width:100%;
+}
+
+a {
+	color:#06C;
+}	
+
+/* HEADER */
+	div#header {
+		background:url(/treeline/themes/img/bk_holder.gif) no-repeat top;
+float:left;
+position:relative;
+		width:100%
+	}
+	
+		div#header h1#logo a {
+			background:url(/treeline/themes/img/treeline_logo.gif) no-repeat;
+			display:block;
+			float:left;
+			height:40px;
+			margin:20px;
+			_margin-left:5px;
+			text-indent:-5000px;
+			width:150px;
+		}
+
+div#header a#help {
+background:url(/treeline/themes/img/icons/popup.gif) no-repeat right center;
+float:right;
+margin:15px 10px;
+padding-right:15px;
+text-align:right;
+width:200px;
+}
+
+div#options {
+float:left;
+width:100%;
+}
+
+div#options h3 {
+border-bottom:1px solid #D0D4D3;
+color:#616F72;
+float:left;
+margin-bottom:5px;
+padding-bottom:5px;
+width:100%;
+}
+div#options label {
+display:none;
+}
+
+fieldset {
+float:left;
+width:30%;
+}
+
+
+fieldset#layout {
+float:left;
+margin-right:50px;
+margin:0 50px 0 20px;
+width:220px;
+}
+fieldset#layout select {
+margin:0 0 5px 0;
+width:100%;
+}
+
+div#quickLinks {
+float:left;
+width:350px;
+}
+
+div#quickLinks a {
+background:url(/treeline/themes/img/icons/popup.gif) no-repeat right center;
+display:block;
+float:left;
+font-size:90%;
+margin-right:14px;
+padding-right:12px;
+width:auto;
+}
+
+div#quickLinks a#lastLink {
+margin-right:0;
+}
+
+
+fieldset#controls {
+float:right;
+margin-right:20px;
+width:220px;
+}
+

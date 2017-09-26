@@ -1,0 +1,380 @@
+<?
+
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");	
+
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/subscriber.class.php');
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+	include ($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+	include ($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+	
+	$action = read($_REQUEST,'action','edit');
+	// Anybody can change their settins but nuffn else.
+	if ($_SESSION['treeline_user_group']!="Superuser") {
+		if ($action != "notify") {
+			header("Location: /treeline/");
+		}
+	}
+
+	$guid = read($_REQUEST,'guid','');
+
+	$message = array();
+	$feedback = read($_REQUEST,'feedback','generic');
+
+	$message_in = read($_REQUEST,'message',false);
+	if($message_in){ $message[] = $message_in; }
+	
+	$userid = read($_SERVER['REQUEST_METHOD']=="POST"?$_POST:$_GET,'userid',false);
+	$edit_user = read($_POST,'edit_user',false);
+	
+	$new_fullname = read($_POST,'new_fullname',false);
+	$new_username = read($_POST,'new_username',false);
+	$new_email = read($_POST,'new_email',false);
+	$new_password = read($_POST,'new_password',false);
+	$new_confirm = read($_POST,'new_confirm',false);
+	$new_type = read($_POST,'new_type',false);
+	$new_status = (read($_POST,'new_status',false) ) ? 1 :0;
+	$status = read($_POST,'status',false);
+
+	$newuser = new User();
+	
+	//for searching users...
+	$search_field = read($_POST,'search_field',false);
+	$select_field = read($_POST,'select_field',false);
+
+	$nextsteps='';
+	$feedback="error";
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+		if ($action == 'create') {
+
+			if (!$new_username) {
+				$message[] = 'Please enter a Username for this user.';
+			}
+			if($newuser->userExists($new_username)){
+				$message[] = 'This username is already in use';
+			}
+			if (!$new_fullname){
+				$message[] = 'Please enter the Full Name for this user.';
+			}
+			if(!$new_email){
+				$message[] = 'Please enter an Email Address for this user.';
+			}
+			if ($new_type == 'xx' || !$new_type) {
+				$message[] = 'Please select a Group for this user.';
+			}
+			if (!$new_password){
+				$message[] = 'You need to specify a Password for this account.';
+			}
+			if ($new_password!=$new_confirm){
+				$message[] = 'The Password and Password Confirmation fields do not match.';
+			}
+			if(!$message){
+
+				// Create a new user:	
+				/// change IF to validate email address...
+				if($newuser->setEmail($new_email)){
+					$newuser->setName($new_username);
+					$newuser->setFullName($new_fullname);
+					$newuser->setGroup($new_type);	
+					$newuser->setPassword($new_password);
+					$newuser->setStatus(0);
+					
+					/// all OK?  Save the user!
+					if($newuser->save()){
+						$nextsteps.='<li><a href="/treeline/access/?action=create">Create another Treeline user</a></li>';
+						$action='edit';
+					}else{
+						$message[] = 'There was a problem creating this user, please try again';
+					}
+				}else{
+					$newuser->__destruct();
+					$message[] = 'The email address does not appear to be valid.';
+				}
+
+			}
+
+		} 
+		
+		else if ($action == 'edit') {
+
+			if($userid && $edit_user){
+				$edit_user=true;
+
+				$newuser->loadByID($userid);
+	
+				if (!$new_username) {
+					$message[] = 'Please enter a Username for this user.';
+				}
+				if($newuser->getName()!=$new_username){
+					if($newuser->userExists($new_username)){
+						$message[] = 'This username is already in use';
+					}
+				}
+				if (!$new_fullname){
+					$message[] = 'Please enter the Full Name for this user.';
+				}
+				if(!$new_email){
+					$message[] = 'Please enter an Email Address for this user.';
+				}
+				if ($new_type == 'xx' || !$new_type) {
+					$message[] = 'Please select a Group for this user.';
+				}
+				if (!$new_password){
+					$message[] = 'You need to specify a Password for this account.';
+				}
+				if ($new_password!=$new_confirm){
+					$message[] = 'The Password and Password Confirmation fields do not match.';
+				}
+				if(!$message){
+	
+					if($newuser->setEmail($new_email)){
+						$newuser->setName($new_username);
+						$newuser->setFullName($new_fullname);
+						$newuser->setGroup($new_type);	
+						$newuser->setPassword($new_password);
+						$newuser->setStatus($new_status);
+						
+						/// all OK?  Save the user!
+						if($newuser->update($userid)){
+							$feedback="success";
+							$message[] = 'Details for user \'<strong>'. $new_username .'\'</strong> have been updated';
+							$userid=0;
+						}
+						else {
+							$message[]="No changes where made";
+						}
+					}else{
+						$newuser->__destruct();
+						$message[] = 'The email address does not appear to be valid.';
+					}
+	
+				}
+			}
+		}
+
+		else if ($action == "notify") {
+			if ($user->updateNotifications($_POST)) {
+				$feedback="success";
+				$message[]="Your preferences have been saved";
+			}
+		}
+		
+		
+		else if ($action == 'delete') {
+			$newuser->loadByID($userid);
+			if($status=='deleted'){
+				if($newuser->delete($userid)){
+					$nextsteps.='<li><a href="/treeline/access/?action=create">Create a new administrator</a></li>';
+					$action='edit'; $userid=0;
+				}else{
+					$message[] = 'User \''. $newuser->getName() .'\' could not be deleted';
+				}
+			}
+		}				
+
+	}
+
+	else {
+	
+		// Create a CSV listing of all administrators
+		if ($action=="download") {
+			$dl_filename=$user->generateCSV($_SESSION['treeline_user_id']);
+			if (!$dl_filename) {
+				$message[]="Failed to generate CSV listing file";
+				$action="";
+			}
+		}
+	}
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	if ($action == "notify") $extraCSS = '
+	
+form fieldset div#notify-options label {	
+	width: 400px;
+}	
+	
+form fieldset div#notify-options input.not-opt {	
+	width: 50px;
+
+}	
+	';
+
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title
+	
+	
+	
+	$pageTitleH2 = ($action) ? 'Access rights : '.ucwords($action) : 'Access rights';
+	$pageTitle = ($action) ? 'Access rights : '.ucwords($action) : 'Access rights';
+	
+	$pageClass = 'access';
+
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');
+
+?>
+<div id="primarycontent">
+<div id="primary_inner">
+<?php
+echo drawFeedback($feedback,$message);
+if ($nextsteps) echo treelineList($nextsteps, "Next steps", "blue");
+
+if ($action == 'create') { 
+	$page_html='
+	<form id="treeline" action="/treeline/access/'.($DEBUG?'?debug':"").'" method="post">
+    	<fieldset>
+            <input type="hidden" name="action" value="'.$action.'" />
+            <input type="hidden" name="guid" value="'.$guid.'" />
+            <p class="instructions">This section allows super-users to add new administrators of Treeline.</p>
+            <p class="instructions">Fields marked with a <img src="/treeline/img/forms/star.gif" alt="star" title="star" height="12" width="12" /> are mandatory.</p>
+            <label for="new_fullname" class="required">Full Name:</label>
+            <input type="text" name="new_fullname" id="new_fullname" value="'.$new_fullname.'" /><br />
+            <label for="new_username" class="required">Username:</label>
+            <input type="text" name="new_username" id="new_username" value="'.$new_username.'" /><br />
+            <label for="new_email" class="required">Email address:</label>
+            <input type="text" name="new_email" id="new_email" value="'.$new_email.'" /><br />
+            <label for="new_password" class="required">Password:</label>
+            <input type="password" name="new_password" id="new_password" value="" /><br />
+            <label for="new_confirm" class="required">Confirm Password:</label>
+            <input type="password" name="new_confirm" id="new_confirm" value="" /><br />
+            <label for="new_type" class="required">Type of User:</label>
+            '.$newuser->drawGroupsList($new_type,'new_type').'<br />
+            <fieldset class="buttons">
+                <input type="submit" class="submit" value="Save user" />
+            </fieldset>
+    	</fieldset>
+    </form>
+	';
+	echo treelineBox($page_html, "Create a new user", "blue");
+} 
+// ---------------------------------------------------------
+// EDIT USERS.
+else if ($action == 'edit') {
+
+	if ($userid) { 
+		$newuser->loadByID($userid); 
+		$page_html='
+		<form id="treeline" action="'.$_SERVER['REQUEST_URI'].($DEBUG?'?debug':"").'" method="post">
+			<fieldset>
+				<input type="hidden" name="action" value="'.$action.'" />
+				<input type="hidden" name="guid" value="'.$guid.'" />
+				<p class="instructions">This section allows super-users to '.$action.' users of Treeline.</p>
+				<p class="instructions">Fields marked with a <img src="/treeline/img/forms/star.gif" alt="star" title="star" height="12" width="12" /> are mandatory.</p>	
+				<label for="new_fullname" class="required">Full Name:</label>
+				<input type="text" name="new_fullname" id="new_fullname" value="'.$newuser->getFullName().'" /><br />
+				<label for="new_username" class="required">Username:</label>
+				<input type="text" name="new_username" id="new_username" value="'.$newuser->getName().'" /><br />
+				<label for="new_email" class="required">Email address:</label>
+				<input type="text" name="new_email" id="new_email" value="'.$newuser->getEmail().'" /><br />
+				<label for="new_password" class="required">Password:</label>
+				<input type="password" name="new_password" id="new_password" value="'.$newuser->getPassword().'" /><br />
+				<label for="new_confirm" class="required">Confirm Password:</label>
+				<input type="password" name="new_confirm" id="new_confirm" value="'.$newuser->getPassword().'" /><br />
+				<label for="new_type" class="required">Type of User:</label>
+				'.$newuser->drawGroupsList($newuser->getGroup(),'new_type').'<br />
+				<input type="checkbox" class="checkbox" name="new_status" id="new_status"'.((($new_status == '1') || ($newuser->getStatus() == 'blocked') ) ? ' checked="checked"' : '').' />
+				<label for="new_status" class="checklabel" class="required">Block user?</label><br />
+				<input type="hidden" name="userid" value="'.$userid.'" />
+				<input type="hidden" name="'.$action.'_user" value="true" />
+				<fieldset class="buttons">
+					<input type="submit" class="submit" value="Save details" />
+				</fieldset>
+			</fieldset>
+		</form>
+		';
+		echo treelineBox($page_html, 'Edit user : '.$newuser->getName(), "blue");
+	
+	}
+	else {
+		$page_html='
+		<form id="treeline" action="'.$_SERVER['REQUEST_URI'].($DEBUG?'?debug':"").'" method="post">
+			<fieldset>
+				<input type="hidden" name="action" value="'.$action.'" />
+				<input type="hidden" name="guid" value="'.$guid.'" />
+				<p class="instructions">Find the user you want to '.$action.'. You can search by name, username, email address or group.</p>
+				<label for="search_field">Search for:</label>
+				<input type="text" name="search_field" id="search_field" value="'.$search_field.'" /><br />
+				<label for="select_field">Search by:</label>
+				<select name="select_field" id="select_field">
+					<option value="u.name">Please select</option>
+					<option value="u.name"'.($select_field=='u.name'?' selected':"").'>Username</option>
+					<option value="full_name"'.($select_field=='full_name'?' selected':"").'>Full Name</option>
+					<option value="email"'.($select_field=='email'?' selected':"").'>Email</option>
+					<option value="g.name"'.($select_field=='g.name'?' selected':"").'>Group</option>
+				</select><br />
+				<fieldset class="buttons">
+					<button type="submit" class="submit">Search</button>
+				</fieldset>
+			</fieldset>
+		</form>
+		';	
+
+		echo treelineBox($page_html, ucfirst($action).' a User', "blue");
+	
+		?>
+		<h2>Recently Added Users</h2>
+		<?php
+		if( $select_field && $search_field){
+			echo $newuser->getUsersList($select_field,$search_field);
+		}
+		else{
+			echo $newuser->getUsersList();
+		}
+	}
+}
+// ---------------------------------------------------------
+// DELETE A USER
+else if($userid && $action=='delete' ){ 
+	$page_html='
+    <form id="treeline" action="'.$_SERVER['REQUEST_URI'].($DEBUG?'?debug':"").'" method="post">
+    <fieldset>
+        <input type="hidden" name="action" value="'.$action.'" />
+        <input type="hidden" name="guid" value="'.$guid.'" />
+        <p class="instructions">Are you sure you want to delete <strong>'.$newuser->getName().'</strong>?</p>
+        <input type="hidden" name="status" value="deleted" />
+        <input type="hidden" name="userid" value="'.$userid.'" />
+        <fieldset class="buttons">
+            <input type="submit" class="submit" value="Confirm delete" />
+        </fieldset>
+   </fieldset>
+   </form>
+   ';
+   echo treelineBox($page_html, "Delete this user", "blue");
+} 
+// ---------------------------------------------------------
+// MANAGE NOTIFICATIONS
+else if ($action == "notify") {
+	$page_html = '
+<p class="instructions">By default all notifications are eligible to go to all administrators. At the point of sending an email the system will decide if an email is appropriate to send to you based on its content and your privileges. This means that just because an options is selected you may still never receive this email. You should use this section mainly to opt out of emails that you are receiving that you do not require.</p>
+<form method="post">
+<fieldset>
+	<input type="hidden" name="action" value="'.$action.'" />
+	<div id="notify-options">
+		'.$user->drawNotifications().'
+	</div>
+	<div class="buttons">
+		<label for="f_submit" style="visibility:hidden;">submit</label>
+		<input type="submit" class="submit" value="Save" />
+</fieldset>
+</form>
+';
+	echo treelineBox($page_html, "Setup notifications required", "blue");
+}
+// ---------------------------------------------------------
+else if ($action=="download") { 
+	$html = '<p><a href="'.$site->link."silo/tmp/".$dl_filename.'" target="_blank">Click here</a> to view the administrator listing</p>';
+	echo treelineBox($html, "All Treeline administrators", "blue");
+}
+
+?>
+</div>
+</div>
+
+<?php 
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); 
+?>

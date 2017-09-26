@@ -1,0 +1,267 @@
+<?php
+
+//ini_set("dispaly_errors", true);
+//error_reporting(E_ALL);
+
+//print "mode($mode) pagemode({$page->getMode()}) guid(".$page->getGUID().") pageguid($pageGUID)<br>";// exit;
+	$content = new HTMLPlaceholder();
+	// If we've put the panel in 'list' mode -- ie, we've included the panel in a page we're editing -- we don't want to actively edit the content:
+	if ($page->getMode() == 'inline') {
+		$content->setMode('view');
+	}
+	else $content->setMode($page->getMode());
+	$content->load($page->getGUID(), 'panelcontent');
+
+	$referer = read($_REQUEST,'referer','/treeline/');
+	//$referer = "/treeline/panels/?action=edit";
+
+	$page->loadByGUID($pageGUID);
+	$pageTitle = $page->drawTitle();
+	$panelStyle = $page->getStyle();
+	
+
+	if ($_SERVER['REQUEST_METHOD'] == "POST") {
+	
+		$referer.=(strpos($referer, "?")?"&":"?");
+		$action = read($_POST,'treeline','');
+	
+		if ($action == 'Save changes') {
+			$content->save();
+			$page->save(true);
+			
+			// Content is saved so redirect the user
+			$feedback .= createFeedbackURL('success',"Changes saved to panel '<strong>". $page->drawTitle() ."</strong>'");
+			$referer .= $feedback;		
+			
+			$publish_redirect = '/treeline/panels/?action=saved&guid='.$page->getGUID();
+			//$publish_redirect .= '&'.$feedback;
+			
+			include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.class.php");
+			if($user->drawGroup() == 'Superuser' || $user->drawGroup() == 'Publisher'){ // can this user publish pages?
+				$redirectURL=$publish_redirect; // show them the publish option
+			} else{
+				$redirectURL=$referer; // otherwise take the user back to the edit pages page
+			}
+			redirect($redirectURL);
+
+		} else if ($action == 'Discard changes') {
+
+			$page->releaseLock($_SESSION['treeline_user_id']);			
+
+			$referer .= createFeedbackURL('notice','Your changes were not saved');
+			redirect ($referer);
+		}
+	}
+	
+	// END DATABASE INTERACTION
+
+	//print "show panel in mode(".$page->getMode()." - $mode) action($action)<br>";
+	include ($_SERVER['DOCUMENT_ROOT']."/includes/templates/previewmode.inc.php");
+
+
+	
+	// START PREVIEW/EDIT/VIEW MODE
+	if ($page->getMode() != 'view' && $mode=="preview"){ // PREVIEW MODE: SHOW PROPER HTML
+		//$page->loadByGUID($pageGUID);
+		$pageClass = 'panel'; // used for CSS usually
+		//$panelStyle = $page->getStyle();
+	
+		$css = array('page','3col','editMode'); // all attached stylesheets
+
+		?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Panel - <?=$page->drawTitle()?></title>
+<style type="text/css">
+    @import url("/style/reset.css");
+    @import url("/style/yui_fonts.css");
+    @import url("/style/global.css");
+    @import url("/style/page.css");
+    @import url("/style/3col.css");
+    @import url("/style/scheme/palate01.css");
+	<?php
+	if (file_exists($_SERVER['DOCUMENT_ROOT']."/style/microsite/scheme".$site->id.".css") && !$_SESSION['palate']) echo '@import url("/style/microsite/scheme'.$site->id.'.css");';
+	else if ($palateNumber>1) echo '@import url("/style/scheme/palate'.(($palateNumber<10?"0":"").$palateNumber).'.css");';		
+	if ($_GET['palate']>0) echo '@import url("/style/scheme/palate'.(($_GET['palate']<10?"0":"").$_GET['palate']).'.css");';
+	?>
+    body{background: #FFF;}
+</style>
+<?php //include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/commonCSS.inc.php'); ?>
+<script type="text/javascript" src="/behaviour/jquery.js"></script>
+<script type="text/javascript" src="/behaviour/jquery.corner.js"></script>
+<script type="text/javascript">
+$(window).load(function()
+{
+	// -------------------- Keep large images within the design --------------------
+	
+	$("#secondarycontent div.rounded").each(function()
+	{	
+		$(this).corner("7px");
+	});
+
+});
+</script>
+</head>
+        
+<body>	
+<?php include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/previewModeTop.inc.php'); ?>	
+<?php
+	}
+		
+	if ($page->getMode() == 'edit') { // EDIT MODE: BASIC HTML
+
+		require_once ($_SERVER['DOCUMENT_ROOT']."/treeline/includes/help.class.php");
+		
+		?>
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Panel - <?=$page->drawTitle()?></title>
+        <style type="text/css">
+			@import url("/style/reset.css");
+			@import url("/style/yui_fonts.css");
+            @import url("/style/global.css");
+            @import url("/treeline/style/editMode.css");
+            body{background: #FFF;}
+        </style>
+        </head>
+        
+        <body>
+        <?php
+		
+		// EDIT MODE: SHOW EDIT FORM
+		
+		// Should this be part of the treeline class?
+		echo $page->drawPanelTinyMCE();
+
+		// Now add the 'edit' form -- is there a neater way to do this, rathr than sandwiching the panel in form tags like this?
+		// $dbqs = ($DEBUG)?'?debug':'';
+		$dbqs = '';
+		$frm_action = $_SERVER['REQUEST_URI'].$dbqs;
+		//$referer = read($_SERVER,'HTTP_REFERER','');
+		// If we're debugging, apend ?debug to the form post
+		echo '<form id="treeline_edit" action="'.$frm_action.'" method="post">'."\n";
+	
+		// Add the panel toolbar:	
+		//echo $page->drawPanelToolbar();
+		$currentStyle = ($_POST['style']) ? $_POST['style'] : $page->style_id;
+		echo $page->drawToolbar($currentStyle, false, 'panel');
+		
+		
+
+		//include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/functions/pages.php");
+		//echo drawStyleSwitcherMenu($currentStyle, 6);	// The six means draw the styles availble for panels (which have a template id of 6)
+		
+		
+		echo '<input type="hidden" name="action" value="save" />'."\n";
+		echo '<input type="hidden" name="mode" value="'.$page->getMode().'" />'."\n";
+		echo '<input type="hidden" name="referer" value="'.$referer.'" />'."\n";
+		echo '<input type="hidden" name="title" value="'.$page->drawTitle().'" />'."\n";
+		
+		echo '<div style="width: 300px; margin:0 auto;">'."\n"; /* This should inherit from a stylesheet somewhere, I think */
+
+	}	
+
+	// Trying to edit this panel from the panel manager interface
+	else if ($page->getMode() == "inline-edit") {
+		echo $page->drawPanelTinyMCE();
+		echo '<form id="treeline_edit" method="post">
+<input type="hidden" name="action" value="save" />
+<input type="hidden" name="panelguid" value="'.$thispanel.'" />
+<input type="hidden" name="mode" value="'.$page->getMode().'" />
+<input type="hidden" name="referer" value="'.$referer.'" />
+<input type="hidden" name="title" value="'.$page->drawTitle().'" />
+';
+	}
+
+	
+	// PREVIEW MODE: SHOW DUMMY CONTENT
+	else if ($page->getMode() != 'view' && $mode == 'preview'){  
+		?>
+    
+<div id="sidebar">
+	<ul class="submemu">
+    	<li><a class="level-1" href="#">Sub-section</a></li>
+        <li><a class="level-1" href="#">Sub-section</a></li>
+        <li class="subon"><a class="level-2" href="#">Sub-section</a>
+       	<li><a class="level-1" href="#">Sub-section</a></li>
+        <li><a class="level-1" href="#">Sub-section</a></li>
+        <li><a class="level-1" href="#">Sub-section</a></li>
+        <li><a class="level-1" href="#">Sub-section</a></li>
+    </ul>
+</div>
+
+<div id="contentholder">
+    <h1 class="pagetitle">Dummy content</h1>
+    
+    <div id="primarycontent">
+        <p>This page doesn't have any content, its purpose is to highlight what the panel (left panels also appear on right - just for preview) will look like in context.</p>
+        <p>By seeing this so-called 'Dummy content' next to your new panel you should get a better feeling as to how the panel will look on your website.</p>
+    </div>
+    
+    <div id="secondarycontent">
+
+	<?php 
+	} 
+?>
+
+
+<?php
+// If there is content to show..
+if ($content->getMode()=="view" && !$content->draw()) ;
+else {
+	?>
+	<!-- SHOW ACTUAL PANEL CONTENT -->
+    <div class="panel rounded <?=$panelStyle?>">
+        <h3><?= $pageTitle?></h3>
+        <?=$content->draw()?>
+    </div>
+	<?php
+}
+?>
+
+
+<?php 
+	// EDIT MODE: CLOSE FORM AND BASIC HTML
+	// Close the form [and containing div] we opened above:
+	if ($page->getMode() == 'edit') {
+		?>
+	    	</div>
+    	</form>
+
+		<script type="text/javascript">
+        function editorNotes(guid) {
+            var settings="scrollbars=yes,top=100,left=200,height=500,width=346,directories=no,location=no,resizeable=no";
+            var newwindow = window.open("/treeline/ednotes/?guid="+guid, "editwin", settings);
+            if (window.focus) { newwindow.focus(); }	
+        }
+        </script>
+	</body>
+</html>
+		<?php
+	}
+
+	else if ($page->getMode()=="inline-edit") {
+		?>
+        <fieldset>
+        <input type="submit" class="submit" value="Save" />
+        </fieldset>
+        </form>
+        <?php
+	}
+	
+	// PREVIEW MODE: CLOSE PROPER HTML
+	// Close containing div we opened above:
+	else if ($page->getMode() != 'view' && $mode=="preview") {
+		?>
+	        </div>
+        </div>
+    </body>
+</html>
+		<?php	
+	}
+
+
+?>

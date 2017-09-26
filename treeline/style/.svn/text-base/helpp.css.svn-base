@@ -1,0 +1,42 @@
+/*
+
+HELP SYSTEM CSS
+
+*/
+
+
+div#primarycontent {
+	margin-left: 10px;
+	width: 350px;
+	margin-bottom: 80px;
+}
+
+
+h1.notes-header {
+	width: 360px !important;
+	margin-bottom: 10px !important;
+}
+a.tl-help-link {
+	float: right;
+}
+
+
+div#helptext {
+	margin-bottom: 20px;
+}
+
+div.search_result {
+	width: 360px;
+}
+
+div#tags_top {
+	width: 360px;
+	display: none;
+}
+div#tags_mid {
+	width: 320px;
+}
+div#tags_bot {
+	width: 360px;
+	display: none;
+}

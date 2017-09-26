@@ -1,0 +1,24 @@
+/* 
+
+	VANILLA TREELINE 3 WEBSITE CSS
+	
+	description: comment on page content
+	
+	media: screen, projection
+	
+	written by: Phil Redclift November 2008
+	last edited: Phil Redclift November 2008
+	
+	
+*/
+
+
+ul#l_comments {
+
+}
+	ul#l_comments li {
+		border-bottom:1px solid #aaa;
+	}
+		ul#l_comments li h2 {
+			font-size: 140%;
+		}

@@ -1,0 +1,156 @@
+<?php
+/*
+	MEMBERSHIP FORM ADMIN VIEW
+	Add/Edit member details
+	
+	Note: 
+	This form could be Ajaxified in the future hence it's presence as an includes file located in a folder called ajax.
+	This should allow for an AJAX technique not similar in technique to using an iframe.
+*/
+	
+$firstname = ($_POST['firstname']) ? $_POST['firstname'] : ''; 
+$surname = ($_POST['surname']) ? $_POST['surname'] : ''; 
+$email = ($_POST['email']) ? $_POST['email'] : ''; 
+$oldemail='';
+
+$password = ($_POST['password']) ? $_POST['password'] : ''; 
+$address1 = ($_POST['address1']) ? $_POST['address1'] : ''; 
+$address2 = ($_POST['address2']) ? $_POST['address2'] : ''; 
+$address3 = ($_POST['address3']) ? $_POST['address3'] : ''; 
+$postal_code = ($_POST['postal_code']) ? $_POST['postal_code'] : ''; 
+$telephone = ($_POST['telephone']) ? $_POST['telephone'] : ''; 
+$further_info = ($_POST['further_info']) ? $_POST['further_info'] : ''; // further information
+$terms = ($_POST['terms']) ? $_POST['terms'] : ''; //terms
+$preference = ($_POST['preference']) ? $_POST['preference'] : ''; // preferences
+
+$member_type = ($_POST?$_POST['member_type']:1);
+$bloggable = ($_POST?$_POST['bloggable']:'');
+$forumable = ($_POST?$_POST['forumable']:'');
+
+
+if($action == 'edit'){
+
+	// If we're editing the data should be presupplied.
+	$firstname = $_POST?$_POST['firstname']:$result->firstname; 
+	$surname = ($_POST['surname']) ? $_POST['surname'] : $result->surname; // surname
+	$email = ($_POST['email']) ? $_POST['email'] : $result->email; // email
+	$oldemail = $result->email;
+	$password = ($_POST['password']) ? $_POST['password'] : $result->password; // password
+	$address1 = ($_POST['address1']) ? $_POST['address1'] : $result->address1; // address1
+	$address2 = ($_POST['address2']) ? $_POST['address2'] : $result->address2; // address2
+	$address3 = ($_POST['address3']) ? $_POST['address3'] : $result->address3; // address3
+	$postal_code = ($_POST['postal_code']) ? $_POST['postal_code'] : $result->postal_code; // postal_code
+	$telephone = ($_POST['telephone']) ? $_POST['telephone'] : $result->telephone; // telephone
+	$further_info = ($_POST['further_info']) ? $_POST['further_info'] : $result->further_info; // further_information
+	$terms = ($_POST['terms']) ? $_POST['terms'] : $result->terms; //terms
+	//$preference = ($_POST) ? $_POST['preference'] : $member->getMemberPreferencesById($memberId); // preferences
+
+	$member_type = ($_POST?$_POST['member_type']:$result->member_type);
+	$bloggable = ($_POST?$_POST['bloggable']:$result->bloggable);
+	$forumable = ($_POST?$_POST['bloggable']:$result->forumable);
+}
+
+	
+// Get allowed member types.
+// If there is only 1 type then add as a hidden field
+$query = "SELECT id, title FROM member_types ORDER BY sort_order, title";
+if ($results = $db->get_results($query)) {
+	foreach($results as $result) {
+		$member_type_html.='<option value="'.$result->id.'"'.($result->id==$member_type?' selected="selected"':"").'>'.$result->title.'</option>'."\n";
+	}
+}
+if (!$member_type_html) $member_type_html = '<input type="hidden" name="member_type" value="1" />';
+else $member_type_html = '
+	<label for="f_member_type" class="required">Membership type:</label>
+	<select name="member_type" id="f_member_type">
+		'.$member_type_html.'
+	</select>
+';	
+
+$page_title = ($action == 'join' || $action == 'create' || $action == 'add') ? 'Add a new member' : 'Edit '.$firstname.' '.$surname;
+
+$page_html = '
+
+<form id="'.$action.'form" action="" method="post">
+<fieldset>
+	<p class="instructions">'.(($action == 'join' || $action == 'create' || $action == 'add') ? 'Add a new member' : 'Edit the member <strong>'.$firstname.' '.$surname.'</strong>').' using form below</p>
+	<fieldset>
+		<legend>Personal details</legend>
+		<label for="firstname" class="required">First name:</label>
+		<input type="text" value="'.$firstname.'" id="firstname" name="firstname" /><br />
+
+		<label for="surname" class="required">Surname:</label>
+		<input type="text" value="'.$surname.'" id="surname" name="surname" /><br />
+	';
+$page_html.=$member_type_html;
+
+// Should we show the blogs checkbox
+if ($site->getConfig('setup_blogs')) {
+	$page_html.='
+		<div class="field">
+			<label for="f_bloggable">Allowed to blog:</label>
+			<input type="checkbox" id="f_bloggable" name="bloggable" value="1" style="width: auto;" '.($bloggable?' checked="checked"':"").' /><br />
+		</div>
+	';
+}
+// Should we show the forum checkbox
+if ($site->getConfig('setup_forum')) {
+	$page_html.='	
+		<div class="field">
+			<label for="f_forumable">Post to forums:</label>
+			<input type="checkbox" id="f_forumable" name="forumable" value="1" style="width: auto;" '.($forumable?' checked="checked"':"").' /><br />
+		</div>
+	';
+}
+	
+$page_html.='	
+	</fieldset>
+
+	<fieldset>
+		<legend>Login details</legend>
+		<label for="email" class="required">Email:</label>
+		<input type="text" value="'.$email.'" id="email" name="email" '.($action=="edit"?"disabled":"").' /><br />
+		<input type="hidden" name="oldemail" value="'.$oldemail.'" />
+
+		<label for="password" class="required">Password:</label>
+		<input type="text" value="'.$password.'" id="password" name="password" /><br />
+	</fieldset>
+    ';
+        
+	$page_html.='
+	<fieldset>
+		<legend>Contact details</legend>
+		<!-- 
+		<p id="contactDetailsHelp" class="instructions"></p>
+		<div id="extraContactDetails">
+			<p class="instructions">Add contact details that differ to the member\'s organisation\'s.</p>
+			<label for="address1" class="required">Building/Street &amp; number:</label>
+			<input type="text" value="'.$address1.'" id="address1" name="address1" /><br />
+			<label for="address2" class="required">City/Town:</label>
+			<input type="text" value="'.$address2.'" id="address2" name="address2" /><br />
+			<label for="address3">County:</label>
+			<input type="text" value="'.$address3.'" id="address3" name="address3" /><br />
+			<label for="telephone" class="required">Postal code:</label>
+			<input type="text" value="'.$postal_code.'" id="postal_code" name="postal_code" /><br />
+		</div>
+		-->
+		<label for="telephone">Telephone:</label>
+		<input type="text" value="'.$telephone.'" id="telephone" name="telephone" /><br />
+		<label for="further_info" class="textarea">Further information:</label>
+		<textarea id="further_info" name="further_info" rows="5" cols="10">'.$further_info.'</textarea><br />
+	</fieldset>
+	';
+		
+	$page_html.='
+	<input type="hidden" name="terms" id="terms" value="1" />        
+	<input type="hidden" name="action" value="'.$action.'" />
+	<fieldset>
+	<fieldset class="buttons">
+		<input type="submit" class="submit" value="Submit '.($action == 'join'?'Application':'Changes').'" />
+	</fieldset>
+	</fieldset>
+</fieldset>
+</form>
+	';
+
+	echo treelineBox($page_html, $page_title, "blue");

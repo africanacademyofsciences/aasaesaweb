@@ -1,0 +1,237 @@
+
+div#th {
+	margin: 0;
+	margin-top: 10px;
+	padding: 0;
+	float: left;
+	width: 669px;
+	font-weight: bold;
+	color: #fff;
+	float: left;
+	background-color: #ADB7B9;
+	font-size: 90%;
+}
+	div#th p {
+		float:left;
+		padding: 4px 10px;
+		width: 649px;
+	}
+	div#th span {
+	}
+	span.title {
+		float: left;
+	}	
+	span.status {
+		float: right;
+		width: 128px;
+	}
+	span.preview {
+		float: right;
+		width: 70px;
+	}
+
+	div.status {
+		float: left;
+		width: 66px;	
+	}
+
+/* I really hate IE6 */
+div.menu-wrap-wrap {
+	float: left;
+	border: 1px solid #B7C9CA;
+	width: 667px;
+	background-color: #F6FAFA;
+	color: #607072;
+	font-size: 90%;
+	font-weight: bold;
+}
+div.menu-wrap {
+	float: left;
+	width: 627px;
+}
+	
+ul.page-list table {
+	width: 100%;
+	direction: rtl;
+	padding: 0;
+	border: 0;
+	border-collapse: collapse;
+	margin:0;
+}
+	ul.page-list table tbody {
+	}
+	ul.page-list table tr {
+	}
+	ul.page-list table td {
+		padding: 0;
+		margin: 0;
+		text-align: left;
+		height:25px;
+	}
+		ul.page-list table td.title {
+			padding-left: 10px;
+		}
+			ul.page-list table td.title span.newpage {
+				background: url('/treeline/img/layout/new-page-flower.gif') no-repeat 10px 0px;
+				padding: 3px 32px 5px 0;
+			}
+		ul.page-list table td.status {
+			width: 150px;
+		}
+		ul.page-list table td.preview {
+			width: 15px;	
+			text-indent: -9000em;
+		}
+			ul.page-list table td.preview a.preview {
+				display: block;
+				background: url('/treeline/img/icons/blue_preview.gif') no-repeat top left;
+				outline: none;
+				text-decoration: none;
+			}			
+
+ul#mm li.no-pages {
+	padding: 4px 10px;
+}
+	#mm {
+		margin: 0;
+		list-style-type: none;
+		padding: 0;
+		/* width: 687px; */
+		width: 627px;
+	}
+	
+	/*
+	#mm.moving {
+		cursor: row-resize;
+	}
+	*/
+	
+
+	#mm li {
+		/*
+		border-bottom: 1px solid #CED3E0;
+		border-top: 1px solid #FFF;
+		*/
+		margin: 0;
+		padding-top: 0px;
+		clear: left;
+	}
+	
+	#mm li.level_1 div.title {
+		width: 350px;
+		margin-left: 6px;
+		font-weight: bold;
+	}	
+	
+	#mm li.level_2 div.title {
+		width: 340px;
+		margin-left: 16px;
+	}	
+	
+	#mm li.level_3 div.title {
+		width: 330px;
+		margin-left: 26px;
+	}	
+	
+	#mm li.level_4 div.title {
+		width: 320px;
+		margin-left: 36px;
+	}	
+	
+	#mm li.level_5 div.title {
+		width: 310px;
+		margin-left: 46px;
+	}	
+	
+	#mm li.level_6 div.title {
+		width: 300px;
+		margin-left: 56px;
+	}	
+	
+	#mm li.level_7 div.title {
+		width: 290px;
+		margin-left: 66px;
+	}	
+	
+	#mm li.level_8 div.title {
+		width: 280px;
+		margin-left: 76px;
+	}	
+	
+	#mm li.level_9 div.title {
+		width: 270px;
+		margin-left: 86px;
+	}	
+	
+	/* IE fixes for indent menu items */
+	
+	* html body #mm LI.level_2 DIV.title {width: 330px}
+	* html body #mm LI.level_3 DIV.title {width: 310px}
+	* html body #mm LI.level_4 DIV.title {width: 290px}
+	* html body #mm LI.level_5 DIV.title {width: 270px}
+	* html body #mm LI.level_6 DIV.title {width: 250px}
+	* html body #mm LI.level_7 DIV.title {width: 230px}
+	* html body #mm LI.level_8 DIV.title {width: 210px}
+	* html body #mm LI.level_9 DIV.title {width: 190px}
+									
+	
+	#mm li.selected {
+		background-color: #efcedd;
+		border-bottom: 1px solid #d16d9a;
+		height: 19px;
+	}
+	
+	#mm li.selected div.move {
+		color: #8b8b8b;
+	}
+	
+	#mm li.created {
+		color: #CA3B7B;
+	}
+		#mm li.created table td.status {
+			/* background: url('/treeline/img/layout/new-page.gif') no-repeat top left; */
+			text-indent: -9999px;
+		}
+	
+	#mm li.over {
+		background: transparent url('/treeline/img/menumanager/over.gif');
+		border-bottom-style: none;
+	}	
+	
+	#mm li div.move {
+		cursor:move;
+		font-weight: bold;
+		color: #AB0D54;
+	}	
+
+	#mm li div.status {
+		color: #8B8B8B;
+	}
+
+	#mm li div.promote {
+	}
+	#mm li div.promote img.arrows {
+		margin-top: 4px;
+		border-style: none;
+	}	
+
+	
+	ul#mm{
+		background: #F6FAFA;
+	}	
+	ul#mm ul {
+		background: #F6FAFA;
+	}	
+
+	ul#mm li {
+		background: #F6FAFA;
+	}
+
+form#mmForm{
+	background: #F3F7F7;
+	border: none;
+}
+
+	form#mmForm fieldset{
+		padding: 0;
+	}

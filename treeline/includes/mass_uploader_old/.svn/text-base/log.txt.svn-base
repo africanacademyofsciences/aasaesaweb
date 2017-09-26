@@ -1,0 +1,4 @@
+set sort order 1 
+run insert image(INSERT INTO gallery_images (gallery_id, title, image_extension, sort_order)
+	VALUES (1, '8-test', 'jpg', 1))<br>
+got image name(.jpg)

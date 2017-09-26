@@ -1,0 +1,25 @@
+
+div#basket form {
+	border: 1px solid #000;
+	clear: both;
+}
+fieldset#buttons {
+}
+
+	
+table {
+	border:1px solid #000;
+}
+
+
+
+
+
+table#shopping-basket td.col_remove a {
+	background:transparent url(/store/images/layout/basket-remove.gif) no-repeat scroll 0 0;
+	display:block;
+	float:right;
+	height:17px;
+	text-indent:-9999px;
+	width:17px;
+}

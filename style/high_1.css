@@ -1,0 +1,46 @@
+/* 
+
+
+*/
+
+
+div#midholder-inner {
+}
+	div#midholder-inner div#contentholder-top; {
+		background-image: url('/img/layout/content-high1-top.png');
+	}
+
+
+h1.pagetitle {
+	width: 711px;
+}
+
+div#contentholder {
+	width: 751px;
+}
+div#primarycontent{
+}
+
+
+div#fixedcontent {
+	display: none;
+}
+div#sidebar{
+	display: none;
+}
+div#secondarycontent{
+	display: none;
+}
+
+
+		
+
+
+div#row2 div#landing-block-1 {
+	display: block;
+	width: 467px;
+}
+div#row2 div#landing-block-2 {
+	display: block;
+}
+

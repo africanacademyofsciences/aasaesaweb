@@ -1,0 +1,247 @@
+<?php
+
+include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.init.php");
+include($_SERVER['DOCUMENT_ROOT'] . "/treeline/newsletters/includes/newsletter.class.php");
+
+include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/event.class.php");
+
+$curPage = "newsletters_edit";
+$nid = ($_POST?$_POST['id']:$_GET['id']);
+
+// Choices for action: "create", "edit" and "reuse".
+$action = read($_REQUEST,'action','');
+$guid = read($_REQUEST,'guid','');
+	
+$message = array();
+$feedback = 'error';
+$nextsteps.='<li><a href="/treeline/newsletters/">Newsletter menu</a></li>';
+$new_status = 'N';
+	
+if (!$action && $nid>0) $action = "edit";
+
+// Newsletter processing
+if($_POST["hidden_save"] == "save"){
+
+	$newsletter = new newsletter($nid);
+	
+	// 1 Validate subject && text
+	$newsletter->subject = $_POST['nl_subject'];
+	$newsletter->validateSubject();
+	$newsletter->html_text = $_POST['nl_text'];
+	$newsletter->validateHTMLText();
+	$newsletter->html_text2 = $_POST['nl_text2'];
+	$newsletter->html_text3 = $_POST['nl_text3'];
+	$newsletter->preferences = $_POST["preference"];
+	$newsletter->event_id = $_POST['guid'];
+	$newsletter->header = $_POST["header"];
+	
+	// Check the newsletter we are trying to update belongs to this site.
+	if ($site->id>1 && $newsletter->status=='S') {
+		$query = "SELECT msv FROM newsletter WHERE id = $nid";
+		if ($db->get_var($query)!=$site->id) {
+			$nid = 0;
+			$new_status='S';
+		}
+	}
+	
+	
+	// Update an existing Newsletter
+	if($nid > 0){
+		$newsletter->update();
+		if ($newsletter->validate()) {
+			$feedback = "success";
+			$message[]="Newsletter saved";
+			$nextsteps.='<li><a href="/treeline/newsletters/newsbrowse/?status='.$newsletter->status.'">Manage '.($newsletter->status=='S'?"follow up ":"").'newsletters</a></li>';
+		}
+		else $message[]="There was a problem saving your newsletter";
+	}
+
+	// Create a new newsletter
+	else {
+		$newsletter->createNew($new_status);
+		if ($newsletter->validate()) {
+			$feedback = "success";
+			$message[]="Newsletter saved";
+			$nextsteps.='<li><a href="/treeline/newsletters/newsbrowse/">Manage newsletters</a></li>';
+			$action = "edit";
+			$nid = $newsletter->id;
+		}
+		else $message[]="There was a problem creating your newsletter";
+	}
+
+	// Forget all about the newsletter we just updated
+	unset($newsletter);
+}
+else if ($_GET['action'] == "delete") {
+	$query = "DELETE FROM newsletter WHERE id = ".$_GET['id'];
+	if($db->query($query)){
+		$nextsteps.='<li><a href="/treeline/newsletters/newsbrowse/">Manage newsletters</a></li>';
+		$action = "create";
+	}
+	else{
+		$message[] = 'Newsletter was not deleted due to a technical error';
+	}
+}
+
+
+// Reload the newsletter....
+switch($action){
+	case "edit":
+		$pageTitle = "Newsletters - Edit Newsletter";
+		$newsletter = new newsletter($nid);
+		break;
+	case "reuse":
+		$pageTitle = "Newsletters - Edit Newsletter";
+		$newsletter = new newsletter();
+		$newsletter->reuse($nid);
+		break;
+	case "create":
+	default:
+		$pageTitle = "Newsletters - Create Newsletter";
+		$action = "create";
+		$newsletter = new newsletter();
+		break;
+}
+
+	
+	// PAGE specific HTML settings
+	
+	$css = array('forms'); // all CSS needed by this page
+	$extraCSS = '
+
+form fieldset input.checkbox {
+	margin-left: 0px;
+}
+div#cb-preferences {
+	float: left;
+}
+table select{width: auto;} table.mceEditor{width: 600px !important;}
+
+.mceEditorContainer select {
+	width:100px !important;
+	margin: 0px !important;
+}
+	'; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+
+	$pageClass = 'newsletters';
+		
+	global $siteID;
+		
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+
+
+?>
+<div id="primarycontent">
+<div id="primary_inner">
+
+<?php
+	echo drawFeedback($feedback,$message);
+	if ($nextsteps) echo treelineList($nextsteps, "Next steps", "blue");
+
+	if($action == "edit" && !$newsletter->id){ 
+		$feedback = 'error';
+		$message = 'Cannot find the newsletter you are trying to use.';
+		echo drawFeedback($feedback,$message);
+	} 
+	else { 
+	
+		// Check if this newsletter is already associated with an event subscriber group?
+		if ($nid>0) $event_id=$db->get_var("SELECT event_id FROM newsletter_send_preferences WHERE newsletter_id=".$nid);
+		$event = new Event($event_id);
+
+		$page_html='';
+		if ($newsletter->status=="S") { 
+			$page_title="Follow up email editor";
+			$page_html='
+			<p>You are editing the <strong>'.$newsletter->html_text3.'</strong> follow up email.</p>
+			<p>Please take care when editing in here as all saved changes are final</p>
+			'.$newsletter->html_text2.'
+			';
+		} 
+		else { 
+			if ($action=="edit") $page_title="Modify your newsletter below";
+			else $page_title="Use the editor below to create your newsletter";
+		} 
+		
+		$page_html.= '
+
+		<form method="post" id="frmNewsletter">
+		<fieldset>
+			<p class="instructions">All fields are mandatory.</p>
+			<input type="hidden" name="id" value="'.$newsletter->id.'" />
+			
+			<label for="subject" class="requried">Subject:</label>
+			<input type="text" id="subject" name="nl_subject" maxlength="255" size="40" value="'.$newsletter->subject.'" class="requried" /><br />
+						
+			<label for="nl_text" class="requried">Newsletter Copy:</label><br />
+			<div style="float:left;width:600px;padding-top:5px;">
+				<textarea id="nl_text" class="mceEditor required" name="nl_text" rows="20" cols="20">'.$newsletter->html_text.'</textarea>
+			</div>
+			';
+
+        if ($newsletter->status=='S' || 1) { 
+			$page_html.='
+            <input type="hidden" name="nl_text3" value="'.$newsletter->html_text3.'" />
+            <input type="hidden" name="nl_text2" value="'.$newsletter->html_text2.'" />
+			';
+		} 
+		else { 
+			?> 
+            <label for="nl_text2" class="requried">Section 2 Copy:</label><br />
+            <div style="float:left;width:600px;padding-top:5px;">
+                <textarea id="nl_text2" class="mceEditor required" name="nl_text2" rows="20" cols="20"><?php echo $newsletter->html_text2; ?></textarea>
+            </div>
+
+            <label for="nl_text3" class="requried">Section 3 Copy:</label><br />
+            <div style="float:left;width:600px;padding-top:5px;padding-bottom:10px;">
+                <textarea id="nl_text3" class="mceEditor required" name="nl_text3" rows="20" cols="20"><?php echo $newsletter->html_text3; ?></textarea>
+            </div>
+            <?php 
+		}
+		
+		if ($newsletter->status!="S") {
+			$page_html.='
+			<fieldset style="float:left;width:660px;margin-top:20px;">
+				<legend>Select audience</legend>
+				';
+			$event_select = $event->drawSelectList("guid", false, 'Not related to an event');
+			if ($event_select) $page_html.=' 
+				<p>You can select an event to send your newsletter to all current attendees of that event. Or you can select one or more news groups to send this mail to.</p>
+                <label for="s_event">Event subscribers</label>
+               	'.$event_select;
+			else $page_html.='<p>Select one or more news groups to send this mail to.</p>';
+			$page_html.='
+                <label for="c_preference">News group</label>
+				<div id="cb-preferences">
+				'.$newsletter->drawAdminPreferences($newsletter->id, $site->id).'
+				</div>
+			</fieldset>
+			';
+		}
+         
+		$page_html.='
+			<input type="hidden" name="hidden_save" value="save" />
+			
+			<fieldset class="buttons">
+				<input type="submit" name="save" class="submit" value="Save" />
+			</fieldset>
+	
+		</fieldset>
+		</form>
+		';
+		echo treelineBox($page_html, $page_title, "blue");
+	} 
+?>
+
+
+</div>
+</div>
+
+<script type="text/javascript" src="/treeline/includes/tiny_mc3/jscripts/tiny_mce/tiny_mce.js"></script>
+
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>
+
+<script type="text/javascript" src="/treeline/behaviour/tiny_mce/tiny_mce_newsletters.js"></script>

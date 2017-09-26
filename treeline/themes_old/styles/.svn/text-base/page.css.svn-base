@@ -1,0 +1,84 @@
+div#primarycontent ul#pageTypes {
+list-style:none;
+margin-left:20px;
+}
+
+ul#pageTypes li {
+background:url(/treeline/themes/img/bk_layout_fade.jpg) repeat-x left center;
+border:1px solid #D5DFE0;
+float:left;
+height:122px;
+margin-right:10px;
+position:relative;
+width:125px;
+}
+
+ul#pageTypes li label {
+background:url(/treeline/themes/img/pagetypes/landing.gif) 0 20px no-repeat;
+color:#0069C8;
+font-size:80%;
+height:95px;
+left:10px;
+position:absolute;
+top:5px;
+width:105px;
+}
+
+ul#pageTypes li input {
+bottom:5px;
+position:absolute;
+right:10px;
+width:auto;
+}
+
+ul#pageTypes li#ptLanding label {
+background-image:url(/treeline/themes/img/pagetypes/landing.gif);
+}
+ul#pageTypes li#ptContent label {
+background-image:url(/treeline/themes/img/pagetypes/content.gif);
+}
+ul#pageTypes li#ptNews label {
+background-image:url(/treeline/themes/img/pagetypes/news.gif);
+}
+ul#pageTypes li#ptMedia label {
+background-image:url(/treeline/themes/img/pagetypes/media.gif);
+}
+
+div.formField {
+clear:left;
+width:100%;
+}
+
+fieldset label {
+font-size:100%;
+width:200px;
+}
+
+fieldset label a {
+margin-left:10px;
+}
+
+fieldset#pageDetails div#tagList {
+float:left;
+font-size:90%;
+line-height:1.2em;
+margin:0 0 10px 200px;
+width:490px;
+}
+
+
+
+div#tagList a {
+background:url(/treeline/themes/img/icons/tag_delete.gif) no-repeat right center;
+display:block;
+float:left;
+margin-right:10px;
+padding-right:10px;
+text-decoration:underline;
+width:auto;
+}
+
+fieldset#littleExtras select{
+width:auto;
+}
+

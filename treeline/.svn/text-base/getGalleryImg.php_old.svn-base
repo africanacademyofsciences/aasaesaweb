@@ -1,0 +1,53 @@
+<?php
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/ezSQL.class.php");
+
+$min_width=170;
+$min_height=121;
+
+// Compile gallery list
+$galleryID=$_POST['galleryID'];
+$width=$_POST['w'];
+$height=$_POST['h'];
+if (!$galleryID) $galleryID=$_GET['galleryID'];
+if (!$width) $width=$_GET['w'];
+if (!$height) $height=$_GET['h'];
+if (!$width) $width=$min_width;
+if (!$height) $height=$min_height;
+
+if ($galleryID) {
+	//if ($testing) echo "get gallery($galleryID)<br>";
+	$query="select isi.guid, filename, p.name, p2.name as parent from images_galleries ig 
+			left join images_sizes isi on ig.image_guid=isi.guid
+			left join images i on ig.image_guid=i.guid
+			left join pages p on ig.page_guid=p.guid
+			left join pages p2 on p.parent=p2.guid
+			where ig.page_guid='$galleryID' 
+			and ig.revision=0
+			and (isi.width>=$width or isi.height>=$height) 
+			order by ig.sort_order, isi.width
+			";
+	print "$query<br>";
+	if ($results=$db->get_results($query)) {
+		$filelist=''; $currentGUID=''; $count=0;
+		foreach($results as $result) {
+			if ($currentGUID!=$result->guid) {
+				$currentGUID=$result->guid;
+				$filelist.="&file".$count++."=".$result->filename;
+			}
+		}
+		$string="&page={$result->name}&parent={$result->parent}&filecount=$count".$filelist;
+	}
+	if (strlen($string)) {
+		echo $string;
+		//if ($testing) echo ("<br>returning gallery($galleryID)=$string<br>");
+	}
+}
+else if ($videoID) {
+	$string="&video=$filename";
+}
+else {
+	//print "bug no data passed in";
+}
+
+
+?>

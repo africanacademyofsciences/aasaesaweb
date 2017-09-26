@@ -1,0 +1,41 @@
+
+
+
+
+ul#store_products li div.productImage {
+	border: 1px solid #CFC8BD;
+	display: block;
+	height: 100px;
+	margin: 0 10px 1em 0;
+	text-indent:-9999px;
+	width: 100px;
+}
+	ul#store_products li div.productImage a {
+		display: block;
+		height: 100px;
+		width: 100px;
+	}
+
+div#product div#mainImage {
+	background-repeat:no-repeat;
+	height:335px;
+	margin:0 30px 0 0;
+	padding:20px;
+	text-indent:-9999px;
+	width:245px;
+}
+
+
+div#productDetail div.productImage {
+	background-repeat: no-repeat;
+	border: 1px solid #D7D7D7;
+	height: 80px;
+	margin: 4px 10px 4px 0;
+	text-indent: -5000px;
+	width: 80px;
+}
+	div#productDetail div.productImage a {
+		display: block;
+		height: 80px;
+		width: 80px;
+	}

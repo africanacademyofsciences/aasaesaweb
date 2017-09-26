@@ -1,0 +1,68 @@
+/* 
+STANDARD TREELINE FORM CSS
+*/
+
+
+
+form.std-form {
+	padding:0px;
+	margin-bottom:20px;
+	clear: left;
+}
+	form.std-form fieldset {
+		padding-bottom: 25px;
+	}
+		form.std-form fieldset legend {
+			font-size: 160%;
+			margin: 0 0 10px;
+			padding: 0;
+		}
+		form.std-form fieldset label {
+			width:140px;
+			float:left;
+			margin-right: 10px;
+		}
+		form.std-form fieldset input.text,
+		form.std-form fieldset textarea.text {
+			width: 266px;
+		}
+		form.std-form fieldset select {
+			width: 270px;
+		}
+	form.std-form fieldset.border {
+		border-width: 1px;
+		border-style: solid;
+		padding:20px;
+	}
+	form.std-form fieldset.field {
+		padding: 0 0 7px 0;
+	}
+		form.std-form fieldset.field label.checkbox {
+			clear: none;
+			float: left;
+			width: 270px;
+			margin-right: 0;
+		}
+		form.std-form fieldset.field input.checkbox {
+			margin-left:120px;
+			margin-right: 10px;
+			width: 20px;
+			float: left;
+			clear: left;
+		}
+
+	form.std-form fieldset.radio {
+		padding: 0px;
+	}
+		form.std-form fieldset.radio legend {
+			font-size: 130%;
+			margin:0;
+			padding-top: 5px;
+		}
+
+	form.std-form input.submit.right {
+		margin-top:10px;
+		float:right;
+	}
+
+

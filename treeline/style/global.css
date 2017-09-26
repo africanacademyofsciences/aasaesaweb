@@ -1,0 +1,815 @@
+/* 
+
+	CSS
+
+	Description: Basic CSS file for all sites to start with as a base
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 10/09/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+	HTML Tags
+		- * (universal selector)
+		- html, body
+		- a
+		- h1-6
+		- p
+		- ul, ol, dl
+		- tables
+		- forms
+		
+	Common Classes
+		- accessibility: .hide
+		- pagination
+		- google_serp
+		
+	Layout
+		- holder
+		- logo
+		- page title
+		- user (login) information
+		- midholder
+		- (main) menu
+		- primary content
+			- user feedback
+			- curvation(rounded corners)
+		- footer
+
+*/
+
+
+/*
+
+HTML TAGS
+
+*/
+
+
+
+html{
+	font-size: 100%;
+}
+
+/* BODY */
+body{
+	background: #DAE3E3;
+	color: #000;
+	font: 75%/140% Arial, Helvetica, sans-serif;
+	padding: 20px 0;
+}
+
+/* A  (LINKS) */	
+a{
+	color: #0067CB;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #0067CB;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #CF337B;
+	text-decoration: underline;
+}
+
+a:active {
+	color: #6F0033;
+	text-decoration: underline;
+}
+
+a.tl_link {
+	padding-right:13px;
+	margin-right:4px;
+	background:url('/img/layout/link-marker.gif') right no-repeat;
+}
+a.help-small {
+	margin-left: 6px;
+	margin-top: 3px;
+	outline: none;
+}
+a.tags-jump {
+	float:left; 
+	display:inline; 
+	line-height:0%;
+}
+
+/* HEADINGS */
+
+h1, h2, h3, h4, h5, h6{
+	font: normal 100% Arial, Helvetica, sans-serif;
+	padding: 5px 0;
+}
+
+h1{
+	font-size: 180%;
+}
+
+h2{
+	font-size: 200%;
+}
+
+h3{
+	font-size: 160%;
+}
+
+h4, h5, h6{ /* keep the same because h5&h6 are rarely used*/
+	font-size: 140%;
+}
+
+h2.pagetitle {
+	background-color: #CA3B7B;
+	color: #fff;
+	clear: left;
+	float: left;
+	font-size: 130%;
+	padding-left: 22px;
+	padding-right: 13px;
+	margin-bottom: 17px;
+	width: 700px;
+}
+
+/* PARAGRAPHS */
+p{
+	font-size: 100%;
+	padding: .5em 0;
+}
+
+/* LISTS */
+
+ul, ol, dl{
+	font-size: 100%;
+	margin: 1em 0 0;
+	padding: 0 0 1em;
+}
+
+	li{
+		font-size: 100%;
+		margin: 0 0 0 2em;
+	}
+	
+	li ul, li ol{
+		padding: .25em 0;
+	}
+
+ul.submenu {
+	list-style: none;
+	margin: 0;
+	padding: 0;	
+}
+	ul.submenu li {
+		background: transparent url('/treeline/img/layout/arrow-li.gif') no-repeat top left;
+		margin: 0;
+		padding: 0;
+		padding-left: 20px;
+		margin-bottom: 10px;
+	}
+	
+dt{
+	font-size: 100%;
+	font-weight: bold;
+}
+
+dd{
+	font-size: 100%;
+	margin-left: 2em;
+}
+
+
+/* HORIZONTAL RULE */
+
+hr{
+	border: 1px solid #CED3E0;
+	border-width: 1px 0;
+	margin: .5em 0;
+}
+
+/*
+
+COMMON CLASSES
+
+*/
+
+ul.arrow {margin:0}
+ul.arrow li{
+	list-style-image: url('/treeline/img/layout/arrow.gif'); 
+	margin-bottom: 5px;
+	margin-left: 15px;
+	padding-bottom: 1px;
+}
+
+/* ACCESSIBILITY/SCREEN-READER */
+
+.hide{
+	left: -9999px;
+	position: absolute;
+	top: -9999px;
+}
+
+.locked{
+	color: #999;
+}
+
+/* pagination */
+
+ul.pagination{
+	text-align: center;
+	float: left;
+	width: 735px;
+}
+
+ul.pagination li{
+	margin: 0;
+	padding: 0;
+	border: none;
+	display: inline;
+	font-size: 90%;
+	font-weight: bold !important;
+}
+	ul.pagination li a { 
+		font-weight: bold !important;
+	}
+	ul.pagination li.page {
+		padding: 1px 4px;
+	}
+	ul.pagination li.inactive a{
+		color: #606F72;
+	}
+	ul.pagination li.selected{
+		background-color: #497FBF;
+		color: #fff;
+	}
+		ul.pagination li.selected a{
+			background: #F3F3F3;
+		}
+	ul.pagination li.bookend{
+		margin-right: 5px;
+	}
+
+/* LAYOUT */
+div.cke-wrapper {
+	float: left;
+}
+
+div#holder{
+	float: none;
+	position: relative;
+	margin: 0px auto;
+	width: 964px;
+}
+
+	div#topcurve {
+		border: 2px solid #CED3E0;
+		border-bottom: none;
+		background: #FFF;
+		float: left;
+		width: 960px;
+	}
+	div#holder_inner {
+		border: 2px solid #CED3E0;
+		border-top: none;
+		background: #FFF;
+		float: left;
+	}
+div#header {
+	padding: 15px 30px 15px 10px;
+	float: left;
+	width: 920px;
+	margin-top: -14px;
+}
+	
+		h1#logo{
+			background: transparent url("/treeline/img/logo.gif") no-repeat;
+			float: left;
+			height: 34px;
+			padding: 0;
+			text-indent: -99999em;
+			width: 155px;
+		}
+		
+			h1#logo a{
+				/* background: #FFF url("/treeline/img/logo.gif") 0 0 no-repeat; */
+				display: block;
+				height: 34px;
+				width: 147px;
+			}		
+			
+
+div#announcement {
+	width: 920px;
+	margin-left: 10px;
+	background: url('/treeline/img/layout/ann_top.gif') no-repeat top left;
+	float: left;
+	clear: both;
+	display: inline;
+	border: 0px solid #000;
+	margin-bottom: 20px;
+}
+	div#announcement div#ann_body {
+		float:left;
+		margin-top:8px;
+		padding-left:8px;
+		width: 912px;
+		background: url('/treeline/img/layout/ann_mid.gif') repeat-y top left;
+		background-color: #EDF1F2;
+	}
+		div#announcement div#ann_body p {	
+			float: left;
+			padding: 0;			
+			padding-left: 30px;
+			line-height: 100%;
+			color: #A90D54;
+		}
+		div#announcement div#ann_body p.ann_title {
+			background-color: #A90D54;
+			width: 146px;
+			color: #fff;
+			padding-left: 0;
+		}
+		div#announcement div#ann_body table {	
+			border: 0;
+			margin: 0;
+			padding: 0;
+			line-height: 100%;
+		}
+			div#announcement div#ann_body table tbody,	
+			div#announcement div#ann_body table td {	
+				padding: 0;
+				margin: 0;
+				line-height: 100%;
+			}
+				div#announcement div#ann_body table td.ann-title {	
+					width: 146px;
+					color: #fff;
+				}
+	div#announcement div#ann_footer {
+		float: left;
+		width: 920px;
+		height: 8px;
+		background: url('/treeline/img/layout/ann_foot.gif') no-repeat top left;
+	}
+
+table#announcement-table {
+	background: url('/treeline/img/layout/ann_body.gif') no-repeat;
+	margin: 0px 0px 20px 10px;
+	float: left;
+	width: 920px;
+	height: 25px;
+	clear: left;
+	color: #A90D54;
+}
+	table#announcement-table td.ann-title {
+		color: #fff;
+		width: 176px;
+		padding-left: 6px;
+	}
+	table#announcement-table td.ann-ticker {
+		padding-right: 20px;
+	}
+
+	h2#pagetitle{
+		color: #669;
+		float: left;
+		font: normal 200%/100% Arial, Helvetica, sans-serif;
+		padding: 12px 0 0 30px;
+	}	
+	
+	p.userinfo{
+		font-size: 90%;
+		margin: 0;
+		padding: 0px;
+		text-align: right;
+		line-height: 130%;
+	}
+	p.taskinfo {
+		border: 1px solid #819093;
+		color: #819093;
+		background-color: #FEFFB3;
+		padding: 10px;
+		margin-bottom: 10px;
+		font-family: "Courier New", Courier, monospace;
+	}
+	
+	
+		ul#menu{
+			background: url("/treeline/img/layout/menu-top-bg.gif") 0 0 no-repeat;
+			float: left;
+			margin: 0 30px 0px 10px;
+			padding: 20px 0 0;
+			width: 155px;
+		}
+		
+			ul#menu li{
+				background-color: #EDF1F1;
+				line-height: 170%;
+				font-size: 90%;
+				list-style: none;
+				margin: 0;
+				width: 155px;
+			}
+				ul#menu li#menu-bottom-curve {
+					background: #EDF1F1 url("/treeline/img/layout/menu-bot-bg.gif") 0 0 no-repeat;
+					width: 155px;
+					height: 11px;
+				}
+			
+				ul#menu li a {
+					border: 1px solid #EDF1F1;
+					border-width: 1px 0;
+					color: #0066CB;
+					display: block;
+					font-weight: normal;
+					padding: 0 15px;
+					text-decoration: none;
+					width: 125px;
+				}
+					ul#menu li a:hover{
+						background: #F7FCFC;
+					}
+					
+					/* different links */
+					ul#menu li#help-link{
+						margin: 20px 0;
+					}
+					ul#menu li#menu-bottom-spacer {
+						height: 20px;
+						background-color: transparent;
+					}
+					
+					
+					/* last item = bototm curve */
+					ul#menu li.last{
+						/*background: #EDF1F1 url("/treeline/img/layout/menu-bottom-bg.gif") left bottom no-repeat;*/
+						padding: 0 0 40px;
+					}
+				
+				/* selected menu items(highlight) */
+				body.home ul#menu li#home-link a,
+				body.create-content ul#menu li#create-content-link a,
+				body.edit ul#menu li#edit-link a,
+				body.edit-content ul#menu li#edit-content-link a,
+				body.publish-content ul#menu li#edit-content-link a,
+				body.delete-content ul#menu li#edit-content-link a,
+				body.edit-assets ul#menu li#edit-assets-link a,
+				body.edit-structure ul#menu li#edit-structure-link a,
+				body.publish ul#menu li#publish-link a,
+				body.newsletters ul#menu li#newsletters-link a,
+				body.members ul#menu li#members-link a,
+				body.organisations ul#menu li#organisations-link a,
+				body.venues ul#menu li#venues-link a,
+				body.rehearsal-spaces ul#menu li#rehearsal-spaces-link a,
+				body.events ul#menu li#events-link a,
+				body.forums ul#menu li#forums-link a,
+				body.forms ul#menu li#forms-link a,
+				body.blogs ul#menu li#blogs-link a,
+				body.meetings ul#menu li#meetings-link a,
+				body.access ul#menu li#access-link a,
+				body.sites ul#menu li#microsite-link a,
+				body.tags ul#menu li#tags-link a,
+				body.blogs ul#menu li#blogs-link a,
+				body.map ul#menu li#map-link a,
+				body.galleries ul#menu li#galleries-link a,
+				body.events ul#menu li#events-link a,
+				body.language ul#menu li#language-link a,
+				body.settings ul#menu li#settings-link a,
+				body.statistics ul#menu li#statistics-link a,
+				body.tools ul#menu li#tools-link a,
+				body.help ul#menu li#help-link a,
+				ul#menu li.selected a{
+					border-color: #DCE1E1;
+					background: #F3F7F7;
+				}
+					
+		div#midholder{
+			background: transparent url("/treeline/img/layout/menu-bottom-bg.gif") 10px top no-repeat;
+			clear: both;
+			float: left;
+			width: 930px;
+		}	
+					
+		div#primarycontent{
+			/* background: #FFF url("/treeline/img/layout/primary-topleft-bg.gif") 0 0 no-repeat; */
+			color: #617073;
+			margin: 0;
+			padding: 0;
+			float: left;
+			display: inline;
+			width: 735px;
+		}
+		
+		div#primary_inner{
+			/* background: #F3F7F7 url("/treeline/img/layout/primary-topright-bg.gif") right top no-repeat; */
+			/* min-height: 480px; */
+			/* padding: 15px 20px 15px 0; */
+		}
+		
+			/* READABILITY */
+
+			div#primarycontent h3, div#primarycontent h4, div#primarycontent h5, 
+			div#primarycontent h6, div#primarycontent p, div#primarycontent li{
+			}
+		
+			/* User Feedback */
+			div.feedback{
+				background: #E5EBEB;
+				background-image: url("/treeline/img/layout/feedback-notice1.jpg");
+				border: 1px solid #0C6DCE;
+				margin: 0 0 20px;
+				padding-left: 80px;
+				padding-bottom: 10px;
+				background-repeat: no-repeat;
+				clear: left;
+				color: #607072;
+			}
+			
+				div.feedback h3 {
+					margin: 0;
+					padding:10px 10px 10px 0px;
+				}
+				div.feedback ul, div.feedback ol {
+					margin: 0;
+					padding: 0;
+				}
+				div.feedback p, div.feedback ul li {
+					padding: 4px 10px 4px 0;
+				}
+					div.feedback ul li {
+						margin: 0;
+						list-style: none;
+						
+					}
+			
+				div.feedback h3{
+					font-size: 180%;
+					padding-top: 20px;
+				}
+				
+				div.feedback p.hideFeedback{
+					float: right;
+				}
+				div.feedback p.reportBug{
+					clear: right;
+					float: right;
+				}
+			
+			div.feedback.error {
+				/* background-image: url("/treeline/img/layout/feedback-notice1.jpg"); */
+			}
+
+			div.feedback.success {
+				/* background-image: url("/treeline/img/layout/feedback-success.gif"); */
+			}
+			
+		
+		/* curve (round corners of the ain content area */
+		div#contentcurve{		
+			margin: -15px 0 0 175px;
+		}
+
+			div#contentcurve span.left{
+				background: transparent url("/treeline/img/layout/primary-bottomleft-bg.gif") left bottom no-repeat;
+				float: left;
+				height: 15px;
+				width: 48%;
+			}
+			
+			div#contentcurve span.right{
+				background: transparent url("/treeline/img/layout/primary-bottomright-bg.gif") right bottom no-repeat;
+				float: right;
+				height: 15px;
+				margin: 0 10px 0 0;
+				width: 48%;
+			}
+		
+	/* Curve the bottom holder - due to CSS restrictions (IE6) I ahve to do this to curve the main holding div */
+	div#topcurve span.right{
+		background: url("/treeline/img/layout/holder-topright-bg.gif") right top no-repeat;
+		float: right;
+		height: 16px;
+		width: 16px;
+		margin: -2px -2px 0 0;
+	}
+	
+	div#bottomcurve {
+		clear: both;
+		width: 960px;
+	}
+
+	div#bottomcurve span.left{
+		background: transparent url("/treeline/img/layout/holder-bottomleft-bg.gif") left bottom no-repeat;
+		float: left;
+		height: 16px;
+		margin: 0 0 -2px -2px;
+		width: 480px;
+	}
+	
+	div#bottomcurve span.right{
+		background: transparent url("/treeline/img/layout/holder-bottomright-bg.gif") right bottom no-repeat;
+		float: right;
+		height: 16px;
+		margin: 0 -2px -4px 0;
+		width: 480px;
+	}
+	
+	/* Footer */
+	div#footer{
+		clear: both;
+		text-align: center;
+		margin:0px auto 50px;
+		width: 960px;
+	}
+	
+		div#footer ul{
+			margin: 0;
+			padding: 0;
+		}
+	
+		div#footer ul li {
+			display: inline;
+			margin: 0;
+			padding: 0;
+			font-size: 90%;
+			/* 
+			NEED THIS BACK FOR T4 
+			font-size: 85%;
+			*/
+		}
+		div#footer ul li.footer-left {
+			border-left: 1px solid #798198;
+			padding-left: 5px;	
+			margin-right: 5px;
+			/* 
+			NEED THIS BACK FOR T4 
+			float: left; 
+			*/
+		}
+		div#footer ul li.footer-right {
+			border-right: 1px solid #798198;
+			padding-right: 5px;	
+			margin-left: 5px;
+			float: right;
+		}
+		
+		div#footer ul li.first {
+			border-left:0;
+			margin-left: 0;
+		}
+		div#footer ul li.last{
+			border: none;
+		}
+		
+		div#footer ul li a{
+			color: #AB0D54;
+			font-weight: normal;
+			text-decoration: none;
+		}
+	
+	/* nfo box */
+	div#nfoholder {
+		float: left;
+		background: url('/treeline/img/layout/nfo-bg-big-yellow.gif') top left no-repeat;
+		position: absolute;
+	}
+	div#nfoholder div#nfoheaderleft {
+		float: left;
+		clear: left;
+		height: 9px;
+		width: 22px;
+		line-height: 0;
+	}
+	div#nfoholder div#nfotopline {
+		float: left;
+		clear: left;
+		display: inline;
+		line-height: 50%;
+		margin: 0 0 0 22px;
+		border-bottom: 1px solid #666698;
+		height: 8px;
+		width: 130px;
+	}
+	div#nfotext {
+		float: left;
+		clear: left;
+		display: inline;
+		padding: 0px;
+		border-left: 1px solid #666698;
+		border-bottom: 1px solid #666698;
+		border-right: 1px solid #666698;
+		margin: 0px 2px 3px 0px;
+		padding: 0;
+		line-height: 100%;
+		width: 150px;
+	}
+		div#nfotext p.bodytext {
+			background-color: #FFFFB5;
+			color: #656798;
+			padding: 6px;
+			line-height: 150%;
+		}
+		div#nfotext span {
+			padding: 0px;
+			margin: 0;
+			width: 100%;
+		}
+
+	
+		
+div.tl-box {
+	background: #fff url('/treeline/img/layout/tlb_left.gif') top left repeat-y;
+	padding: 0p;
+	width: 735px;
+	float: left;
+	margin: 0 0 17px 0;
+}
+div.tl-box-left {
+	margin-right: 20px;
+}
+div.tl-box-right {
+	margin-left: 20px;
+}
+	div.tl-box div.tl-head {
+		background:transparent url('/treeline/img/layout/tlb_top_grey1.gif') top left repeat-x;
+		height: 33px;
+		float: left;
+		clear: left;
+	}
+		div.tl-box div.tl-head span.tl-head-left {
+			width:12px;
+			height: 33px;
+			float:left;
+			background:transparent url('/treeline/img/layout/tlb_top_left_grey1.gif') top left no-repeat;
+		}
+		div.tl-box div.tl-head h2.tl-head-right {
+			float:left;
+			height: 23px;
+			width: 706px;
+			background:transparent url('/treeline/img/layout/tlb_top_right_grey1.gif') top right no-repeat;
+			margin: 0;
+			padding: 0;
+			line-height: 80%;
+			color: #FFF;
+			font-size: 135%;
+			font-weight: bold;
+			padding-top: 10px;
+			padding-left: 12px;
+			overflow: visible;
+		}
+	div.tl-box div.tl-content {
+		background:transparent url('/treeline/img/layout/tlb_right.gif') top right repeat-y;
+		padding: 20px 23px 0;
+		width: 684px;
+		float: left;
+		clear: left;
+	}
+	div.tl-box div.tl-footer {
+		background:transparent url('/treeline/img/layout/tlb_bot.gif') top left repeat-x;
+		height: 23px;
+		float: left;
+		clear: left;
+	}
+		div.tl-box div.tl-footer span.tl-footer-left {
+			background:transparent url('/treeline/img/layout/tlb_bot_left.gif') top left no-repeat;
+			height: 23px;
+			width: 12px;
+			float:left;
+		}
+		div.tl-box div.tl-footer span.tl-footer-right {
+			background:transparent url('/treeline/img/layout/tlb_bot_right.gif') top left no-repeat;
+			height: 23px;
+			width: 12px;
+			float:right;
+		}
+		
+	/* OTHER tl-box HEADERS */
+	div.tl-box div.tl-head-blue {
+		background-image : url('/treeline/img/layout/tlb_top_blue.gif');
+	}
+		div.tl-box div.tl-head-blue span.tl-head-left {
+			background-image : url('/treeline/img/layout/tlb_top_left_blue.gif');
+		}
+		div.tl-box div.tl-head-blue h2.tl-head-right {
+			background-image : url('/treeline/img/layout/tlb_top_right_blue.gif');
+		}
+			div.tl-box div.tl-head h2 {
+				float: left;
+			}
+			div.tl-box div.tl-head h2 span {
+				float: left;
+			}
+			div.tl-box div.tl-head h2 a.tl-help-link,
+			a.tl-help-link {
+				float: left;
+				width: 107px;
+				font-size: 70%;
+				padding-right:13px;
+				margin-right: 10px;
+				color: #FFFF04;
+				text-align:right;
+				background: url('/treeline/img/icons/help_small_green.gif') top right no-repeat;
+			}
+

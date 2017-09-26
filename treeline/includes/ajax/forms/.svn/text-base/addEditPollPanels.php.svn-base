@@ -1,0 +1,61 @@
+
+	<form action="<?= $thisURL ?>" method="post">
+        <input type="hidden" name="action" value="<?=$action?>" />
+        <input type="hidden" name="guid" value="<?=$guid?>" />
+        <input type="hidden" name="mode" value="<?=$mode?>" />  
+        <fieldset>
+        	<legend><?= ucfirst($mode) ?> Poll</legend>
+            <fieldset>
+            	<legend>Details</legend>
+                <p class="instructions">Please set your question and supply some text to show to the user once they've voted on the poll.</p>
+                <label for="poll_title">Title</label>
+                <input type="text" name="poll_title" value="<?= $poll_title ?>" /><br />
+                <label for="poll_question">Question</label>
+                <textarea name="poll_question"><?= $poll_question ?></textarea><br />
+                <label for="poll_response">Response</label>
+                <textarea name="poll_response"><?= $poll_response ?></textarea><br />              
+                <label for="f_reset">Reset results</label>
+                <input type="checkbox" name="poll_reset" id="f_reset" value="1" style="padding-left:0;width:auto;" /><br />
+            </fieldset>
+            
+            <fieldset id="answers">
+            	<legend>Answers</legend>
+                <p class="instructions">You can specify up to 5 answers to your poll. If there is a correct answer to the question, you can select it using the radio button next to it.</p>
+
+                <label for="poll_answer_one">Answer One</label>
+                <input type="text" name="poll_answer_one" value="<?= $poll_answer_one ?>" />
+                <label for="poll_answer_default" id="poll_default">Default</label>
+                <input type="radio" name="poll_default_answer" id="poll_default_answer1" class="checkbox" value="1"<?= ($poll_default_answer==1 ? ' checked="checked"' : '') ?> />
+                <span class="poll-percent"><?=($polldata['answers'][1]['percentage']+0)?>%</span>
+                <br />
+                
+                <label for="poll_answer_two">Answer Two</label>
+                <input type="text" name="poll_answer_two" value="<?= $poll_answer_two ?>" />
+                <input type="radio" name="poll_default_answer" id="poll_default_answer2" class="checkbox" value="2"<?= ($poll_default_answer==2 ? ' checked="checked"' : '') ?> />
+                <span class="poll-percent"><?=($polldata['answers'][2]['percentage']+0)?>%</span>
+                <br />
+
+                <label for="poll_answer_three">Answer Three</label>
+                <input type="text" name="poll_answer_three" value="<?= $poll_answer_three ?>" />
+                <input type="radio" name="poll_default_answer" id="poll_default_answer3" class="checkbox" value="3"<?= ($poll_default_answer==3 ? ' checked="checked"' : '') ?> />
+                <span class="poll-percent"><?=($polldata['answers'][3]['percentage']+0)?>%</span>
+                <br />
+                
+                <label for="poll_answer_four">Answer Four</label>
+                <input type="text" name="poll_answer_four" value="<?= $poll_answer_four ?>" />
+                <input type="radio" name="poll_default_answer" id="poll_default_answer4" class="checkbox" value="4"<?= ($poll_default_answer==4 ? ' checked="checked"' : '') ?> />
+                <span class="poll-percent"><?=($polldata['answers'][4]['percentage']+0)?>%</span>
+                <br />
+                
+                <label for="poll_answer_five">Answer Five</label>
+                <input type="text" name="poll_answer_five" value="<?= $poll_answer_five ?>" />
+                <input type="radio" name="poll_default_answer" id="poll_default_answer5" class="checkbox" value="5"<?= ($poll_default_answer==5 ? ' checked="checked"' : '') ?> />
+                <span class="poll-percent"><?=($polldata['answers'][5]['percentage']+0)?>%</span>
+                <br />
+            </fieldset>
+            
+            <fieldset class="buttons">
+            	<button type="submit" class="submit">Save</button>
+            </fieldset>
+        </fieldset>  	
+    </form>

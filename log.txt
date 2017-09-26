@@ -1,0 +1,116 @@
+
+
+20012009 13:36:09
+set sort order 5 
+run insert image(INSERT INTO gallery_images 
+		(gallery_id, title, image_extension, sort_order)
+		VALUES 
+		(6, 'camp4', 'jpg', 5))<br>
+got image name(14.jpg)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/b_14.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/b_14.jpg) ext(jpg)<br>
+c_a_r(190x127)
+icr(new_image, object, 0, -37.752442996743, '0', '0', 190x127, 75.504885993485, 307, 122)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/t_14.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/t_14.jpg) ext(jpg)<br>
+Failed to write file<br>
+c_a_r(60x40)
+icr(new_image, object, 30, 0, '0', '0', 0, , , )
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/m_14.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/m_14.jpg) ext(jpg)<br>
+Failed to write file<br>
+
+
+20012009 13:42:56
+set sort order 6 
+run insert image(INSERT INTO gallery_images 
+		(gallery_id, title, image_extension, sort_order)
+		VALUES 
+		(6, 'camp1', 'jpg', 6))<br>
+got image name(15.jpg)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/b_15.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/b_15.jpg) ext(jpg)<br>
+c_a_r(190xc127)
+icr(new_image, object, 0, -44.261194029851, '0', '0', 190, 215.5223880597, 134, 152)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/t_15.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/t_15.jpg) ext(jpg)<br>
+c_a_r(60xc40)
+icr(new_image, object, 0, -0.052631578947366, '0', '0', 60, 40.105263157895, 190, 127)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/m_15.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/6/m_15.jpg) ext(jpg)<br>
+
+
+20012009 14:02:13
+set sort order 4 
+run insert image(INSERT INTO gallery_images 
+		(gallery_id, title, image_extension, sort_order)
+		VALUES 
+		(5, 'african-laugh', 'jpg', 4))<br>
+got image name(16.jpg)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_16.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_16.jpg) ext(jpg)<br>
+c_a_r(190xc127)
+icr(new_image, object, 0, -63.166666666667, '0', '0', 190, 253.33333333333, 225, 300)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_16.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_16.jpg) ext(jpg)<br>
+c_a_r(60xc40)
+icr(new_image, object, 0, -0.052631578947366, '0', '0', 60, 40.105263157895, 190, 127)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_16.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_16.jpg) ext(jpg)<br>
+
+
+20012009 14:02:14
+set sort order 5 
+run insert image(INSERT INTO gallery_images 
+		(gallery_id, title, image_extension, sort_order)
+		VALUES 
+		(5, 'african-child-1', 'jpg', 5))<br>
+got image name(17.jpg)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_17.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_17.jpg) ext(jpg)<br>
+c_a_r(190xc127)
+icr(new_image, object, 0, -7.75, '0', '0', 190, 142.5, 300, 225)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_17.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_17.jpg) ext(jpg)<br>
+c_a_r(60xc40)
+icr(new_image, object, 0, -0.052631578947366, '0', '0', 60, 40.105263157895, 190, 127)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_17.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_17.jpg) ext(jpg)<br>
+
+
+20012009 14:02:15
+set sort order 6 
+run insert image(INSERT INTO gallery_images 
+		(gallery_id, title, image_extension, sort_order)
+		VALUES 
+		(5, 'african-child-2', 'jpg', 6))<br>
+got image name(18.jpg)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_18.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_18.jpg) ext(jpg)<br>
+c_a_r(190xc127)
+icr(new_image, object, 0, -63.166666666667, '0', '0', 190, 253.33333333333, 225, 300)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_18.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_18.jpg) ext(jpg)<br>
+c_a_r(60xc40)
+icr(new_image, object, 0, -0.052631578947366, '0', '0', 60, 40.105263157895, 190, 127)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_18.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_18.jpg) ext(jpg)<br>
+
+
+20012009 14:02:15
+set sort order 7 
+run insert image(INSERT INTO gallery_images 
+		(gallery_id, title, image_extension, sort_order)
+		VALUES 
+		(5, 'african-child-3', 'jpg', 7))<br>
+got image name(19.jpg)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_19.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/b_19.jpg) ext(jpg)<br>
+c_a_r(190xc127)
+icr(new_image, object, 0, -7.75, '0', '0', 190, 142.5, 300, 225)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_19.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/t_19.jpg) ext(jpg)<br>
+c_a_r(60xc40)
+icr(new_image, object, 0, -0.052631578947366, '0', '0', 60, 40.105263157895, 190, 127)
+Save file C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_19.jpg<br>
+write(C:/phil/websites/csip/csipu/httpdocs//silo/images/galleries/5/m_19.jpg) ext(jpg)<br>

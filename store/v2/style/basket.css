@@ -1,0 +1,72 @@
+
+div#basket form {
+	border: none;
+	clear: both;
+	background-color: #fff;
+	padding: 0;
+}
+fieldset#buttons {
+}
+
+	
+table {
+	border:1px solid #000;
+}
+
+
+
+table#donations {
+}
+	table#donations tr {
+	}
+		table#donations tr th {
+			text-align: left;
+		}
+
+
+table.basket-table tr th {
+	text-align: left;
+}
+	table.basket-table tr td.col_quantity input {
+		width: 35px;
+	}
+	table.basket-table tr td.col_remove a {
+		background: transparent url(/store/images/layout/basket-remove.gif) no-repeat scroll 0 0;
+		display: block;
+		float: right;
+		height: 17px;
+		text-indent: -9999px;
+		width: 17px;
+	}
+
+
+table#shopping-basket {
+	width: 840px;
+	border: 0;
+}
+	table#shopping-basket tr {
+	}
+		table#shopping-basket tr th {
+		}
+			table#shopping-basket tr th.col_remove {
+				text-align: right;
+			}
+	
+		table#shopping-basket tr.col_recalc {
+		}
+			table#shopping-basket tr.col_recalc td {
+				text-align: right;
+			}
+
+		table#shopping-basket tr td {
+		}
+			table#shopping-basket tr td.col_quantity {
+			}
+				table#shopping-basket tr td.col_quantity input {
+					width: 35px;
+				}
+
+		table#shopping-basket tr td.col_remove {
+		}
+			table#shopping-basket tr td.col_remove a {
+			}

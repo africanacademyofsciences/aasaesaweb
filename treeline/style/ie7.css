@@ -1,0 +1,79 @@
+/* 
+
+	Treeline IE 7 Fixes CSS
+
+	Description: Fixes layout bugs in Internet Explorer 7
+
+	written by: Phil Thompson => phil.thompson@ichameleon.com
+	
+	last edited on: 11/7/07
+	last edited by: 
+
+	Table of Contents
+
+*/
+
+p#userinfo{background: url("/treeline/img/layout/holder-topright-bg.gif") right top no-repeat;}
+
+div#midholder{
+	background-image: url('/treeline/img/layout/menu-bottom-ie-bg.gif');
+}
+
+div#primary_inner{background: transparent; margin-bottom: 5px;}
+/*
+div#contentcurve{float: left;}
+div#contentcurve span.left{
+	background: transparent url("/treeline/img/layout/primary-bottomleft-bg.gif") left top no-repeat;
+	margin: 0;
+	padding: 0;
+	
+}
+div#contentcurve span.right{
+	background: transparent url("/treeline/img/layout/primary-bottomright-bg.gif") left top no-repeat;
+	margin: 0 0;
+	padding: 0 17px 0 0;
+}
+*/
+/* Curve the bottom holder - due to CSS restrictions (IE6) I have to do this to curve the main holding div */
+/*
+div#bottomcurve span.left{
+	background: transparent url("/treeline/img/layout/holder-bottomleft-bg.gif") left bottom no-repeat;
+	margin: 0 0 -2px -2px;
+	padding: 0 0 0px 20px;
+}
+div#bottomcurve span.right{
+	margin: 0 -2px -2px 0;
+	padding: 0 20px 0px 0;
+}
+*/
+
+div#primarycontent  ul li{
+	xmargin-left: 0;	
+}
+
+/* forms */
+form fieldset legend{
+	padding: 10px 0 10px;
+	margin: 10px 0 0 -8px;
+}
+
+
+input.checkbox{
+	border: none !important;
+}
+
+#mm li {
+	margin-top: 0;
+}
+
+fieldset fieldset{
+	min-width: 70%;
+}
+
+fieldset.buttons button.submit{
+	width: auto;
+}
+
+p.instructions{
+	min-width: 600px;
+}

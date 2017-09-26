@@ -1,0 +1,1 @@
+<link rel="Shortcut Icon" href="/treeline/favicon.ico" type="image/x-icon" />

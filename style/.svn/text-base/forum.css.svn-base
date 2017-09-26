@@ -1,0 +1,152 @@
+/* 
+
+	Intranet Forums CSS
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 17/06/2007
+	last edited by: see above
+
+	Table of Contents	
+	
+	- primary content
+		- 
+
+*/
+
+div#primarycontent table {
+}
+	div#primarycontent table caption {
+	}
+	div#primarycontent table th {
+	}
+	div#primarycontent table td {
+	}
+
+
+
+div#primarycontent table.treeline {
+	width: 100%
+}
+	div#primarycontent table.treeline caption {
+	}
+	div#primarycontent table.treeline tr.category th,
+	div#primarycontent table.treeline tr.category td {
+	}
+	div#primarycontent table.treeline td {
+	}
+		div#primarycontent table.treeline td p {
+			padding: 0 10px 3px;
+		}
+		
+	div#primarycontent table.treeline td.title {
+	}
+	div#primarycontent table.treeline caption.title {
+	}
+		div#primarycontent table.treeline td.title p,
+		div#primarycontent table.treeline caption.title {
+		}
+			div#primarycontent table.treeline td.title p a {
+			}
+			div#primarycontent table.treeline td.title p a:hover {
+			}
+			
+	div#primarycontent table.treeline td.posted,
+	div#primarycontent table.treeline td.reply-links {
+	}
+	div#primarycontent table.treeline td.suspended {
+		padding-left: 40px;
+		background: url('/img/layout/forum-suspend.gif') no-repeat 10px 10px;
+	}
+		div#primarycontent table.treeline td.posted p,
+		div#primarycontent table.treeline td.message p,
+		div#primarycontent table.treeline td.reply-links p {
+		}
+		div#primarycontent table.treeline td.message div.forum-msg {
+		}
+		div#primarycontent table.treeline td.message div.forum-msg p {
+		}
+
+
+
+ul#forum-options {
+}
+	ul#forum-options li {
+	}
+	ul#forum-options li.first {
+	}
+
+/* MCE Editor stuff */
+div#primarycontent div.mceEditor {
+}
+	div#primarycontent div.mceEditor table.mceLayout {
+	}
+	div#primarycontent div.mceEditor table {
+	}
+	div#primarycontent table.mceToolbar td {
+	}
+
+
+
+table tr td span.suspended{
+	color:#393;
+}
+	table#forumCategory tr.suspended td {
+		background:#e9e9ff;
+	}
+
+
+
+
+
+table.forumPost {
+	border-color: #BBB;
+	margin:4px 1em;
+}
+	table.forumPost td.posted {
+		width:150px;
+	}
+		table.forumPost td.posted p.controls {
+			padding:0;
+			margin-top:10px;
+			/*text-align:center;*/
+		}
+			table.forumPost td.posted p.controls a {
+				font-weight:normal;
+			}
+
+	table.forumPost td.title span,
+	table.forumPost td.message {
+		font-weight:normal;
+	}
+
+
+	table.forumPost td.message {
+		padding-top:0;
+	}
+	
+		table.forumPost td.message p {
+			padding:0;
+			margin:7px 0;
+		}
+
+		table.forumPost td.message p.modified{
+			font-style:italic;
+			color:#99e;
+		}
+		
+		table.forumPost td.message div.tags {
+			margin-left:0;
+		}
+
+
+table.forumPost.highlight {
+	border-color:#BBBBBB;
+}
+	table.forumPost.highlight tr.odd td{
+		background-color:#F0F0F3;
+	}
+	table.forumPost.highlight td {
+		background-color:#f5f5f8;
+	}
+

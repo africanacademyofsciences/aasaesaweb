@@ -1,0 +1,664 @@
+/* 
+
+	GLOBAL CSS
+
+	Description: To be included on all  pages
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 21/09/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+	HTML Tags
+		- * (universal selector)
+		- html, body
+		- a
+		- h1-6
+		- p
+		- ul, ol, dl
+		- tables
+		- forms
+		
+	Common Classes
+		- accessibility: .hide
+		- pagination lists
+		- media lists
+		- polls
+		- images
+		
+	Layout
+		- Header
+			- accessMenu
+			- globalMenu
+			- branding
+				- logo
+				- tagline
+			- menu
+			- breadcrumb
+			- search
+		- MidHolder
+			- sidebar
+				- button
+			- primarycontent
+			- secondarycontent
+		- Footer
+			- copyright
+			- footerMenu
+			
+
+*/
+
+
+/* HTML TAGS */
+html {
+	direction: ltr;
+}
+
+
+/* BODY */
+body{
+	color: #999;
+	font-family: Arial;
+	line-height: 150%;
+	padding: 0;
+	background: #CCC ;
+	margin: 0;
+} 
+
+/* A  (LINKS) */	
+a {
+	color: #0080C0;
+	text-decoration: none;
+}
+a:visited { 
+	/*color: #520D12;*/ 
+}
+a:hover { 
+	color: #D1212D; 
+}
+a:active { 
+	color: #85151D; 
+}
+
+a img{
+	border: none;
+}
+a.link-rss {
+	height:14px;
+	background: transparent url('/img/icons/rss.gif') no-repeat left;
+	padding-left:25px;
+}
+	a.link-rss img {
+		margin:0 !important;
+		padding:0;
+	}
+
+a.tl_link {
+	padding-right:13px;
+	margin-right:4px;
+	background:url('/img/layout/link-marker.gif') right no-repeat;
+}
+a.mceButton img {
+	margin:0 !important;
+}
+
+
+/* HEADINGS */
+h1, h2, h3, h4, h5, h6{
+	font-size: 130%;
+	font-weight:normal;
+	padding: 0px 20px 10px;
+}
+
+h1{
+	font-size: 220%;
+}
+h1.pagetitle {
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	margin: 0 0 20px;
+}
+
+h2 {
+	font-size:200%;
+}
+h3{
+	font-size: 136%;
+}
+h4, h5, h6{ /* keep the same because h5&h6 are rarely used*/
+	font-size: 118%;
+}
+
+/* PARAGRAPHS */
+p{
+	padding: 0 20px 10px;
+}
+
+
+table {
+	padding: 0 20px 10px;
+	margin: 0;
+}
+	table td { 
+	}
+	
+
+
+
+
+/* LISTS */
+ul {
+	padding: 0 20px 10px;
+	list-style: inside disc;
+}
+ol {
+	padding: 0 20px 10px;
+	list-style: inside decimal;
+}
+	li {
+	}
+	
+
+
+
+/* HORIZONTAL RULE */
+hr{
+	background: #CCC;
+	color: #CCC;
+	border: none;
+	height: 1px;
+}
+
+
+/* ACCESSIBILITY/SCREEN-READER */
+.hide{
+	left: -9999px;
+	position: absolute;
+	top: -9999px;
+}
+
+
+/* highlight search terms */
+span.keywords{
+	background:#FF6; 
+	color: #000;
+}
+
+
+/* STD-FORM LAYOUT - should be used for all standard forms on icham sites, use ID to modify */
+form.std-form {
+	border: 1px solid #000;
+}
+	form.std-form .field {	
+		padding: 0 0 5px 0;
+		clear: left;
+	}
+	form.std-form label {	
+		width: 200px;
+		float: left;
+	}
+	form.std-form input.text {		
+		width: 200px;
+	}
+	form.std-form textarea.text {		
+		width: 200px;
+	}
+	form.std-form select.text {		
+		width: 200px;
+	}
+
+
+
+/* PAGINATION */
+ul.pagination{
+}
+	ul.pagination li{
+		display: inline;
+		border-right: 1px solid #D1D3CF;
+		padding-right: 4px;
+		padding-left:3px;
+	}
+		ul.pagination li a{
+		}
+		ul.pagination li.inactive a{
+		}
+		ul.pagination li.active,
+		ul.pagination li.selected{
+		}
+		ul.pagination li.selected a,
+		ul.pagination li.active{
+			background: #EAEAEA;
+			border: 1px solid #C9C9C9;
+			padding: 1px 2px;
+		}
+		ul.pagination li.bookend{
+			border: none;
+		}
+		ul.pagination li.last{
+			border-left: 1px solid #D1D3CF;
+			border-right:none;
+			padding-left: 5px;
+		}
+
+
+
+/* LATEST NEWS */
+ul#newslist li {
+}
+
+
+/* FEEDBACK */
+div.feedback {
+	border: 1px solid #000;
+}
+	div.feedback.error {
+		background-color: #FFCC99;
+	}
+
+
+/* HIGHLIGHT */
+div#primarycontent span.highlight,
+div#primarycontent p.highlight {
+	background:#F5F5F2;
+	border:1px solid #ADAF9A;
+	font-style:italic;
+	padding: 5px 8px;
+	margin: 5px 0px;
+}
+div#primarycontent p.box,
+div#primarycontent span.box {
+	background:#FFF;
+	border: 2px solid #CFDEF7;
+	margin: 5px 0px;
+	padding: 5px 8px;
+	
+}
+	div#primarycontent span.box {
+		margin: 5px 10px;
+	}
+
+
+
+p#preview_msg {
+	text-align: center;
+	padding:10px;
+	line-height: 300%;
+	background-color: #FFF;
+}
+	p#preview_msg span {
+		padding: 8px 15px;
+		border: 1px solid #333;
+		background-color: #FFCC99;
+		color: #333;
+	}
+
+
+
+/* CONTENT IMAGES */
+img.left{
+	float: left;
+	margin: 0 20px 20px 0;
+}
+img.right{
+	float: right;
+	margin: 0 0 20px 20px;
+}
+
+
+
+
+
+/* LAYOUT */
+div#holder{
+	margin: 0px auto 0;
+	position:relative;
+	width: 994px;
+}
+
+/* HEADER */
+div#header{
+	background: #FFF;
+	float: left;
+	padding: 0px;
+	width: 994px;
+}
+
+div#access-menu {
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	float:left;
+	height: 29px;
+}
+
+	ul#accessMenu{
+		/*background: url('/img/layout/header-bg.gif') repeat-x top; */
+		background-color: transparent;
+		color: #fff;
+		float: none;
+		margin: 0 auto;
+		width: 994px;
+		padding: 0;
+		height: 30px;
+	}
+		ul#accessMenu li{
+			display: inline;
+			margin: 0;
+			padding-right: 10px;
+			float:left;
+			vertical-align:text-bottom;
+			line-height: 100%;
+			height: 30px;
+		}
+		ul#accessMenu li span {
+			line-height: 100%;
+		}
+
+			ul#accessMenu li#flags-list{
+				padding-right: 0px;
+			}
+				ul#accessMenu li#flags-list ul {
+					float:left;
+					padding:0;
+				}
+
+
+				ul#accessMenu li a {
+					color:#fff;
+				}
+				ul#accessMenu li a.flag {
+					padding:0px;
+				}
+					ul#accessMenu li a.flag img {
+						border:0px solid #000;
+					}
+						ul#accessMenu li a.flag img.selected {
+							border:2px solid #00c;
+							margin-bottom:-2px;
+						}
+				
+
+/* GLOBAL MENU SETTINGS */
+ul#globalMenu{
+	color: #B61E28;
+	float: left;
+	height: 35px;
+	width: 710px;
+	padding: 0;
+	padding-left:20px;
+}
+	ul#globalMenu li{
+		display: inline;
+		float:left;
+		margin:8px 15px 0 0;
+		padding:0;
+		height: 27px;
+		font-size: 90%;
+	}
+		ul#globalMenu li a {
+		}
+		ul#globalMenu li.last{
+		}
+
+
+
+/* SEARCH FORM DIV SETTINGS */		
+div#search-form-div {
+	float:right;
+}
+	div#search-form-div form p.advanced-link {
+		display: none;
+	}
+
+
+div#header_img {
+	float: left;
+	margin: 10px 20px 0;
+	padding: 0;
+	min-height: 111px;
+	width: 954px;
+	background-color: #ccc;
+}
+	div#header_img p {
+		padding:0;
+	}
+
+	div#header_img div#branding {
+		height: 40px;
+		width: 324px;
+		float:right;
+		text-indent: -9999px;
+	}
+	div#header_img div#branding a {
+		height: 40px;
+		width: 324px;
+		float:left;
+		background-repeat: no-repeat;
+		text-indent: -9000px;
+	}
+	div#header_img h1 {
+		padding:0;
+		margin:0;
+		padding-left:18px;
+		clear:both; 
+	}
+		div#header_img p,h1 a {
+			
+		}
+		
+
+div#menu_div {
+	width:954px;
+	padding:0 20px;
+	float:left;
+	margin-top:10px;
+}
+
+ul#menu{
+	float: left;
+	width: 954px;
+	padding:0;
+	background-color: #999;
+}
+	ul#menu li{
+		float: left;
+		font-weight: bold;
+		height:16px;
+		margin: 0;
+		padding: 7px 10px;
+	}
+	ul#menu li.selected {
+	}
+		ul#menu li.selected a {
+			color: #000
+		}
+	ul#menu li.last {
+	}
+		ul#menu li a{
+			color: #fff;
+			float: left;
+			padding: 0;
+			text-decoration: none;
+		}
+		ul#menu li.last a{
+		}
+		
+		ul#menu li a:hover{
+			text-decoration: none;
+		}
+
+ul#news-ticker {
+}				
+	ul#news-ticker li {
+		float: left;
+		padding: 4px 10px;
+		margin-left:0;
+		font-size: 90%;
+	}
+		ul#news-ticker li.ticker {
+			padding-right:0;
+			width: 694px;
+		}
+			ul#news-ticker li.ticker table {
+				margin-bottom: 0px;
+			}
+		
+
+div#breadcrumb{
+	background-color: #fff;
+	line-height: 100%;
+	clear: both;
+	float: left;
+	width: 954px;
+	padding: 4px 20px 4px;
+}
+	div#breadcrumb p {
+		padding:0;
+		height: 20px;
+	}
+	
+		
+/* MIDHOLDER */
+div#midholder{
+	clear: both;
+	float: left;
+	margin: 0;
+	background-color: #fff;
+	width: 994px;
+}
+	
+	
+div#sidebar{
+	float: left;
+	margin-left: 20px;
+	padding-bottom: 20px;
+	display: inline;
+	width: 223px;
+	min-height:100px;
+}
+	div#sidebar ul{
+		margin: 0;
+		padding: 0;
+		width: 223px;
+	}
+		div#sidebar ul li{
+			margin: 0 0 1px 0;
+			line-height:0;
+		}
+			div#sidebar ul li a{
+				border-width: 1px;
+				border-style: solid;
+				display: block;
+				padding: 5px;
+			}
+			div#sidebar ul li.subon a{
+			}
+				div#sidebar ul li a.level-1{
+					font-weight:bold;
+				}
+				div#sidebar ul li.subon a.level-1{
+					font-weight:bold;
+				}
+				div#sidebar ul li a.level-2{
+					padding-left:20px;
+				}
+				div#sidebar ul li.subon a.level-2{
+					padding-left:20px;
+				}
+				div#sidebar ul li a.level-3{
+					padding-left:40px;
+				}
+				div#sidebar ul li a.level-4{
+					padding-left:60px;
+				}
+
+				
+
+	
+	
+/* FLASH MAP styling - will obviously affect other Flash in the main area too... */
+div#midholder object {
+	margin:0;
+	padding:0;
+}
+
+	
+	
+
+
+
+	
+		
+	
+/* FOOTER */
+div#tags {
+	clear both;
+	background-color:#fff;
+	float:left;
+	padding:0px;
+	margin: 0px;
+	padding-bottom: 8px;
+	width:994px;
+}
+	div#tags p {
+		margin:0px;
+		padding:0;
+	}
+		div#tags p a {
+		}
+
+/* Alternative tag styling */
+div#tagslist{	
+	border: 0;
+	margin: 0px;
+	width: 711px;
+	float:left;
+	min-height: 20px;
+}
+	div#tagslist p{
+		margin: 15px 0 10px 50px;
+		padding:0;
+	}
+		
+
+	
+			
+div#footer{
+	clear: both;
+	float: left;
+	width: 994px;
+	background-color: #fff;
+	margin-right: -3px;
+}
+	div#footer p {
+		padding:0;
+	}
+		div#footer p a {
+			margin-right: 10px;
+		}
+
+div#footerMenu {
+}
+	div#footerMenu p {
+		clear: left;
+		text-align: right;
+		padding: 10px 0 40px;
+	}
+	
+
+
+
+div#contentholder {
+	float: left;
+}
+div#primarycontent {
+	float: left;
+}
+div#secondarycontent {
+	float: left;
+	width: 224px;
+}
+

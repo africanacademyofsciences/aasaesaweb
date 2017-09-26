@@ -1,0 +1,73 @@
+/* 
+
+	Treeline Homepage CSS
+
+	Description: 
+
+	written by: Phil Thompson => phil.thompson@ichameleon.com
+	
+	last edited on: 23/07/2007
+	last edited by: phil.thompson@ichameleon.com
+
+	Table of Contents
+		
+	treeline news
+	table (form inside caption)
+
+*/
+div#treelineNews{
+	background: #EDF1F1;
+	border: 1px solid #FFF;
+	float: right;
+	padding: 0 10px;
+}
+
+	div#treelineNews ul.feed{
+		padding-top: 0;
+	}
+	
+	div#treelineNews ul.feed li{
+		list-style: none;
+		margin-left: 0;
+	}
+	
+	ul.feed li em.date{
+			float: left;
+			font-style: normal;
+			margin-right: .5em;
+			width: 5em;
+		}
+	
+
+form#recentOptionsSelect{
+	background: transparent; 
+	border: none;  
+	clear: none; 
+	display: inline; 
+	float: none;
+	margin: 0; 
+	padding: 0; 
+	width: auto;
+}
+	form#recentOptionsSelect fieldset{
+		clear: none; 
+		display: inline; 
+		float: none; 
+		margin: 0; 
+		padding: 0; 
+		width: auto;
+	}
+	
+		form#recentOptionsSelect fieldset select{
+			clear: none; 
+			float: none;  
+			margin: 0 0 -.2em;
+			width: auto; 
+		}
+		
+		form#recentOptionsSelect fieldset button{
+			clear: none; 
+			float: none;
+			margin: 0 0 -.25em 5px;
+			width: auto;
+		}

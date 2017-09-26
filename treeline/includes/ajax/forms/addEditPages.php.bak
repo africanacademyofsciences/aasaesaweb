@@ -1,0 +1,140 @@
+<?php
+// if edit mode
+if($action == 'edit'){
+	// Edit mode should have a page's details so display that instead of the generic (so we can use just 1 form)
+	$title = ($_POST['title']) ? $_POST['title'] : $newPage->title;
+	$parent = $newPage->getSectionByPageGUID($guid);
+	$template = ($_POST['template']) ? $_POST['template'] : $newPage->template_id;
+	$style = ($_POST['style']) ? $_POST['style'] : $newPage->style_id;
+	$tagslist = ($_POST['tagslist']) ? $_POST['tagslist'] : $tags->drawTags($guid);
+	$shorturl = ($_POST['shorturl']) ? $_POST['shorturl'] : $newPage->shorturl;
+	$hidden = ($_POST['hidden']) ? $_POST['hidden'] : $newPage->hidden;
+	$comment = ($_POST['comment']) ? $_POST['comment'] : $newPage->comment;
+	$meta_desc = ($_POST['description']) ? $_POST['description'] : $newPage->getMetaDescription();
+	$news_display = ($_POST['news_display']) ? 1 : $newPage->newsDisplay;
+	$page_type = ($_POST['page_type']) ? $_POST['page_type'] : $newPage->type;
+}
+
+
+?>
+
+
+<form id="treeline" action="<?=$_SERVER['REQUEST_URI']?><? if ($DEBUG) echo '?debug'?>" method="post">
+    <fieldset>
+        <legend><?php echo ($action == 'create') ? 'Create a new page' : 'Edit page: '.$title ;?></legend>
+        <input type="hidden" name="action" value="<?=$action?>" />
+        <input type="hidden" name="guid" value="<?=$guid?>" />
+        <p class="instructions">To create a new page, please complete the form below:</p>
+        <fieldset>
+            <legend>Basic info</legend>
+            <div>
+                <label for="title">Title:</label>
+                <input type="text" name="title" id="title" value="<?= html_entity_decode($title) ?>" />
+            </div>
+            <div>
+                <label for="parent">Section:</label>
+                <select name="parent" id="parent">
+                	<option value="<?=$_SESSION['treeline_user_site_id']?>">Select:</option>
+                  	<?php $parent = ($action == 'create' && $mode == 'story') ? $personal_stories_guid : $parent; ?>
+					<?=$treeline->drawSelectPagesByParent($siteID,$parent,$siteID,array(2,4,11), array('resources'))?>
+                  	<?
+					// Note - the last parameter in drawSelectPagesByParent() can be a single number or integer or an array of templates 
+					// types you can show in the list..eg, array(2,11) allows folders and pages
+					   
+					// Note -- as treeline always sits just underneath the root of a site at /treeline,
+					// selecting the grandparent of a page in the cms effectively chooses site root
+                 	?>
+				</select><br />
+            </div>
+
+        </fieldset>
+        
+		
+		<?php if(!$newPage->locked) { ?>
+        <fieldset>
+            <legend>Look and feel</legend>
+       		
+            <div class="hasHelp">
+				<label for="template">Page type:</label>
+                <select name="template" id="template" onchange="javascript:toggleEvent(this.value);">
+                  	<option value="xx">Select:</option>
+  	                <?php 
+    	                //Create function that gets page template options
+						if ($_SESSION['treeline_user_site_id']==1 && $_SESSION['treeline_user_language']=='en') ;
+						else $exclude=array("Events page");
+                	    echo drawTemplatesList($template, $exclude);
+                  	?>
+                </select>
+                <span class="help">Confused? <a href="/treeline/includes/ajax/pageTypesHelp.php?height=500&amp;width=500" class="thickbox">See a description of page types</a>.</span>                      
+            </div>
+
+			<?php
+                // we could do with hiding this if it's not an events page we're making... 
+                echo $event->drawForm($_SERVER['REQUEST_METHOD']=='POST'?$_POST:array(), $template);
+            ?>
+
+
+        <fieldset id="styles">
+        <legend>Page layout</legend>
+            <div class="hasHelp">
+                <!--<label for="style">Page layout:</label>
+                <select name="style" id="style">
+                  <option value="xx">Select:</option>-->
+                  <?php 
+                    //Create function that gets page style options
+                    echo $page->drawStyleList($style, 2);
+                  ?>
+               <!-- </select>-->
+                <span class="help">Page layout determines how your page looks.</span>
+            </div>
+           </fieldset>
+        </fieldset>
+        <? } else {?>
+        <input type="hidden" name="template" value="<?=$template?>" />
+        <input type="hidden" name="style" value="<?=$style?>" />
+        <? } ?>
+        
+        
+        <fieldset>
+            <legend>Search engine optimisation</legend>
+            <div id="descriptionElement" class="hasHelp">
+                <label for="description">Description: <span class="hint"><em>Not sure what to write?</em> <a href="/treeline/includes/ajax/metaDescriptionHelp.php?height=500&amp;width=500" class="thickbox">See some examples</a></span></label>
+                <textarea name="description" id="description" cols="30" rows="4"><? if($meta_desc){ echo html_entity_decode($meta_desc); }?></textarea><span class="help">The description is vital. This will appear in Google/Yahoo's search results, so make it relevant and sell your page to potential viewers.</span><br />
+            </div>
+            
+   			<?php include $_SERVER['DOCUMENT_ROOT']."/treeline/includes/ajax/forms/addEditTags.php"; ?>            
+
+        </fieldset>
+
+        <fieldset>
+            <legend>Little extras</legend>
+            <div>
+                <label for="shorturl">Web shortcut: </label><em class="url">http://<?=$site->url?>/</em>
+                <input type="text" name="shorturl" id="shorturl" value="<?=$shorturl?>" />
+                <em class="optional">[optional]</em><br />
+            </div>
+            <div class="hasHelpx">
+                <?php $visibility = ($hidden) ? ' checked="checked"' : $visibility = ''; ?>
+                <input type="checkbox" class="checkbox" id="hidden" name="hidden"<?=$visibility?> /><label for="hidden" class="checklabel">Hide this page?</label>
+                <span class="help">Hiding this page will only prevent it from displaying in the site's navigation.</span><br />
+            </div>
+			<?php if ($site->getConfig('setup_comments')) { ?>
+            <div class="hasHelpx">
+                <?php $checkedStatus = ($comment) ? ' checked="checked"' : ''; ?>
+                <input type="checkbox" class="checkbox" id="f_comment" name="comment" <?=$checkedStatus?> />
+                <label for="f_comment" class="checklabel">Allow comments?</label>
+                <span class="help">Allow people viewing this content to add comments to the page.</span><br />
+            </div>
+			<?php } ?>
+		</fieldset>
+
+        <fieldset class="buttons">
+        	<?php if ($action=="edit") { ?>
+        	<input type="submit" class="submit" name="button-action" value="Save attributes" />
+        	<input type="submit" class="submit" name="button-action" value="Save &amp; Edit" style="clear:none;margin-left:20px;" />
+            <?php } else { ?>
+        	<input type="submit" class="submit" name="button-action" value="Next Step &raquo;" style="clear:none;margin-left:20px;" />
+            <?php } ?>
+        </fieldset>
+    </fieldset>
+</form>

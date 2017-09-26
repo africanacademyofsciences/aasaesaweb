@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Facelift Image Replacement | Examples</title>
+<script language="javascript" src="/behaviour/facelift1.2/flir.js"></script>
+
+<style type="text/css">
+
+h2.neue {
+	padding-top:10px;
+	font-family: neue-med-cond, arial;
+	font-size: 170%;
+	color : #ff0000;
+	text-transform:none;
+}
+
+h2.flir {
+	padding-top:10px;
+	font-family: futurabook, Century Gothic, arial;
+	font-size: 210%;
+	color : #980000;
+	text-transform:none;
+}
+h2.flirl {
+		display:block;
+		font-size:40px;
+		padding:0px;
+		color: #980000;
+		font-family: futuralight, futurabook, "Century Gothic", arial;
+}
+span.flirl {
+		font-size:40px;
+		padding:0px;
+		color: #980000;
+		font-family: futuralight, futurabook, "Century Gothic", arial;
+}
+</style>
+
+</head>
+<body>
+
+<ol id="examples">    
+
+   <li id="example">
+      <h2 class="neue">Some nice neue text</h2>
+      <h2 class="flir">An ordinary heading</h2>
+      <h2 class="flirl">CLIENTS</h2>
+      <span class="flirl">CLIENTS</span>
+      <span class="flirl">AMREF</span>
+      <h2 class="flir">CLIENTS</h2>
+   </li>
+
+</ol>
+    
+    
+
+<script type="text/javascript">
+FLIR.init( new FLIRStyle({mode:'wrap'}) );
+FLIR.auto(['h2.flir','h3','span.flirl','h2.neue']);
+</script>
+</body>
+</html>

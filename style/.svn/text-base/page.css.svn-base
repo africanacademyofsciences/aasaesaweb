@@ -1,0 +1,112 @@
+/* 
+
+	AMREF CONTENT PAGE CSS
+
+	Description: To be included on all AMREF content pages - page.php
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 11/09/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+			
+
+*/
+
+
+
+div#breadcrumb p {
+}
+
+
+	div#primarycontent img{
+		margin: 5px 0 10px 0; /* was margin: 5px 10px 10px 0; - Dan */
+	}
+	div#primarycontent div#photo_credit img {
+		padding:0;
+		margin:0;
+	}
+	div#primarycontent img.left{
+		float: left;
+		margin: 0 10px 10px 0;
+	}
+	div#primarycontent img.right{
+		float: right;
+		margin: 0 0 10px 10px;
+	}
+	
+
+	/* Panel button styles - buttons */
+	div#sidebar div.panel.panel_but_right ,
+	div#secondarycontent div.panel.panel_but_right ,
+	div#sidebar div.panel.panel_but_left,
+	div#secondarycontent div.panel.panel_but_left {
+		margin:5px 0;
+	}
+		div#sidebar div.panel.panel_but_right p,
+		div#secondarycontent div.panel.panel_but_right p,
+		div#sidebar div.panel.panel_but_left p,
+		div#secondarycontent div.panel.panel_but_left p {
+			padding:0;
+			margin:0;
+			padding-top:10px;
+		}
+
+
+	div#sidebar div.panel.panel_but_right h2,
+	div#sidebar div.panel.panel_but_right h3,
+	div#sidebar div.panel.panel_but_right h4,
+	div#sidebar div.panel.panel_but_left h2,
+	div#sidebar div.panel.panel_but_left h3,
+	div#sidebar div.panel.panel_but_left h4,
+	div#secondarycontent div.panel.panel_but_right h2,
+	div#secondarycontent div.panel.panel_but_right h3,
+	div#secondarycontent div.panel.panel_but_right h4,
+	div#secondarycontent div.panel.panel_but_left h2,
+	div#secondarycontent div.panel.panel_but_left h3,
+	div#secondarycontent div.panel.panel_but_left h4 {
+		display:none;
+	}
+
+
+
+		/* custom panels */
+		div#secondarycontent div.panel.sponsor {
+			/* border:1px solid #DC7624; */
+			padding-bottom:0px;
+		}
+			div#secondarycontent div.panel.sponsor h1 {
+				font-size: 340%;
+				color:#fff;
+			}
+			div#secondarycontent div.panel.sponsor h1.red {
+				background-color: #AD2A27;
+				text-align:center;
+			}
+			div#secondarycontent div.panel.sponsor h2,
+			div#secondarycontent div.panel.sponsor h3,
+			div#secondarycontent div.panel.sponsor h4 {
+				background-color:#3E4142;
+				color:#fff;
+				font-family:arial;
+			}
+			div#secondarycontent div.panel.sponsor p.red {
+				background-color: #AD2A27;
+				color:#fff;
+			}
+
+			div#secondarycontent div.panel.sponsor h1.dark {
+				background-color: #3E4142;
+			}
+			div#secondarycontent div.panel.sponsor p.dark {
+				background-color: #3E4142;
+				font-weight:bold;
+				color:#fff;
+			}
+				div#secondarycontent div.panel.sponsor p.dark a {
+					background-color: #3E4142;
+					color:#A1ABAD;
+				}
+

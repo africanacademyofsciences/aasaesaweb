@@ -1,0 +1,38 @@
+<?php
+	// Add default instructions
+	$instruction_class="instructions";
+	if (!$instructions) {
+		$instructions = 'To create a new panel, please complete the form below:';
+	}	
+	if (!$button_text) $button_text = "Save &amp; Create Content";
+	
+	$page_html .= '
+		<input type="hidden" name="action" value="'.$action.'" />
+		<input type="hidden" name="guid" value="'.$guid.'" />
+		<input type="hidden" name="mode" value="'.$mode.'" />
+		<p class="'.$instruction_class.'">'.$instructions.'</p>
+		<div>
+			<label for="title">Title:</label>
+			<input type="text" name="title" id="title" class="text" value="'.$title.'"/>
+		</div>
+		<fieldset>
+			<legend>Appearance:</legend>
+	';
+	$currentStyle = ($_POST['style']) ? $_POST['style'] : $page->style_id;
+	$currentStyle = ($currentStyle) ? $currentStyle : 8;
+	$page_html.=$page->drawStyleList($currentStyle, 6);	// The six means draw the styles availble for panels (which have a template id of 6)
+	$page_html.='
+		</fieldset>    
+		<div id="tagsElement" class="">
+	';
+	//include $_SERVER['DOCUMENT_ROOT']."/treeline/includes/ajax/forms/addEditTags.php";
+	$page_html.=$tags_html.'
+		</div>
+		<fieldset class="buttons">		
+			<input type="submit" class="submit" value="'.$button_text.'" />
+		</fieldset>
+	';
+
+
+
+?>

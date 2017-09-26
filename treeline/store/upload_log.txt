@@ -1,0 +1,118 @@
+18-01-2013 16:39:14 - ======================
+18-01-2013 16:39:14 - Started upload-process
+18-01-2013 16:51:01 - ======================
+18-01-2013 16:51:01 - Started upload-process
+18-01-2013 16:52:19 - ======================
+18-01-2013 16:52:19 - Started upload-process
+18-01-2013 16:53:17 - ======================
+18-01-2013 16:53:17 - Started upload-process
+18-01-2013 16:54:01 - ======================
+18-01-2013 16:54:01 - Started upload-process
+18-01-2013 16:54:01 - Show POST params
+18-01-2013 16:54:01 - k(Filename) = v(african-child-3.jpg)
+18-01-2013 16:54:01 - k(Test_parameter) = v(aardvark)
+18-01-2013 16:54:01 - k(gallery_id) = v(small-fluffy-armadillo)
+18-01-2013 16:54:01 - k(Upload) = v(Submit Query)
+18-01-2013 16:54:01 - Show file params
+18-01-2013 16:54:01 - k(name) = v(african-child-3.jpg)
+18-01-2013 16:54:01 - k(type) = v(application/octet-stream)
+18-01-2013 16:54:01 - k(tmp_name) = v(/tmp/phpjkToRf)
+18-01-2013 16:54:01 - k(error) = v(0)
+18-01-2013 16:54:01 - k(size) = v(61052)
+18-01-2013 16:54:01 - Got product id(1)
+18-01-2013 16:54:01 - Upload from(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013165401.jpg)
+18-01-2013 16:54:01 - To image african-child-3.jpg
+18-01-2013 16:54:01 - get max(SELECT MAX(sort_order)+1 FROM store_products_images WHERE product_id = '1')
+18-01-2013 16:54:01 - create image(11)
+18-01-2013 16:54:01 - got image name(11.jpg)
+18-01-2013 16:54:01 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013165401.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/images/1/11.jpg
+18-01-2013 16:54:01 - Failed to save file(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/images/1/11.jpg)
+18-01-2013 16:57:42 - ======================
+18-01-2013 16:57:42 - Started upload-process
+18-01-2013 16:57:42 - Show POST params
+18-01-2013 16:57:42 - k(Filename) = v(african-child-3-1.jpg)
+18-01-2013 16:57:42 - k(Test_parameter) = v(aardvark)
+18-01-2013 16:57:42 - k(gallery_id) = v(small-fluffy-armadillo)
+18-01-2013 16:57:42 - k(Upload) = v(Submit Query)
+18-01-2013 16:57:42 - Show file params
+18-01-2013 16:57:42 - k(name) = v(african-child-3-1.jpg)
+18-01-2013 16:57:42 - k(type) = v(application/octet-stream)
+18-01-2013 16:57:42 - k(tmp_name) = v(/tmp/phpmMPxdz)
+18-01-2013 16:57:42 - k(error) = v(0)
+18-01-2013 16:57:42 - k(size) = v(105485)
+18-01-2013 16:57:42 - Got product id(1)
+18-01-2013 16:57:42 - Upload from(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013165742.jpg)
+18-01-2013 16:57:42 - To image african-child-3-1.jpg
+18-01-2013 16:57:42 - get max(SELECT MAX(sort_order)+1 FROM store_products_images WHERE product_id = '1')
+18-01-2013 16:57:42 - create image(12)
+18-01-2013 16:57:42 - got image name(12.jpg)
+18-01-2013 16:57:42 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013165742.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/images/1/12.jpg
+18-01-2013 16:57:42 - Failed to save file(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/images/1/12.jpg)
+18-01-2013 16:59:08 - ======================
+18-01-2013 16:59:08 - Started upload-process
+18-01-2013 16:59:08 - Show POST params
+18-01-2013 16:59:08 - k(Filename) = v(african-child-3.jpg)
+18-01-2013 16:59:08 - k(gallery_id) = v(small-fluffy-armadillo)
+18-01-2013 16:59:08 - k(Test_parameter) = v(aardvark)
+18-01-2013 16:59:08 - k(version) = v(v1)
+18-01-2013 16:59:08 - k(Upload) = v(Submit Query)
+18-01-2013 16:59:08 - Show file params
+18-01-2013 16:59:08 - k(name) = v(african-child-3.jpg)
+18-01-2013 16:59:08 - k(type) = v(application/octet-stream)
+18-01-2013 16:59:08 - k(tmp_name) = v(/tmp/phpkhIfOC)
+18-01-2013 16:59:08 - k(error) = v(0)
+18-01-2013 16:59:08 - k(size) = v(61052)
+18-01-2013 16:59:08 - Got product id(1)
+18-01-2013 16:59:08 - Upload from(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013165908.jpg)
+18-01-2013 16:59:08 - To image african-child-3.jpg
+18-01-2013 16:59:08 - get max(SELECT MAX(sort_order)+1 FROM store_products_images WHERE product_id = '1')
+18-01-2013 16:59:08 - create image(13)
+18-01-2013 16:59:08 - got image name(13.jpg)
+18-01-2013 16:59:08 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013165908.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/images/1/13.jpg
+18-01-2013 16:59:08 - Failed to save file(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/images/1/13.jpg)
+18-01-2013 17:00:14 - ======================
+18-01-2013 17:00:14 - Started upload-process
+18-01-2013 17:00:14 - Show POST params
+18-01-2013 17:00:14 - k(Filename) = v(african-child-3.jpg)
+18-01-2013 17:00:14 - k(gallery_id) = v(small-fluffy-armadillo)
+18-01-2013 17:00:14 - k(Test_parameter) = v(aardvark)
+18-01-2013 17:00:14 - k(version) = v(v1)
+18-01-2013 17:00:14 - k(Upload) = v(Submit Query)
+18-01-2013 17:00:14 - Show file params
+18-01-2013 17:00:14 - k(name) = v(african-child-3.jpg)
+18-01-2013 17:00:14 - k(type) = v(application/octet-stream)
+18-01-2013 17:00:14 - k(tmp_name) = v(/tmp/phpHv9WXH)
+18-01-2013 17:00:14 - k(error) = v(0)
+18-01-2013 17:00:14 - k(size) = v(61052)
+18-01-2013 17:00:14 - Got product id(1)
+18-01-2013 17:00:14 - Upload from(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013170014.jpg)
+18-01-2013 17:00:14 - To image african-child-3.jpg
+18-01-2013 17:00:14 - get max(SELECT MAX(sort_order)+1 FROM store_products_images WHERE product_id = '1')
+18-01-2013 17:00:14 - create image(14)
+18-01-2013 17:00:14 - got image name(14.jpg)
+18-01-2013 17:00:14 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013170014.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/v1/images/1/14.jpg
+18-01-2013 17:00:14 - Failed to save file(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/v1/images/1/14.jpg)
+18-01-2013 17:01:35 - ======================
+18-01-2013 17:01:35 - Started upload-process
+18-01-2013 17:01:35 - Show POST params
+18-01-2013 17:01:35 - k(Filename) = v(asia-man.jpg)
+18-01-2013 17:01:35 - k(gallery_id) = v(small-fluffy-armadillo)
+18-01-2013 17:01:35 - k(Test_parameter) = v(aardvark)
+18-01-2013 17:01:35 - k(version) = v(v1)
+18-01-2013 17:01:35 - k(Upload) = v(Submit Query)
+18-01-2013 17:01:35 - Show file params
+18-01-2013 17:01:35 - k(name) = v(asia-man.jpg)
+18-01-2013 17:01:35 - k(type) = v(application/octet-stream)
+18-01-2013 17:01:35 - k(tmp_name) = v(/tmp/phprloNcw)
+18-01-2013 17:01:35 - k(error) = v(0)
+18-01-2013 17:01:35 - k(size) = v(70862)
+18-01-2013 17:01:35 - Got product id(1)
+18-01-2013 17:01:35 - Upload from(/var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013170135.jpg)
+18-01-2013 17:01:35 - To image asia-man.jpg
+18-01-2013 17:01:35 - get max(SELECT MAX(sort_order)+1 FROM store_products_images WHERE product_id = '1')
+18-01-2013 17:01:35 - create image(15)
+18-01-2013 17:01:35 - got image name(15.jpg)
+18-01-2013 17:01:36 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013170135.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/v1/images/1/15.jpg
+18-01-2013 17:01:36 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013170135.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/v1/images/1/15_large.jpg
+18-01-2013 17:01:36 - Save /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/silo/tmp/upload18012013170135.jpg to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/v1/images/1/15_small.jpg
+18-01-2013 17:01:36 - Save cropped file to /var/www/vhosts/ichameleon.com/subdomains/vanilla/httpdocs/store/v1/images/1/15_thumb.jpg

@@ -1,0 +1,422 @@
+/* 
+
+	GLOBAL CSS
+
+	Description: To be included on all  pages
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 21/09/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+	HTML Tags
+		- * (universal selector)
+		- html, body
+		- a
+		- h1-6
+		- p
+		- ul, ol, dl
+		- tables
+		- forms
+		
+	Common Classes
+		- accessibility: .hide
+		- pagination lists
+		- media lists
+		- polls
+		- images
+		
+	Layout
+		- Header
+			- accessMenu
+			- globalMenu
+			- branding
+				- logo
+				- tagline
+			- menu
+			- breadcrumb
+			- search
+		- MidHolder
+			- sidebar
+				- button
+			- primarycontent
+			- secondarycontent
+		- Footer
+			- copyright
+			- footerMenu
+			
+
+*/
+
+
+/* ACCESSIBILITY/SCREEN-READER */
+.hide{
+	left: -9999px;
+	position: absolute;
+	top: -9999px;
+}
+
+body {
+    margin: 0;
+}
+
+/* FEEDBACK */
+div.feedback {
+	border: 1px solid #000;
+	padding: 10px 20px 20px;
+	margin: 25px 0 20px;
+}
+	div.feedback.error {
+		background-color: #FFCC99;
+	}
+	div.feedback.success{
+		background-color: #B5F1B2;
+	}
+
+p#preview_msg {
+	text-align: center;
+	padding:10px;
+	line-height: 300%;
+	background-color: #FFF;
+}
+	p#preview_msg span {
+		padding: 8px 15px;
+		border: 1px solid #333;
+		background-color: #FFCC99;
+		color: #333;
+	}
+
+
+.cke_styles_panel,
+.cke_style_panel {
+	height: 430px !important;
+}
+.cke_format_panel
+{
+	height: 350px !important;
+	width: 300px !important;
+}
+
+div.swipe-element {
+	z-index:1;
+	width:100%;
+	height:100%;
+	background-repeat:no-repeat;
+	background-size: 100%;
+}
+
+	
+	table.cookie-table {
+	}
+		table.cookie-table tr td {
+			padding: 2px 5px;
+		}
+		
+/* FLASH MAP styling - will obviously affect other Flash in the main area too... */
+div#midholder object {
+	margin:0;
+	padding:0;
+}
+
+.formbuilder {
+}
+	.formbuilder .form-group {
+		border-bottom: none;
+	}
+	.formbuilder .form-control {
+		border: 1px solid #3c3c4a !important;
+		border-radius: 5px;
+		padding: 10px 14px !important;
+	}
+	.formbuilder .fb-para,
+	.formbuilder label {
+		font-size: 16px;
+		font-weight: 300;
+		width: 100%;
+		margin: 0 0 10px 0;
+	}
+		.formbuilder .required {
+		}
+			.formbuilder .required:before {
+				content: "* ";
+			}
+	.formbuilder .fb-checkbox label {
+		margin-left: 20px;
+	}
+	.formbuilder .fb-radio label {
+		width: 100%;
+	}
+	.formbuilder .fb-radio .fb-para {
+	}
+	.formbuilder .f-expertise {
+		height: 200px;
+	}
+	
+.page-intro {
+}
+	.page-intro .intro-box {
+	}
+		.page-intro .intro-box h2.circle i,
+		.page-intro .intro-box h3.circle i,
+		.page-intro .intro-box p.circle i {
+			text-align: center;
+			margin-left: 15px;
+		}
+		
+.login-form {
+}
+	.login-form .login-forgot {
+		display: none;
+	}
+
+.quick-login {
+}
+	.quick-login .login-form .login-forgot {
+		display: inline;
+	}
+
+p.home-members {
+	margin: 5px 0 0;
+}
+
+ul.nav p.login-forgot {
+	margin-top: 10px;
+	display: none;
+}
+
+
+#sub-form {
+	margin-top: 20px;
+}
+	#sub-form .form-group-sm {
+		width: 50%;
+	}
+	#sub-form input.checkbox {
+		margin-top: 7px;
+		margin-right: 10px;
+		float: left;
+		clear: left;
+	}
+	#sub-form label {
+		color: #003a70;
+	}
+	
+/* This creates a responsive rectangle approximately TV aspect ratio
+ 	Any content that does not respond by default can be wrapped in this class
+	*/
+div.iframe-rwd  {
+	position: relative;
+	padding-bottom: 65.25%;
+	padding-top: 30px;
+	height: 0;
+	overflow: hidden;
+}
+	div.iframe-rwd iframe,
+	div.iframe-rwd div.map-div {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+@media (max-width: 767px) {
+	header {
+		position: relative;
+	}
+	div.main-content,
+	div.content {
+		margin-top : 0;
+	}
+	.page-title {
+		position: relative;
+		padding-top: 10px;
+		height: auto;
+	}
+	
+	.page-title .title-container {
+		height: auto;
+	}
+}
+
+div#primarycontent {
+}
+	div#primarycontent > p:first-child {
+		margin-top: 28px;
+	}
+	div#primarycontent div.iframe-rwd  {
+		margin-bottom: 20px;
+	}
+
+div.tags {
+    clear: both;
+	margin-top: 15px;
+}
+
+
+div.show-altcontent {
+}
+	div.show-altcontent p {
+		text-align: right;
+	}
+
+
+div#header-google-tr {
+	margin-right: 20px;
+	margin-bottom: 10px;
+}
+
+div#secondarycontent {
+}
+
+    select#treeline_panels_add {
+            width: 100%;
+    }
+
+	div#panel-tl-editor {
+		width: 100%;
+	}
+	div#secondarycontent fieldset.panel-title {
+		padding: 0;
+	}
+		div#secondarycontent fieldset.panel-title input.text {
+			width: 100%;
+		}
+	div#secondarycontent fieldset.panel-style {
+		padding: 2px 0;
+	}
+		div#secondarycontent fieldset.panel-style fieldset {
+			padding: 0;
+		}
+			div#secondarycontent fieldset.panel-style fieldset select {
+				width: 100%;
+			}
+	div#secondarycontent fieldset.panel-content {
+		padding: 2px 0;
+	}
+	div#secondarycontent ul.panel-edit {
+		width: 100%;
+	}
+
+ul.panel-edit {
+	background-color: #ccc;
+	float: left;
+	list-style: none;
+	padding: 0;
+	border: 2px solid #000;
+}
+	ul.panel-edit li {
+		float: left;
+		padding: 0;
+		margin: 0;
+	}
+		ul.panel-edit li a {
+			display: block;
+			background-repeat: no-repeat;
+			width: 14px;
+			height: 14px;
+			margin-right: 3px;
+			text-indent: -9999px;
+			margin-left: 0;
+		}
+		ul.panel-edit li.edit {
+		}
+			ul.panel-edit li.edit a {
+				background-image: url('/treeline/img/icons/blue_edit.gif');
+			}
+		ul.panel-edit li.unedit {
+		}
+			ul.panel-edit li.unedit a {
+				background-image: url('/treeline/img/icons/blue_edit.gif');
+			}
+		ul.panel-edit li.rejedit,
+		ul.panel-edit li.noedit {
+		}
+			ul.panel-edit li.rejedit a,
+			ul.panel-edit li.noedit a {
+				background-image: url('/treeline/img/icons/blue_noaction.gif');
+			}
+		ul.panel-edit li.moveup {
+		}
+			ul.panel-edit li.moveup a {
+				background-image: url('/treeline/img/icons/blue_moveup.gif');
+			}
+		ul.panel-edit li.moveup-hidden {
+		}
+			ul.panel-edit li.moveup-hidden a {
+				background-image: url('/treeline/img/icons/blue_nomoveup.gif');
+			}
+		ul.panel-edit li.movedown {
+		}
+			ul.panel-edit li.movedown a {
+				background-image: url('/treeline/img/icons/blue_movedown.gif');
+			}
+		ul.panel-edit li.movedown-hidden {
+		}
+			ul.panel-edit li.movedown-hidden a {
+				background-image: url('/treeline/img/icons/blue_nomovedown.gif');
+			}
+		ul.panel-edit li.delete {
+			float: right;
+		}
+			ul.panel-edit li.delete a {
+				background-image: url('/treeline/img/icons/blue_delete.gif');
+				margin-right: 0;
+			}
+
+/* CONTENT IMAGES */
+div.img_left {
+    float: left;	
+}
+div.img_right {
+	float: right;	
+}
+img.left{
+	float: left;
+	margin: 0 20px 20px 0;
+}
+img.right{
+	float: right;
+	margin: 0 0 20px 20px;
+}
+
+div.img_block {
+    margin-bottom: 20px;
+}
+    div#primarycontent div.img_block img,
+    div.img_block img {
+            margin: 0;
+    }
+    div.img_block p {
+        font-size: 11px;
+        padding: 0 0 10px;
+        margin: 0;
+    }
+        div.img_block p.credit {
+            padding: 0;
+            text-shadow: none;
+            color: #000;
+            float: none;
+            text-align: auto;
+        }
+        div.img_block p.caption {
+            line-height: 140%;
+        }
+        div.img_block hr {
+            color: #ADADAD;
+            clear: left
+        }
+
+
+
+
+
+
+div#footer {
+    clear: both;
+    width: 100%;
+}
+
+

@@ -1,0 +1,9 @@
+body {
+background:none;
+color:#000;
+}
+
+ul#menu,
+p#userinfo {
+display:none;
+}

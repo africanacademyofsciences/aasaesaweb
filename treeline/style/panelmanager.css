@@ -1,0 +1,234 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+	padding: 0;
+	background-color: #fff;
+}
+h1.notes-header {
+	font-size: 135%;
+	background-color: #4B7EBF;
+	float: left;
+	margin: 0;
+	padding: 6px 0 6px 20px;
+	width: 580px;
+	line-height: 100%;
+}
+	h1.notes-header span {
+		float:left;
+		font-weight: bold;
+		color: #fff;
+	}
+	h1.notes-header a {
+		float: right;
+		width: auto !important;
+	}
+
+div#panel-manager {
+	float: left;
+	width: 600px;
+	background-color: #fff;
+}
+div#contentholder {
+	float: left;
+	width: 445px;
+}
+
+ul#panel-menu {
+	background-color: #EDF1F1;
+	float: left;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	width: 155px;
+}
+	ul#panel-menu li {
+		margin: 0;
+		padding: 0;
+		float: left;
+		clear: left;
+	}
+		ul#panel-menu li.first {
+			margin-top: 20px;
+		}
+		ul#panel-menu li.savenclose {
+			width: 155px;
+			margin-top: 30px;
+		}
+			ul#panel-menu li.savenclose a {
+				margin: 0 20px;
+				width: 115px;
+				float: none;
+				text-align: center;
+				background: #CB417F url(/treeline/img/layout/button-submit-bg.gif) repeat-x scroll left top !important;
+				border: 1px solid #AB0D54;
+				outline: none;
+				text-decoration: none;
+				color: #fff;
+				font-weight: bold;
+			}
+
+		ul#panel-menu li a {
+			padding: 4px 15px;
+			line-height: 100%;
+			border-color: #EDF1F1;
+			border-width: 1px 0px;
+			border-style: solid;
+			float: left;
+			font-size: 90%;
+			width: 125px;
+		}
+		ul#panel-menu li a:hover {
+			background-color: #fff;
+			text-decoration: none;
+		}
+		ul#panel-menu li a.selected {
+			background:#F3F7F7 none repeat scroll 0%;
+			border-color:#DCE1E1;
+		}
+			ul#panel-menu li a.selected:hover {
+				background-color: #EDF1F1;
+			}
+
+
+
+form {
+	padding: 0;
+	border: 0;
+}
+	form fieldset {
+		clear: left;
+		padding: 0;
+	}
+		form fieldset fieldset {
+			padding:0;
+		}
+			form fieldset fieldset#related_content_links {
+				border-width: 1px;
+				padding: 10px;
+			}
+				form fieldset fieldset#related_content_links legend {
+					margin-bottom: 0;
+				}
+		form fieldset p.instructions {
+			margin-top:0;
+		}
+	form fieldset label {
+		color: #60706F;
+		width: auto;
+		font-weight: normal;
+	}
+	form fieldset input,
+	form fieldset textarea,
+	form fieldset select {
+		width: 200px;
+		float: right;
+	}
+		form fieldset input.radio {
+			width: auto;
+		}
+		form fieldset select#f_new_panel {
+			width: 250px;
+		}
+	form fieldset input.text {
+		width: 192px;
+	}
+	form fieldset input.related-checkbox {
+		margin: 5px 0;
+		clear: right;
+		float: right;
+		width: auto;
+		margin-right: 187px;
+	}
+	form fieldset input.submit {
+		float: right;
+		clear: right;
+		font-size: 90%;
+	}
+	form fieldset fieldset.buttons {
+		margin: 0;
+		padding-left: 0;
+	}
+
+/* MENU MANAGER */
+fieldset div.menu-wrap-wrap {
+	width: 367px;
+	margin-bottom: 20px;
+}
+	fieldset div.menu-wrap-wrap div.menu-wrap {
+		width: 367px;
+	}
+	div.menu-wrap ul#mm {
+		width: 367px;
+	}
+		div.menu-wrap ul#mm li {
+			padding: 5px 10px;
+		}
+			div.menu-wrap ul#mm li td.pm-right {
+				text-align: right;
+			}
+		
+
+div.styleOption {
+	float:left;
+	
+	margin:0 20px 10px 0;
+	padding:102px 0 0;
+}		
+div.tl-box {
+	margin: 15px 0 0 15px;
+	display: inline;
+}	
+/* ie6 narrower menu 
+div#panel-manager form fieldset div.menu-wrap-wrap {
+	width: 347px;
+}
+div#panel-manager form fieldset div.menu-wrap-wrap div.menu-wrap {
+	width: 347px;
+}
+div#panel-manager form fieldset div.menu-wrap-wrap div.menu-wrap ul#mm {
+	width: 347px;
+}
+div#panel-manager form fieldset div.menu-wrap-wrap div.menu-wrap ul#mm li table.tl_list {
+	width: 327px;
+}
+div#panel-manager form fieldset div.menu-wrap-wrap div.menu-wrap ul#mm li table.tl_list td span.title {
+	width: 186px;
+}
+*/
+
+div.tl-content div.menu-wrap-wrap table.tl_list {
+	width: 347px;
+}
+	div.tl-content div.menu-wrap-wrap table.tl_list td {
+		font-size: 100%;
+	}
+		div.tl-content div.menu-wrap-wrap table.tl_list td span.title {
+			width: auto;
+		}
+		div.tl-content div.menu-wrap-wrap table.tl_list td.action {
+			width: 105px;
+		}
+			div.tl-content div.menu-wrap-wrap table.tl_list td.action a {
+				text-decoration: none;
+			}
+				div.tl-content div.menu-wrap-wrap table.tl_list td.action a.delete {
+					margin-right: 0;
+				}
+		
+
+ul.message {
+	width: 390px;
+	margin: 15px 0 0px 15px;
+	padding: 10px;
+	float: left;
+	border: 1px solid #819093;
+	background-color: #FEFFB3;
+	font-size: 90%;
+	color: #819093;
+	line-height: 110%;
+}
+ul.error {
+	background-color: #FF9999;
+}
+

@@ -1,0 +1,56 @@
+<AMREF>
+	<weborder>
+		<customer>
+			<URN>AX00000001</URN>
+			<SourceCode>AXGRB</SourceCode>
+			<MediaType>WEB</MediaType>
+			<Title>Mr</Title>
+			<Forename>John</Forename>
+			<Surname>Doe</Surname>
+			<Salutation>Dear John Doe</Salutation>
+			<Company>A Company</Company>
+			<Add1>10 The Street</Add1>
+			<Add2>The Road</Add2>
+			<Add3></Add3>
+			<Add4></Add4>
+			<Add5></Add5>
+			<Town>Atown</Town>
+			<County>Acounty</County>
+			<Postcode>RH1 1NN</Postcode>
+			<Country>United Kingdom</Country>
+			<Telephone>01234 567890</Telephone>
+			<Mobile>07775 123456</Mobile>
+			<Fax>01234 567891</Fax>
+			<Amount>12.00</Amount>
+			<PandP>2.00</PandP>
+			<Donation>0.00</Donation>
+			<Paytype>CC</Paytype>
+			<DelTitle>Mr</DelTitle>
+			<DelForename>John</DelForename>
+			<DelSurname>Doe</DelSurname>
+			<DelSalutation>Dear John Doe</DelSalutation>
+			<DelCompany>A Company</DelCompany>
+			<DelAdd1>10 The Street</DelAdd1>
+			<DelAdd2>The Road</DelAdd2>
+			<DelAdd3></DelAdd3>
+			<DelAdd4></DelAdd4>
+			<DelAdd5></DelAdd5>
+			<DelTown>Atown</DelTown>
+			<DelCounty>Acounty</DelCounty>
+			<DelPostcode>RH1 1NN</DelPostcode>
+			<DelCountry>United Kingdom</DelCountry>
+			<Order>
+				<OrderItem>
+					<ItemID>AX-CARD01</ItemID>
+					<ItemCost>5.00</ItemCost>
+					<ItemQty>1</ItemQty>
+				</OrderItem>
+				<OrderItem>
+					<ItemID>AX-CARD02</ItemID>
+					<ItemCost>5.00</ItemCost>
+					<ItemQty>1</ItemQty>
+				</OrderItem>
+			</Order>
+		</customer>
+	</weborder>
+</AMREF>

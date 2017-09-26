@@ -1,0 +1,276 @@
+<?php
+
+//ini_set("display_errors", "yes");
+//error_reporting(E_ALL);
+
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");
+include($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/preference.class.php");
+
+	$curPage = "prefedit";
+	$action = strtolower(read($_SERVER['REQUEST_METHOD']=="POST"?$_POST:$_GET, 'action', ''));
+	$feedback="error";
+
+
+$showFrom = addslashes($_REQUEST["sf"]);
+if(!$showFrom) $showFrom = 0;
+$showRows = addslashes($_REQUEST["sr"]);
+if(!$showRows) $showRows = 10;
+
+
+	// Create a new Preference
+	if ($_SERVER['REQUEST_METHOD']=="POST") {
+		
+		if($action == "create"){
+			$preference = new preference();
+			if ($_POST['preference_title'] && $_POST['preference_description']) {
+				$preference->set('preference_title', $_POST["preference_title"]);
+				$preference->set('preference_description', $_POST["preference_description"]);
+				$preference->set('siteID', $site->id);
+				if (!$preference->createNew()) $message[]="Failed to create your new preference";
+				else {
+					$message[]="Your preference has been added";
+					$feedback="success";
+					$action="browse";
+				}
+			}
+			else $message[]="You must enter a title and description";
+		}
+	
+		// Update an existing preference
+		else if ($action=="edit") {
+	
+			if(isset($_POST["preference_id"]) && (($_POST["preference_id"] + 0) > 0)){
+				//print "update preference<br>\n";
+				$preference = new preference(addslashes($_POST["preference_id"]));
+				
+				$preference->set('preference_title', $_POST["preference_title"]);
+				$preference->set('preference_description', $_POST["preference_description"]);
+				$preference->set('siteID', $site->id);
+					
+				if ($preference->isValid()) {
+					$action = '';
+					if ($preference->updated) {
+						$preference->update();
+					}
+				}
+				else $message[]="Your preference is not valid";
+			}
+		} 
+		
+	}
+	else {
+		if ($action == "delete") {
+			// Delete id
+			$preference = new preference(addslashes($_GET["preference_id"]));
+			$preference->delete();
+			$action="";
+		}
+		else if ($action == "re_enable") {
+			// Re-enable preference
+			$preference = new preference(addslashes($_GET["preference_id"]));
+			$preference->re_enable();
+			$action="";
+		}
+	}
+		
+
+	// Load the preference for use on the page.
+	unset($preference);
+	if ($action=="edit") $preference = new preference(addslashes($_REQUEST["preference_id"]), $site->id);
+	else $preference = new preference(null);
+
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Newsletters Preferences: '.ucwords($action) : 'Newsletters Preferences';
+	$pageTitle = ($action) ? 'Newsletters Preferences : '.ucwords($action) : 'Newsletters Preferences';
+	
+	$pageClass = 'newsletters';
+	
+	
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+
+<div id="primarycontent">
+<div id="primary_inner">
+<?php
+
+	echo drawFeedback($feedback, $message);
+	
+    if(($action == "edit" || $action=="delete") && !$preference->preference_id){ 
+		?>
+	    <p class="error">Cannot find the preference you are trying to <?=$action?>.</p>
+    	<?php
+	}
+	else if ($action=="create" || $action=="edit") {
+		$page_html = '
+		<p>Use the form below to set up a preference.</p>
+		
+		<form action="" method="post" id="frmPreference">
+		  <fieldset>
+	
+			  <p class="instructions">Fields marked * are required.</p>
+			  <input type="hidden" name="preference_id" value="'.$preference->preference_id.'" />
+			  <label for="preference_title" class="required">Title:</label>
+			  <input type="text" class="required" id="preference_title" name="preference_title" maxlength="255" value="'.$preference->preference_title.'" />
+			  <br />
+			  <label for="preference_description" class="required">Description:</label>
+			  <textarea class="preference_description" name="preference_description" id="preference_description">'.$preference->preference_description.'</textarea>
+			  <br />
+			  <fieldset class="buttons">
+				<input type="submit" class="submit" name="action" value="'.ucfirst($action).'" />
+			  </fieldset>
+		  </fieldset>
+		</form>
+		';
+		$page_title=($action == 'add' || $action == 'create') ? 'Add new preference':'Edit preference ('.$preference->preference_title.')';
+		echo treelineBox($page_html, $page_title, "blue");
+    } 
+	else if ($action=="browse" || !$action) {
+	
+		// **********************************************************
+		// START OF VERY OLD CODE WARNING
+		// **********************************************************
+		?>
+        <h2 class="pagetitle rounded">Step 2: Manage preferences</h2>
+		<p><a href="/treeline/newsletters/prefedit/?action=create">Add a new preference</a></p>
+		<?php
+
+		//================================================================================================
+		// PAGINATION
+		// Get the pagination data now, so we can copy it at the top and bottom of the results list
+	
+		$strPagination = '';
+	
+		// Run stripped down SQL for pagination data
+		$strSQL = "SELECT count(*) FROM newsletter_preferences WHERE site_id = ".$site->id;
+		$hits = $db->get_var($strSQL);
+	
+		$num_pages = ceil($hits / $showRows);
+		$last_page = $num_pages;
+		$cur_page = ceil($showFrom / $showRows) + 1;
+	
+		$strCurURL = "../prefbrowse/?sr=" . $showRows . "&amp;ob=" . $orderBy . "&amp;se=" . $searchEmail . "&amp;sfn=" . $searchFullname . "&amp;od=" . $orderDir;
+	
+		if($showFrom > 0){
+	
+			$prevSF = $showFrom-$showRows;
+	
+			$strPagination .= '
+<li><a title="go to start" href="'.$strCurURL.'&amp;sf=0"></a></li>
+<li><a title="go to previous" href="'.$strCurURL.'&amp;sf='.$prevSF.'"></a></li>
+';
+	
+		}
+	
+		$showPageLink = (($cur_page - 2) > 0 ? $cur_page - 2 : 1);
+	
+		if($last_page - $showPageLink < 5)$showPageLink = $last_page - 4;
+		if($showPageLink < 1)$showPageLink = 1;
+	
+		for($i = 0; $i < 5 && $showPageLink <= $last_page; $i++, $showPageLink++){
+			if($showPageLink == $cur_page){
+				$strPagination .= "<li class=\"chosen_page\">" .$showPageLink . "</li>";
+			}else{
+				$strPagination .= "<li><a title=\"go to page " . $showPageLink . "\" href=\"" . $strCurURL . "&amp;sf=" . (($showPageLink - 1) * $showRows) ."\">" . $showPageLink . "</a></li>";
+			}
+		}
+
+		if($cur_page < $last_page){
+	
+			$nextSF = ($showFrom+$showRows);
+			$endSF = ($last_page - 1) * $showRows;
+	
+			$strPagination .= '
+<li><a title="go to next" href="'.$strCurURL.'&amp;sf='.$nextSF.'">&gt;</a></li>
+<li><a title="go to end" href="'.$strCurURL.'&amp;sf='.$endSF.'">&gt;&gt;</a></li>
+';
+	
+		}
+		// /PAGINATION
+		//===============================================================================================
+
+	
+		// Fetch old newsletters
+		$query = "SELECT preference_id, preference_title, preference_description, deleted 
+			FROM newsletter_preferences 
+			WHERE site_id = ".$site->id."
+			ORDER BY preference_title";
+		//echo $query;
+		if($db->query($query)) {
+			$results = $db->get_results(null);
+			//$idx = 0;
+			?>
+<table class="treeline">
+<caption>Preferences - <?php echo ($hits . " result" . ($hits == 1 ? "" : "s") . " found"); ?></caption>
+<thead>
+<tr>
+  <th scope="col">Preference Title</th>			
+  <th scope="col">Edit</th>
+  <th scope="col">Delete</th>
+  <th scope="col">Re-enable</th>
+</tr>
+</thead>
+<tbody>
+			<?php
+			//echo "<pre>".print_r($results, true)."</pre>";
+			foreach($results as $result){
+	
+				$dellink = $reenablelink = '';
+				$editlink = '<a href="/treeline/newsletters/prefedit/?action=edit&amp;preference_id='.$result->preference_id.'">Edit</a>';
+				if ($result->deleted == 1){
+					$reenablelink = '<a href="/treeline/newsletters/prefedit/?preference_id='.$result->preference_id.'&amp;action=re_enable" title="Re-enable">Re-enable</a>';
+				}
+				// Scrappy but dont allow the digest preference to be deleted. 
+				else if ($result->preference_id != 2) {
+					$dellink = '<a href="/treeline/newsletters/prefedit/?preference_id='.$result->preference_id.'&amp;action=delete" title="Delete">Delete</a>';
+				}
+				$date = ($result->date_changed) ? $result->date_changed : $result->date_added;
+				?>
+				<tr>
+					<td><?php echo smartTruncate(stripslashes($result->preference_title), 40); ?></td>
+					<td class="action edit"><?php echo $editlink; ?></td>
+					<td class="action delete"><?php echo $dellink; ?></td>
+					<td class="action publish"><?php echo $reenablelink; ?></td>
+				</tr>
+				<?php 
+			} 
+			?>
+		  </tbody>
+		</table>
+		<ul class="pagination"><?=$strPagination?></ul>
+		<?php
+		}
+		else { 
+			?>
+			<p class="warn">No preferences found</p>
+			<?php
+		}
+	
+	
+	}
+	?>
+
+</div>
+</div>
+<?php 
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); 
+
+
+function smartTruncate($str, $maxLen){
+	if(strlen($str) < $maxLen){
+		return($str);
+	}else{
+		$str = substr($str, 0, $maxLen - 4) . " ...";
+		return($str);
+	}
+}
+
+?>

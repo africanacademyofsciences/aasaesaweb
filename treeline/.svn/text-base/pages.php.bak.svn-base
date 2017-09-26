@@ -1,0 +1,586 @@
+<?php
+
+//	ini_set("display_errors", "yes");
+//	error_reporting(E_ALL);
+
+
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");	
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/event.class.php");
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/functions/pages.php");
+
+	$tags = new Tags($site->id, 1);// TAGS
+	
+	$action = read($_REQUEST,'action','');
+	if (!$action) header("Location: /treeline/"); // hide this page if no action is present
+	
+	$guid = read($_REQUEST,'guid','');
+	$view = read($_REQUEST,'view',false);
+	$mode = read($_REQUEST,'mode',false);
+
+	$event = new Event($guid);
+
+	// user feedback
+	$feedback = read($_REQUEST,'feedback','');
+	$message = read($_REQUEST,'message','');
+	
+	$title = read($_POST,'title',''); // Page title
+	$parent = read($_POST,'parent','xx'); // Page parent
+	$meta_desc = read($_POST,'description',false); // Meta Description
+	$template = read($_POST,'template',2); // Page template e.g. page.php
+	$style = read($_POST,'style',2); // Page template e.g. page.php
+	$shorturl = read($_POST,'shorturl',false); // page shortcut e.g. example.com/link
+
+	$hidden = read($_POST,'hidden',false); // Hidden (from menu) status
+	$hiddenflag = ($hidden=='on')?'1':'0';
+	$comment = read($_POST,'comment',false); // Hidden (from menu) status
+	$commentflag = ($comment=='on')?'1':'0';
+
+	$page_type = read($_POST,'page_type',false); // Describe the kind of page it is...
+	$page_type = ($page_type<='') ? 0 : $page_type;
+	$news_display = ($_POST['news_display']) ? 1 : 0;
+	
+	$page = new Page;
+	
+	$keywords = read($_REQUEST,'keywords',false);
+	$category = read($_REQUEST,'category','xx');
+	$findcat = read($_REQUEST,'findcat',false);
+	$thispage = read($_REQUEST,'p',1);
+	$page->setPage($thispage);
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {// Form has been submitted
+	
+		// Not very keen on this but keep the site name for emptying cache files later.
+		// Need to check this works really.
+		$tmp = ($site->properties['site_name'] >'' ? '_'.$site->properties['site_name'] : '');
+	
+		// Need to check for tag adding and ensure no other actions are processed
+		// We actually add tags in the /treeline/includes/ajax/forms/addEditTags.php file
+		if ($_POST['tagaction']) {
+			;
+		}
+		else if ($action == 'create') { // Create new page
+
+			if (!$title) {
+				$feedback = 'error';
+				$message = 'Please enter a title for this page';
+			}
+			else if ($parent == 'xx') {
+				$feedback = 'error';
+				$message = 'Please select a section for this page';
+			}
+			else if (!$template) {
+				$feedback = 'error';
+				$message = 'Please select a page type for this page';
+			}
+			else {
+				// Create a new page:
+				$newPage = new Page;
+				$newPage->setParent($parent);
+				$newPage->setTitle($title);
+				$newPage->setTemplate($template);
+				$newPage->setLocked(0);
+				$newPage->setStyle($style);
+				$newPage->setPageType($page_type);
+				
+				// If we have meta data, set it in the page class
+				if($meta_desc){
+					$newPage->setMetaDescription($meta_desc);
+				}
+
+				
+				// Generate a unique name for the page:
+				$name = $newPage->generateName();
+				if (!$name) {
+					$feedback = 'error';
+					$message = 'A page with that name already exists in that section';
+				}else if($shorturl && $page->checkShortURL($shorturl) && ($shorturl!=$newPage->getShortURL()) ){
+					$feedback = 'error';
+					$message = "An existing page already uses short URL <strong>$shorturl</strong>";
+				} else {			
+					$newPage->setHidden($hiddenflag);
+					$newPage->setComment($commentflag);
+					$newPage->setSortOrder();					
+					$newPage->setShortURL($shorturl);
+					if( $newPage->create() ){
+
+						// add tags
+						$tagslist=$tags->drawAdminTags($pagetagslist);
+						$tags->addTagsToContent($newPage->getGUID(), str_replace(", ",",",$tagslist));						
+						// Clear cache files						
+						clearCache(array('footer.inc', 'menu,inc', 'sitemap.inc'));
+						// If we have created an events page we need to update post event data too
+						if ($template==19) {	
+							$event->update($newPage->getGUID(), $_POST);
+						}
+						
+						
+						// If we created a hidden page we should go straight to edit the page contents
+						if($hiddenflag=='1' && $newPage->getPageType()!=4){
+							$redirectURL="{$newPage->drawLinkByGUID($newPage->getGUID())}?mode=edit&referer=/treeline/&guid={$newPage->getGUID()}";
+							//print "goto($redirectURL)<br>";
+							redirect($redirectURL);
+						}
+						// Otherwise we need to position the new page in the menu
+						else {
+							redirect("/treeline/menus/?mode=edit&referer=/treeline/&parent=$parent&guid={$newPage->getGUID()}&pagename={$newPage->getName()}");
+	
+						}
+					}else{
+						$feedback = 'error';
+						$message = 'Your page could not be added due to a technical error.  Please content your site\'s administrator.';
+					}
+				}
+			}
+		}
+		else if ($action == 'edit') { // Edit an existing page
+			if(!$findcat){
+				$newPage = new Page();
+				$newPage->loadByGUID($guid);
+				$newPage->setHidden($hiddenflag);
+				$newPage->setComment($commentflag);
+
+				if (!$title) {
+					$feedback = 'error';
+					$message = 'Please enter a title for this page';
+				}
+				else if ($parent == 'xx') {
+					$feedback = 'error';
+					$message = 'Please select a section for this page';
+				}
+				else if($shorturl && $page->checkShortURL($shorturl) && ($shorturl!=$newPage->getShortURL()) ){
+					$feedback = 'error';
+					$message = "An existing page already uses short URL <strong>$shorturl</strong>";
+				}
+				else {
+					// Do we need to remove a shorturl?
+					if (!$shorturl && $newPage->getShortURL()) {
+						$newPage->deleteShortURL();
+					}
+					
+					/*
+					// Allow changing page names for the ar site as there 
+					// may be a problem with generateName???
+					if ($newPage->getTitle() != $title && $_SESSION['treeline_user_language']=="ar") {
+						//print_r($_SESSION);
+						$newPage->setTitle($title);
+						$newName=$newPage->generateName();
+						//print "got newname($newName)<br>";
+						//$newPage->setName($newName);
+					}
+					*/
+					
+					// We should only set the parent if we dont have one or if the $parent(selected) is not its current master?
+					if (!$newPage->getParent() || $newPage->getPrimary()!=$parent) {
+						if( $newPage->getPageType()==4 || $newPage->getTemplate()==19){
+							$newPage->setParent($siteID);
+						}else{
+							$newPage->setParent($parent);				
+						}
+					}
+
+					$newPage->setTitle($title);
+					if ($template>0) $newPage->setTemplate($template);
+					$newPage->setStyle($style);
+					$newPage->setPageType($page_type);
+					// If we have meta data, set it in the page class
+					$newPage->setMetaDescription($meta_desc);
+
+					$newPage->setShortURL($shorturl);
+					
+					// add tags
+					$tagslist=$tags->drawAdminTags(read($_REQUEST, "pagetagslist", ','));
+					$tags->addTagsToContent($guid, str_replace(", ",",",$tagslist));						
+					
+					$newPage->save();
+
+					clearCache(
+						array(
+							'footer'. $tmp .'.inc', 
+							'menu'. $tmp .'.inc', 
+							'sitemap'. $tmp .'.inc'
+							)
+						);
+					
+					$link = $page->drawLinkByGUID($guid);
+
+					//print "updating event data...<br>";
+					if ($template==19) {	
+						$event->update($guid, $_POST);
+					}
+					
+					// If its a hiddne page go to edit content.
+					if($_REQUEST['button-action']=="Save attributes") $redirectURL='/treeline/pages/?action=edit&'.createFeedbackURL('success',"Changes saved");
+					else if($hiddenflag=='1') $redirectURL="{$link}?mode=edit&referer=/treeline/&guid={$guid}";
+					// Go to the add gallery images page
+					else if($newPage->getTemplate()==18) $redirectURL="/treeline/galleries/?action=edit&guid={$guid}";
+					// Go to the inline page editor
+					else $redirectURL="{$link}?mode=edit&referer=/treeline/&guid={$guid}";
+					redirect($redirectURL);
+				}
+			}
+		}
+		else if ($action == 'publish') { // Publish a page
+			$newPage = new Page();
+			$newPage->loadByGUID($guid);
+			//$dbgmsg=dbgmsg($dbgmsg, "loaded page($guid) - About to try to publish");
+			$newPage->publish();
+			//$dbgmsg=dbgmsg($dbgmsg, "returned from publish");
+			clearCache(array('footer'. $tmp .'.inc', 'menu'. $tmp .'.inc', 'sitemap'. $tmp .'.inc'));
+			//print "dbg($dbgmsg)";
+			redirect('/treeline/?section=publish&'.createFeedbackURL('success','That page has been published'));
+		}
+
+		// Reject page edits
+		// If we do not want the current edit we just remove the entry completely from content
+		else if ($action == 'reject') { 
+			$query = "delete from content where parent = '$guid' and revision_id=1";
+			print "$query<br>\n";
+			if ($db->query($query)) redirect('/treeline/?section=publish&'.createFeedbackURL('success','Edits to that page have been rejected'));
+			else {
+				$message[]="Failed to delete the current version of this page";
+				$feedback="error";
+			}
+		}
+
+		else if ($action == 'delete') {
+			if(!$findcat){
+				$newPage = new Page();
+				$newPage->loadByGUID($guid);
+				$newPage->delete();
+				clearCache(array('footer'. $tmp .'.inc', 'menu'. $tmp .'.inc', 'sitemap'. $tmp .'.inc'));
+				redirect('/treeline/?section=delete&'.createFeedbackURL('success','That page has been deleted'));
+			}
+		}
+	}
+	
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables','events'); // all CSS needed by this page
+	$extraCSS = '
+	em.optional {
+		font-size: smaller;
+		color: #999;
+		float: left;
+		margin: .75em 10px;
+	}
+	em.url {
+		color: #666;
+		float: left;
+		font: smaller;
+		margin: .75em 2px .75em 0;
+	}
+	input#shorturl{
+		width: 160px;
+	}
+	
+	div.styleOption {
+		float: left;
+		margin: 10px 20px 10px 0;
+		padding: 82px 0 0;
+	}
+	
+	div.styleOption *{
+		float: none;
+		margin: 0 !important;
+	}
+	'."\n"; // extra on page CSS
+	
+
+	
+	$js = array('live_story_preview'); // all external JavaScript needed by this page
+	$extraJS = '
+	
+	$(document).ready(
+		function() { 
+				/*If "newsheadlines" is the selected option then show the checkbox otherwise don\'t*/
+				$("select#parent option.newsheadlines").is(":selected") ? $("div#news_checkbox").show() : $("div#news_checkbox").hide();
+				
+				/* hide the checkbox * when other options are selected */
+				$("select#parent option").click(
+					function(){
+						$("div#news_checkbox").hide();
+					}
+				);
+				
+				/* show the checkbox * when "newsheadlines" is selected */
+				$("select#parent option.newsheadlines").click(
+					function(){
+						$("div#news_checkbox").show();
+					}
+				);
+		}
+	);
+	
+	
+	function toggleEvent(index) {
+		var d=document.getElementById("event_data");
+		var display="none";
+		if (index==19) display="block";
+		d.style.display=display;
+	}
+	
+	'; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Pages : '.ucwords($action) : 'Pages';
+	$pageTitle = ($action) ? 'Pages : '.ucwords($action) : 'Pages';
+	
+	$pageClass = 'pages';
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+	
+?>
+            <div id="primarycontent">
+                <div id="primary_inner">
+                <?=drawFeedback($feedback,$message)?>
+
+                <?php 
+				// CREATE A NEW PAGE
+				if ($action == 'create') { 
+	                include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/ajax/forms/addEditPages.php');
+                } 
+				
+				// EDIT MODE
+				else if ($action == 'edit') {  ?> 
+                <?php if (!$guid) {  // no individual page selected ?>
+                
+                <p>Please select the page you would like to edit from the list below.</p>
+                <?php if($view == 'map'){  // Site map view ?>
+                <p>To edit a page, please select it from the list below below or go back to <a href="<?=$_SERVER['PHP_SELF']?>?action=edit">form view</a>.</p>
+                <?=$treeline->drawEditablePagesByParent($siteID,$siteID)?>
+                <?php } else{ 	  // edit individual page ?>
+                <form id="treeline" action="/treeline/pages/<?php if ($DEBUG) echo '?debug'?>" method="post">
+                    <fieldset>
+                        <input type="hidden" name="action" value="<?=$action?>" />
+                        <input type="hidden" name="guid" value="<?=$guid?>" />
+                        <p class="instructions">Can't find the page you need?  Try <a href="/treeline/pages/?action=edit&amp;view=map"><em>Site map</em></a> view.</p>
+                        <label for="keywords">Search for: </label>
+                        <input type="text" name="keywords" id="keywords" value="<?=$keywords ?>" /><br />
+                        <label for="category">Search by:</label>
+                        <select name="category" id="category">
+                          <option value="title">Select:</option>
+                          <option value="title" <?php if($category=='title'){ echo 'selected="selected"'; }?>>Title</option>
+                          <option value="content" <?php if($category=='content'){ echo 'selected="selected"'; }?>>Content</option>
+                          <option value="tags" <?php if($category=='tags'){ echo 'selected="selected"'; }?>>Tags</option>
+                        </select><br />
+                        <input type="hidden" name="findcat" value="1" />
+                        <fieldset class="buttons">
+                            <button type="submit" class="submit">submit</button>
+                        </fieldset>
+                    </fieldset>
+                </form>
+                <?php
+				
+                                $category = ($category == 'xx') ? '' : $category;
+                                if(!$category && $_POST){
+                                    $feedback = 'error';
+                                    $message = 'You need to specify a field to search by.';
+                                    drawFeedback($feedback,$message);
+                                }else if(!$keywords && $_POST){
+                                    $feedback = 'error';
+                                    $message = 'You need to specify keywords to search with.';
+                                    drawFeedback($feedback,$message);
+                                }else if( (!$category && !$keywords) || ($category && $keywords) || (!$_POST) ){
+                                    echo $page->drawPageList($thispage,$action,$category,$keywords,0,0,$siteID);
+                                }
+                         } ?>
+                <?php
+                        } else { // Edit individual page details
+                            $newPage = new $page;
+                            $newPage->loadByGUID($guid);
+							include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/ajax/forms/addEditPages.php');
+                        ?>
+                        
+					<?php
+                    }
+                } 
+				// Delete pages
+                else if ($action == 'delete') { ?>
+	                <?php if (!$guid) { // No id: Show all/Search form ?>
+		                <p>Please select the page you would like to edit from the list below.</p>
+	        	        <?php if($view == 'map'){ // Site map view?>
+    		        	    <p>To delete a page, please select it from the list below below or go back to <a href="/treeline/pages/?action=delete">form view</a>.</p>
+            		    	<?=$treeline->drawDeleteablePagesByParent($siteID, $siteID)?>
+	                	<?php }else{  // form/table view ?>
+                        <form id="treeline" action="/treeline/pages/<?php if ($DEBUG) echo '?debug'?>" method="post">
+                            <fieldset>
+                                <input type="hidden" name="action" value="<?=$action?>" />
+                                <input type="hidden" name="guid" value="<?=$guid?>" />
+                                <p class="instructions">Can't find the page you're after?  Try <a href="/treeline/pages/?action=delete&amp;view=map">Site Map</a> view.</p>
+                                <label for="keywords">Search for: </label>
+                                <input type="text" name="keywords" id="keywords" value="<?=$keywords ?>" /><br />
+                                <label for="category">Search by:</label>
+                                <select name="category" id="category">
+                                  <option value="title">Select:</option>
+                                  <option value="title" <?php if($category=='title'){ echo 'selected="selected"'; }?>>Title</option>
+                                  <option value="content" <?php if($category=='content'){ echo 'selected="selected"'; }?>>Content</option>
+                                </select><br />
+                                <input type="hidden" name="findcat" id="findcat" value="1" />
+                                <fieldset class="buttons">
+                                    <button type="submit" class="submit">submit</button>
+                                </fieldset>
+                            </fieldset>
+                        </form>
+                <?php
+                                $category = ($category=='xx')?'':$category;
+                                if(!$category && $_POST){
+                                    $feedback= 'error';
+                                    $message = 'You need to specify a field to search by.';
+                                    drawFeedback($feedback,$message);
+                                }else if(!$keywords && $_POST){
+                                    $feedback= 'error';
+                                    $message = 'You need to specify keywords to search with.';
+                                    drawFeedback($feedback,$message);
+                                }else if( (!$category && !$keywords) || ($category && $keywords) || (!$_POST) ){
+                                    echo $page->drawPageList($thispage,$action,$category,$keywords,0,0,$siteID);
+                                }
+                         } 
+
+                        } else { // show individual delete form
+                            $newPage = new $page;
+                            $newPage->loadByGUID($guid);
+                        ?>
+                        <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+                            <fieldset>
+                                <input type="hidden" name="action" value="<?=$action?>" />
+                                <input type="hidden" name="guid" value="<?=$guid?>" />
+                                <legend>Delete page:
+                                <?=$newPage->getTitle()?>
+                                </legend>
+                                <p class="instructions">You are about to delete this page. <strong>Are you sure?</strong></p>
+                                <p class="instructions">To <strong>preview</strong> this page first, <a class="thickbox" href="<?=$newPage->drawLink()?>?mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=520&amp;width=<?=$site->getConfig("site_page_width")?>" target="_blank">click here</a>.</p>
+                                <fieldset class="buttons">
+                                    <button type="submit" class="submit">Delete</button>
+                                </fieldset>
+                            </fieldset>
+                        </form>
+					<?php
+					}
+                } // Publish pages
+                else if ($action == 'publish') { 
+					
+					if (!$guid) { // No id: show all.
+						?>
+	    		        <p>To publish a page, please select it from the table below:</p>
+    	    		    <?php echo $page->drawPagePublishableList($thispage,'pages',$siteID);
+                    } else { // Show individual publish form
+						$newPage = new $page;
+						$newPage->loadByGUID($guid);
+                        if($treeline->isContentPublishable($guid)){ // page is publishable 
+							?>
+	                        <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+                        	<fieldset>
+                                <legend>Publish page: <?=$newPage->getTitle()?></legend>
+                                <input type="hidden" name="action" value="<?=$action?>" />
+                                <input type="hidden" name="guid" value="<?=$guid?>" />
+                                <p class="instructions">You are about to publish this page. <strong>Are you sure?</strong></p>
+                                <p class="instructions">To <strong>preview</strong> this page first, <a class="thickbox" href="<?=$newPage->drawLink()?>?mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=520&amp;width=<?=$site->getConfig("site_page_width")?>" class="thickbox">click here</a>.</p>
+                                <fieldset class="buttons">
+                                    <button type="submit" class="submit">Yes, publish it</button>
+                                </fieldset>
+                            </fieldset>
+		                    </form>
+							<?php 
+						} else { // page isn't publishable 
+							?>
+                            <h3><?=$newPage->getTitle()?> isn't publishable.</h3>
+                            <p>This page hasn't been edited recently and so isn't eligible to be published. If it were to be published it could produce errors on your website.</p>
+                            <p><a href="/treeline/pages/?action=publish">View other publishable pages</a></p>
+							<?php 
+						} 
+					} 
+                } 
+				
+				// Reject a publishable page
+                else if ($action == 'reject') { 
+					
+					if (!$guid) { // No id: show all.
+						?><p>No page ID passed, cannot reject edits?</p><?php
+                    } 
+					else { // Show individual reject form
+						$newPage = new $page;
+						$newPage->loadByGUID($guid);
+                        if($treeline->isContentPublishable($guid)){ // page is publishable 
+							?>
+	                        <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+                        	<fieldset>
+                                <legend>Reject edits to page: <?=$newPage->getTitle()?></legend>
+                                <input type="hidden" name="action" value="<?=$action?>" />
+                                <input type="hidden" name="guid" value="<?=$guid?>" />
+                                <p class="instructions">You are about to reject changes to this page. <strong>Are you sure?</strong> All changes to the page since it was last published will be permenantly deleted.</p>
+                                <p class="instructions">To <strong>preview</strong> this page first, <a class="thickbox" href="<?=$newPage->drawLink()?>?mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=520&amp;width=<?=$site->getConfig("site_page_width")?>" class="thickbox">click here</a>.</p>
+                                <fieldset class="buttons">
+                                    <button type="submit" class="submit">Yes, reject it</button>
+                                </fieldset>
+                            </fieldset>
+		                    </form>
+							<?php 
+						} else { // page isn't publishable 
+							?>
+                            <h3><?=$newPage->getTitle()?> isn't publishable.</h3>
+                            <p>This page hasn't been edited recently and so isn't eligible to be published. If it were to be published it could produce errors on your website.</p>
+                            <p><a href="/treeline/pages/?action=publish">View other publishable pages</a></p>
+							<?php 
+						} 
+					} 
+                }
+				
+				else if( $action=='story' ) { ?>
+                	<? if($guid){ 
+							$storyPage = new Page;
+							$storyPage->loadByGUID($guid);
+							$meta_desc = ($meta_desc) ? ($meta_desc) : $storyPage->getMetaDescription();
+							$title = $storyPage->title;
+							 
+							if( !is_object($story) && !is_a($story,'PersonalStory') ){
+								$story = new PersonalStory($guid);
+								$name = $story->properties['name'];
+								$treeline_image1 = ($story->properties['image1']) ?'<img src="'.$story->properties['image1'].'" alt="" />' : '';
+								//$treeline_image2 = ($story->properties['image2']) ? '<img src="'.$story->properties['image2'].'" alt="" />' : '';
+								$treeline_links = stripslashes($story->properties['link_text']);
+								$related1 = stripslashes($story->properties['related1']);
+								$related2 = stripslashes($story->properties['related2']);
+							}
+					   } 
+
+					   // we need to get a demo
+					?>
+                    
+                    
+                    <div id="secondarycontent">
+                        <div id="storypanel">
+                           <img id="storyGallery" src="/images/flash/home-storyimages.gif" alt="" />
+                            <h2><span class="name"><?=$name?></span>'s story</h2>
+                            <p class="meta_desc"><?=$meta_desc?></p>
+                            <ul class="multimedia"> 
+                             <li class="blogs"><a href="#">list item</a></li>
+                             <li class="galleries"><a href="#">list item</a></li>
+                             <li class="reports"><a href="#">list item</a></li>
+                             <li class="audio"><a href="#">list item</a></li>
+                             <li class="movies"><a href="#">list item</a></li>
+                            </ul>
+                            <h3>Related people</h3>
+                             <img id="relatedImages" src="/images/flash/relatedstories.gif" alt="" />
+                            <ul class="multimedia"> 
+                             <li class="people"><a href="#">list item</a></li>
+                             <li class="people"><a href="#">list item</a></li>
+                             <li class="people"><a href="#">list item</a></li>
+                            </ul>
+                       </div>
+                    </div>
+                    
+                    
+                   
+                <?php 
+					include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/ajax/forms/addEditStories.php');
+					
+				} ?>
+                </div>
+            </div>
+            <?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>
+ <?php /* TINY MCE */ if($action == 'story'){	
+ 	echo $page->drawTinyMCE();
+ ?>
+ 	<script type="text/javascript" src="/treeline/behaviour/tiny_mce/tiny_mce_storyimage.js"></script>
+ 	<script type="text/javascript" src="/treeline/behaviour/tiny_mce/tiny_mce_storylinks.js"></script>
+ <? } ?>

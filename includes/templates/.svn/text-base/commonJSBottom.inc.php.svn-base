@@ -1,0 +1,34 @@
+<?php
+
+if (is_array($jsBottom)){
+	foreach($jsBottom as $src){
+		echo "\t".'<script type="text/javascript" src="/behaviour/'.$src.'.js"></script>'."\n";
+	}
+}
+
+
+if ($USEFLIR) {
+	?>
+	<script type="text/javascript">
+	FLIR.init();
+	//FLIR.replace( ['h1.neue','a.neue'], new FLIRStyle( { realFontHeight:true } ) );
+	FLIR.replace( 'p.shadow', new FLIRStyle( { realFontHeight:true } ) );
+	FLIR.replace( 'p.shadowblack', new FLIRStyle({mode:'wrap', realFontHeight:true }) );
+	FLIR.replace( '*.flirneue', new FLIRStyle( { realFontHeight:true } ) );
+	//FLIR.replace( ['li.flirneue','a.flirneue','h2.flirneue'], new FLIRStyle( { realFontHeight:true } ) );
+	</script>
+	<?php
+}
+
+
+
+if($extraJSbottom){
+	?>
+	<script type="text/javascript">
+	<?=$extraJSbottom?>
+	</script>
+    <?php
+}
+
+
+?>

@@ -1,0 +1,59 @@
+/* CSS Document */
+
+
+header,
+.navbar-collapse {
+	background-color: #CD6C2A;
+}
+footer {
+	border-bottom-color: #CD6C2A;
+}
+.carousel-background {
+}
+
+span.link {
+	color: #f2a900;
+}
+.content section:nth-child(1),
+.content section:nth-child(2),
+.content section:nth-child(3) {
+	display: none;
+}
+
+.owl-carousel {
+	display: block;
+}
+
+#searchForm {
+	display: none;
+}
+
+.page-title .sharing-buttons {
+	display: none;
+}
+
+.gca-content {
+	color: #fff;
+}
+
+#panel-researcher-profile {
+	
+}
+#panel-researcher-profile ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#panel-researcher-profile ul li {
+}
+#panel-researcher-profile ul li.photo {
+}
+#panel-researcher-profile ul li.photo img {
+	width: 100%;
+}
+
+.news-summary .media-left,
+footer div.share {
+	display: none;
+}
+

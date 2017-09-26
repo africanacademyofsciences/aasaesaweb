@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/treeline/!svn/ver/2/treeline/newsletters/cron
+END
+add_emails.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/treeline/!svn/ver/2/treeline/newsletters/cron/add_emails.php
+END
+kill_old_content.php
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/treeline/!svn/ver/2/treeline/newsletters/cron/kill_old_content.php
+END
+post_newsletters.php
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/treeline/!svn/ver/2/treeline/newsletters/cron/post_newsletters.php
+END
+post_digests.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/treeline/!svn/ver/2/treeline/newsletters/cron/post_digests.php
+END

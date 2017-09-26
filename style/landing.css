@@ -1,0 +1,50 @@
+/* 
+
+	LANDING PAGES CSS
+
+	Description: To be included on all landing pages e.g. sections - folder.php
+
+	written by: Phil Redclift
+	
+	last edited on: 15/02/2008
+	last edited by: Phil Redclift
+
+	Table of Contents
+	
+			
+
+*/
+
+div#primarycontent {
+}
+
+div.landing-level {
+	clear: both;
+}
+div.panel_holder_big {
+}
+	div.landing-level div.landing-panel,
+	div.panel_holder_big div.landing-panel {
+	}
+
+
+div#landing-section {
+}
+	div#landing-section h1 {
+	}
+
+
+div#landing-content {
+}
+	div#landing-content h3 {
+	}
+	div#landing-content p img {
+	}
+
+	
+
+div#row2 {
+}
+
+
+

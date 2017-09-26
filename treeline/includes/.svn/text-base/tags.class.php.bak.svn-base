@@ -1,0 +1,731 @@
+<?php
+
+	/*
+	=====================
+	Tags Class
+	---------------------
+	Add/Edit/Manage/View tags aka content keywords
+	=====================
+	
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	when: February/March 2007
+	
+	
+	
+	
+	*/
+
+	class Tags{
+	
+		public $error=array();
+		public $supertag;
+		
+		public function __construct() {
+			// This is loaded when the class is created	
+			$this->setMode('view'); // set the default mode
+		}	
+		
+		public function setMode($mode) {
+			$this->mode = $mode;
+		}
+		
+		public function getMode() {
+			return $this->mode;
+		}
+		
+
+		public function uploadFromCSV($file) {
+			unset($this->error);
+			$error=array();
+			$this->error=print_r($file, true);
+			if ($fp=fopen($file['tmp_name'], "r")) {
+				while ($data=fread($fp, 10)) {	
+					//print "got data($data)<br>";
+					$data=str_replace("\n", ",", $leftover.$data);
+					$data=str_replace("\r", "", $data);
+					//print "explode($data)<br>";
+					$newtags=explode(",", $data);
+					//print "got newtags(".print_r($newtags, true).")<br>";
+					if (count($newtags)>1) {
+						for($i=0; $i<(count($newtags)-1); $i++) {
+							if (strlen(trim($newtags[$i]))) {
+								$tag_count++;
+								if (!$this->addTag($newtags[$i])) {
+									$err_count++;
+									array_push($error, $this->error[0]);
+								}
+							}
+						}
+					}
+					$leftover=$newtags[(count($newtags)-1)];
+					//print "residual data($leftover)<br>";
+					unset($newtags);
+				}
+				fclose($fp);
+
+				//print "still got ($leftover) data($data)<br>";
+				if (strlen(trim($leftover))) {
+					$tag_count++;
+					if (!$this->addTag($leftover)) {
+						$err_count++;
+						array_push($error, $this->error[0]);
+					}
+				}
+				
+				if ($error) $this->error=$error;
+				$this->error[]="Added ".($tag_count-$err_count)." of $tag_count tags";
+				return true;
+			}
+			else $this->error="Unable to open uploaded file";
+			return 0;
+		}
+		
+		public function addTag($tag){
+			// add a new tag to the database
+			global $db;
+			unset($this->error);
+
+			if (!$tag) {
+				$this->error[]="No tag specified";
+				return 0;
+			}
+
+			$tag=preg_replace("/[`¬{}><£$\/\\%^]/", "", strtolower(trim($tag)));
+			//print "add tag($tag)<br>";
+			$tag_exists = $this->getTagID($tag);
+			if(!$tag_exists){
+				$query = "INSERT INTO `tags` ( `tag` ) VALUES ( '".$db->escape($tag)."');";
+				if($db->query($query)){
+					return true;
+				}
+			}
+			else{
+				$this->error[] = "Tag <b>$tag</b> already exists";
+				return 0;
+			}
+			
+		}		
+		
+		public function addTagRelationship($guid, $tag_id, $type=1){
+		 	// add a new tag relationship e.g. add a tag to a page/file/image
+			global $db;
+			
+			$query = "INSERT INTO tag_relationships VALUES ('$guid',$type, $tag_id);";
+			
+			if(!$this->checkTagRelationship($guid, $tag_id)){
+				if(@$db->query($query)){
+					return true;
+				}
+				else{
+					$error[] = "That tag is already set for this item";
+					return $error;
+				}
+			}
+			else{
+				return false;
+			}
+			
+		}
+		
+		public function addTagsToContent($guid, $tagslist, $type=1){
+			//take the user entered tags and assign them to the content
+			// NB: $tagslist should be a comma separated list
+			global $db;
+			
+			// convert comma separated taglist into an array
+			$taglist_array = explode(",",$tagslist);
+			
+			foreach($taglist_array as $tags){
+				$taglist[] = trim($tags); //remove whitespace
+			}
+			
+			if(!$guid){ // guid won't be present on a newly created page so we have to find it
+				$grouping = ''; //set GROUP BY clause (blank unless it's an image)
+				switch($type){
+					case 1://content
+					default:
+						$content_type = 'pages';
+						$query = "SELECT guid FROM $content_type $grouping ORDER BY date_created DESC LIMIT 1";
+					break;
+					case 2://images
+						$content_type = 'get_formatted_image_list';
+						$query = "SELECT guid FROM $content_type WHERE parent = 0 ORDER BY datemade DESC LIMIT 1";
+					break;
+					case 3://files
+						$content_type = 'files';
+						$query = "SELECT guid FROM $content_type $grouping ORDER BY date_created DESC LIMIT 1";
+					break;
+				}
+				$results = $db->get_results($query);
+				if($results){
+					foreach($results as $result){
+						$guid = $result->guid; // set the guid to be the guid of the most recently added page
+					}
+				}
+				else{ // or return false and don't any more functions
+					return false;
+				}
+			}
+			
+			$this->removeTagRelationship($guid); // remove old tag relationships
+			
+			foreach($taglist as $tag){
+				if($tag != ''){// tag is empty or just a comma
+					if($tag_id = $this->getTagID($tag)){ // if tags are already in the database
+						$this->addTagRelationship($guid, $tag_id, $type); // add new tag relationships
+					}
+					else{
+						$this->addTag($tag); // add tag
+						$tag_id = $this->getTagID($tag); //get newly added tag ID
+						if($tag_id){
+							$this->addTagRelationship($guid, $tag_id, $type); // add new tag relationships
+						}
+					}
+				}
+			}
+			
+		}
+		
+		public function drawRelatedContentLinks($guid){
+			//create a list of links that relate to the current page. Good for SEO, site structure etc
+			// user specifies a amximum no. of links and how closely (in %s) the links should be related
+			global $db;
+			$content = '';
+			
+			if($this->showRelatedContent($guid)){
+			
+				$current_options = $this->getRelatedContentDetails($guid);
+				$accuracy = $current_options->accuracy;
+				$maxlinks = $current_options->maxlinks;
+				// get contents tags
+				$tags = $this->drawTags($guid);
+				if($tags){
+					$tags = $this->convertTagsToArray($tags);
+					$total_tags = sizeof($tags); // total number of tags the page has - to be used for %s
+					$i = 1;
+					
+					$query_accuracy = 'AND ('; // this value will decide how many results appear/the accuracy of the query
+					foreach($tags as $tag){
+						$query_accuracy .= "t.tag = '$tag'";
+						if($i != $total_tags){
+							$query_accuracy .= ' OR ';
+						}
+						$i++;
+					}
+					$query_accuracy .= ")";
+					
+					$query = "(SELECT p.guid, p.title,p.name, tr.type_id as type FROM content c, pages p, tags t, tag_relationships tr 
+								WHERE c.parent = p.guid AND p.guid=tr.guid AND tr.tag_id=t.id $query_accuracy AND p.guid != '$guid' 
+								GROUP BY p.guid) 
+								UNION
+								(SELECT f.guid, CONCAT(f.title,' (',f.extension, ' file)') as title, CONCAT(f.name,'.',f.extension) as name, 
+								tr.type_id as type FROM files f, pages p, tags t, tag_relationships tr 
+								WHERE f.guid=tr.guid AND tr.tag_id=t.id $query_accuracy AND f.guid != '$guid' 
+								GROUP BY f.guid)";
+								
+					$results = $db->get_results($query);
+					if($results){
+						$related=0;
+						//$content .= '<div class="panel panel_2"><h3>Related content</h3><p><ul id="related">';
+						foreach ($results as $result) {
+							$tag_accuracy = $this->getTagAccuracy($tags,$result->guid, $result->type);
+							//print "got a result accuracy($tag_accuracy)..<br>";
+							if(($tag_accuracy >= $accuracy) && (++$related <= $maxlinks)) { //only shows links to pages whose accuracy meets minimum
+								if($result->type == 1){ // page
+									$page = new Page();
+									$page->loadByGUID($result->guid);
+									//$content .= "<li><a href=\"".$page->drawLinkByGUID($result->guid)."\">".$result->title."</a></li>\n\t";
+									$content .= "<p><a href=\"".$page->drawLinkByGUID($result->guid)."\">".$result->title."</a></p>\n\t";
+								}
+								else if($result->type == 3){ // files
+									//$content .= '<li><a href="'.'/silo/files/'. $result->name.'" target="_blank" title="download this file">'.$result->title."</a></li>\n\t";
+									$content .= '<p><a href="'.'/silo/files/'. $result->name.'" target="_blank" title="download this file">'.$result->title."</a></p>\n\t";
+								}
+							}
+						}
+						//$content .= "</ul></p></div>";	
+					}
+				}
+
+			}
+			//edit mode
+					if($this->mode == 'edit'){
+						$content .= $this->drawToolbar($guid,$accuracy,$maxlinks);
+					}
+					return $content;
+		}
+		
+		public function checkTagRelationship($guid, $tag_id){
+			//check to see if a tag relationship already exist
+			global $db;
+			
+			$query = "SELECT * FROM tag_relationships WHERE guid= '$guid' AND tag_id = '$tag_id'";
+			$results = $db->get_results($query);
+			if($results){
+				return true;
+			}
+			else{
+				return false;
+			}
+			
+		}
+		
+		public function convertTagsToArray($tags){
+			// convert tags into an array
+			$tags = explode(", ",$tags); // split tags into array at seperator (which is a comma and a space)
+			return $tags;
+		}
+		
+		public function drawContentByTag($tag,$type=1){
+			//draw a list of items with a set tag
+			global $db, $results, $siteID;
+			
+			$tag_id = $this->getTagID($tag);
+			
+			switch($type){
+				case 1:
+				default:
+					//content
+					$query = "SELECT p.guid, p.title FROM pages p, tag_relationships tr, tags t 
+					WHERE p.guid=tr.guid AND tr.tag_id=t.id AND t.id = $tag_id AND p.site_id=". $siteID ."
+					ORDER BY p.sort_order, p.title";
+					$content_type = 'pages';
+				break;
+				case 2://images
+					$query = "SELECT i.guid, i.title FROM get_formatted_image_list i, tag_relationships tr, tags t 
+					WHERE i.guid=tr.guid AND tr.tag_id=t.id AND t.id = $tag_id AND i.parent = 0 AND i.site_id=". $siteID;
+					$content_type = 'images';
+				break;
+				case 3://files
+					$query = "SELECT f.guid, f.title FROM files f, tag_relationships tr, tags t 
+					WHERE f.guid=tr.guid AND tr.tag_id=t.id AND t.id = $tag_id AND f.site_id=". $siteID;
+					$content_type = 'files';
+				break;
+			}
+			
+			if($tag_id){
+				$results = $db->get_results($query);
+				if($results){
+					if(sizeof($results) == 1){ // if there's only 1 result
+						$content_type = substr($content_type,0, strlen($content_type) -1); //remove the trailing s to singularise the content type
+					}
+					$content = "<p>Here's the ".sizeof($results)." $content_type with the tag <strong>$tag</strong></p>\n\t";
+					$content .= "<ul id=\"tags\">\n\t";
+					foreach ($results as $result) {
+						$page = new Page();
+						$page->loadByGUID($result->guid);
+						$content .= "<li class=\"arrow\"><a href=\"".$page->drawLinkByGUID($result->guid)."\">".$result->title."</a></li>";
+					}
+					$content .= "</ul>\n\t";	
+					$content .= "<p><a href=\"". substr($_SERVER['REQUEST_URI'],0, strpos($_SERVER['REQUEST_URI'],'?')) ."\">view all tags</a>\n\t";	
+					return $content;
+				}
+				else{
+					$error = "<p>There were no items for that tag</p>";
+					return $error;
+				}
+			}
+			else{
+				$error = "<p>There were no items for that tag</p>";
+				return $error;
+			}
+			
+		}
+		
+		public function drawTags($guid, $format = 'list', $type = 1){
+			//display tags for content
+			global $db, $siteID,$site;
+			//print "dT($guid, $format, $type)<br>";
+			//variables
+			$tags = ''; // set up varaiables as empty to begin with (this will be returned)
+			$grouping = '';
+			switch($type){
+					case 1://content
+					default:
+						$content_type = 'pages';
+						$query = "SELECT t.id, t.tag FROM tags t, tag_relationships tr, pages p  
+						WHERE t.id=tr.tag_id AND tr.guid=p.guid AND p.site_id=". $siteID ." AND p.guid='". $guid ."' GROUP BY t.tag";
+					break;
+					case 2://images
+						$content_type = 'images';
+						$query = "SELECT t.id, t.tag FROM tags t, tag_relationships tr, get_formatted_image_list i 
+						WHERE t.id=tr.tag_id AND tr.guid=i.parent AND i.parent = '$guid' AND i.original_size = 1 AND i.site_id=". $siteID ." GROUP BY t.tag";
+					break;
+					case 3://files
+						$content_type = 'files';
+						$query = "SELECT t.id, t.tag FROM tags t, tag_relationships tr, files f  
+						WHERE t.id=tr.tag_id AND tr.guid=f.guid AND f.guid = '$guid' AND f.site_id=". $siteID ." GROUP BY t.tag";
+					break;
+					case 4://galleries
+						$content_type = 'galleries';
+						$query = "SELECT t.id, t.tag FROM tags t
+							left join tag_relationships tr on t.id=tr.tag_id
+							left join galleries g on tr.guid=g.id
+							WHERE g.id = '$guid' 
+							AND tr.guid='$guid'
+							AND g.msv=". $siteID ." 
+							GROUP BY t.tag
+							";
+					break;
+				}
+//echo $query .'<br />';
+			$results = $db->get_results($query);
+			//echo '<pre>'. print_r($results,true) .'</pre>';
+			if($results){
+				$count=0;
+				foreach($results as $result){
+
+					// Set up super tags as first one
+					if (++$count==1 && $type==1) $this->supertag=$result->tag;
+					
+					$tag_separator=($count == $db->num_rows)?"":", ";
+					if($format == 'list'){ //used when editing content
+						$tags .= $result->tag.", ";
+					}
+					else if($format == 'linklist'){ //used when viewing a page
+						$tags .= '<li><a href="'. ($siteID==1 ? '' : '/'.$site->properties['site_name']) .'/tags/?tag='.urlencode($result->tag).'">'.$result->tag.$tag_separator."</a></li>\n\t";
+					}
+					else if($format == 'paragraph'){ //used when viewing a page
+						$tags .= '<a href="'. ($siteID==1 ? '' : '/'.$site->properties['site_name']) .'/tags/?tag='.urlencode($result->tag).'">'.$result->tag.$tag_separator."</a>\n\t";
+					}
+					else if ($format=="csvbyid") {
+						$tags .= $result->id.",";
+					}
+				}
+				
+				if($format == 'list'){
+					$tags = substr($tags,0, strlen($tags) -2); // remove trailing comma and space
+				}
+				else if($format == 'linklist'){
+					$tags = '<div id="tagslist"><ul id="tags_inner">'.$tags.'</ul></div>'; // add wrapping list tags
+				}
+				else if ($format == "paragraph") {
+					$tags = '<div id="tagslist"><p class="tagslist">'.$tags.'</p></div>'; // add wrapping list tags
+				}
+			}
+			return $tags;
+		}
+		
+
+		public function drawAdminTags($list, $action=''){
+			//display tags for content
+			global $db;
+			if (!$list) return;
+			print "<!-- dat($list) --> \n";
+			$query = "SELECT t.id, t.tag FROM tags t where id in (".substr($list, 0, -1).") GROUP BY t.tag ORDER BY t.tag";
+			//print "$query<br>";
+			$results = $db->get_results($query);
+			if($results){
+				foreach($results as $result) {
+					$tags.= $result->tag;
+					if ($action=="remove") $tags.=' <input type="submit" class="empty" name="subact_'.$result->id.'" value="remove" />';
+					$tags.=", ";
+				}
+				$tags = substr($tags,0, strlen($tags) -2); // remove trailing comma and space
+			}
+			return $tags;
+		}
+		
+		public function drawAdLib() {
+			if (!$this->supertag) return;
+			else return '
+<!-- <p style="padding-top:0;padding-bottom:0px;"><a href="http://146.87.210.24/search.aspx">Search the collection for related items</a></p> -->
+<p style="padding-top:0;padding-bottom:0px;"><a href="http://146.87.210.24/dispatcher.aspx?action=search&amp;database=ChoiceFullCatalogue&amp;search=ti='.urlencode($this->supertag).'">Search the library for related items</a></p>
+<p style="padding-top:0;padding-bottom:0px;"><a href="http://146.87.210.24/dispatcher.aspx?action=search&amp;database=ChoiceArchive&amp;search=TI='.urlencode($this->supertag).'">Search the archive for related items</a></p>
+';
+		}
+
+		public function drawTagCloud(){
+			// draw unordered list of all tags, with different CSS classes dependign on popularity
+			global $db, $siteID;
+			
+			//$query = "SELECT t.tag, COUNT(tr.tag_id) AS count FROM tags t, tag_relationships tr 
+			//			WHERE t.id=tr.tag_id AND tr.type_id = 1 GROUP BY t.tag ORDER BY t.tag";
+			$query = "SELECT t.tag, COUNT(tr.tag_id) AS count,
+						IF(p.title>'', p.title, IF(i.title, i.title, IF(f.title, f.title, NULL) )) as title
+						FROM tags t
+						LEFT JOIN tag_relationships tr ON t.id=tr.tag_id
+						LEFT OUTER JOIN pages p ON p.guid=tr.guid
+						LEFT OUTER JOIN files f ON tr.guid=f.guid
+						LEFT OUTER JOIN get_formatted_image_list i ON tr.guid=i.guid
+						WHERE tr.type_id = 1 AND (p.site_id=". $siteID ." OR f.site_id=". $siteID ." OR i.site_id=". $siteID .")
+						GROUP BY t.tag ORDER BY t.tag";
+			$results = $db->get_results($query);
+			
+			if($results){
+					$content = "<ul id=\"tagcloud\">\n\t";
+					foreach ($results as $result) {
+						$linktitle = $result->count.' item'; // wording for link title (tel user how mnay items share each tag)
+						if($result->count > 1){
+							$linktitle .= 's'; // pluralise
+						}
+						$content .= '<li class="importance-level-'.$result->count.'"><a href="?tag='.$result->tag.'" rel="tag" title="'.$linktitle.'">'.$result->tag."</a></li>\n\t";
+					}
+					$content .= "</ul>\n\t";	
+					return $content;
+				}
+				else{
+					$error = "There were no items for that tag";
+					return $error;
+				}
+			
+		}
+
+
+		public function drawPopularTags(){
+			// draw unordered list of all tags, with different CSS classes dependign on popularity
+			global $db, $siteID;
+			
+			//$query = "SELECT t.tag, COUNT(tr.tag_id) AS count FROM tags t, tag_relationships tr 
+			//			WHERE t.id=tr.tag_id AND tr.type_id = 1 GROUP BY t.tag ORDER BY t.tag";
+			$query = "SELECT t.tag, COUNT(tr.tag_id) AS count,
+						IF(p.title>'', p.title, IF(i.title, i.title, IF(f.title, f.title, NULL) )) as title
+						FROM tags t
+						LEFT JOIN tag_relationships tr ON t.id=tr.tag_id
+						LEFT OUTER JOIN pages p ON p.guid=tr.guid
+						LEFT OUTER JOIN files f ON tr.guid=f.guid
+						LEFT OUTER JOIN get_formatted_image_list i ON tr.guid=i.guid
+						WHERE tr.type_id = 1 AND (p.site_id=". $siteID ." OR f.site_id=". $siteID ." OR i.site_id=". $siteID .")
+						GROUP BY t.tag ORDER BY count(tr.tag_id) desc, tag";
+			$results = $db->get_results($query);
+			
+			if($results){
+					$content = "<p id=\"tagcloud\">\n\t";
+					foreach ($results as $result) {
+						$linktitle = $result->count.' item'; // wording for link title (tel user how mnay items share each tag)
+						if($result->count > 1){
+							$linktitle .= 's'; // pluralise
+						}
+						$content .= '<a href="/tags/?tag='.$result->tag.'" rel="tag" title="'.$linktitle.'">'.$result->tag."</a>, \n\t";
+					}
+					$content .= "</p>\n\t";	
+					return $content;
+				}
+				else{
+					$error = "There were no items for that tag";
+					return $error;
+				}
+			
+		}
+
+		
+		public function drawToolbar($guid,$accuracy,$maxlinks){
+			// draw form items to add/edit intelligent link panels
+			
+			$accuracy_options = NULL;
+			$maxlinks_options = NULL;
+			
+			for($i = 100;$i>=0; $i-=5){
+				if($i != 0){
+				$accuracy_options[] = $i;
+				}
+			}
+			
+			for($i = 1;$i<=10; $i++){
+				$maxlinks_options[] = $i;
+			}
+			
+			$toolbar = "\n".'<fieldset id="related_content_links">'."\n".'<legend>Edit Related content links</legend>'."\n";
+			
+			// show or hide the intelligent link panels
+			if($this->showRelatedContent($guid)){
+				$checked = ' checked="checked"';
+			}
+			$toolbar .= '<input type="checkbox" id="show_related_content" name="show_related_content" value="1" class="checkbox"'.$checked.' /><label for="show_related_content">Show related items?</label><br />'."\n";
+			
+			$toolbar .= '<div id="related_options">'."\n";
+			// Accuracy (%) dropdown menu
+			$toolbar .= '<label for="accuracy" class="hide">Accuracy:</label>'."\n".'<select name="accuracy" id="accuracy">'."\n".'
+				<option value="xx">% accuracy</option>'."\n";
+				foreach($accuracy_options as $accuracy_option){
+					$selected = NULL;
+					if($accuracy_option == $accuracy){
+						$selected = ' selected="selected"';
+					}
+					$toolbar .= '<option value="'.$accuracy_option.'"'.$selected.'>'.$accuracy_option.'%</option>'."\n";
+				}
+			$toolbar .='</select>'."\n";
+			
+			// maximum links drop down menu
+			$toolbar .= '<label for="maxlinks" class="hide">Maximum number of links:</label>'."\n".'<select name="maxlinks" id="maxlinks">'."\n".'
+				<option value="xx">Total links (max.)</option>'."\n";
+				foreach($maxlinks_options as $maxlinks_option){
+					$selected = NULL;
+					if($maxlinks_option == $maxlinks){
+						$selected = ' selected="selected"';
+					}
+					$toolbar .= '<option value="'.$maxlinks_option.'"'.$selected.'>'.$maxlinks_option.'</option>'."\n";
+				}
+			$toolbar .='</select>'."\n";
+			$toolbar .='</div>'."\n";
+			
+			$toolbar .='</fieldset>'."\n";
+			return $toolbar;
+		}
+		
+		public function getRelatedContentDetails($guid){
+			//
+			global $db;
+			
+			$query = "SELECT * FROM tags_intelligent_link_panels WHERE guid = '$guid' LIMIT 1";			
+			$results = $db->get_results($query);
+			if($results){
+				foreach($results as $result){
+					return $result;
+				}
+			}
+			else{
+				return false;
+			}
+			
+		}
+		
+		public function getTagAccuracy($tags, $guid,$type){
+			// get tags of each page & put in an array
+			$page_tags = $this->drawTags($guid, 'list', $type);
+			$page_tags = $this->convertTagsToArray($page_tags);
+			$non_tag_matches = array_diff($tags, $page_tags);
+			$tag_inaccuracy = round((sizeof($non_tag_matches)/sizeof($tags))*100); // work out % of missing tags
+			$tag_accuracy = 100-$tag_inaccuracy; // work out % of matching tags
+			
+			return $tag_accuracy;
+		}
+		
+		public function getTagID($tag){
+			// get the ID of the tag from the tag table in the database, so you can add tags laters
+			global $db;
+			
+			$query = "SELECT id FROM tags WHERE tag = '".$db->escape($tag)."' LIMIT 1;";
+			$results = $db->get_results($query);
+			
+			if($results){
+				foreach($results as $result){
+					$tag_id = $result->id; // results should be a single number
+				}			
+				if($tag_id){
+					return $tag_id;
+				}
+				else{
+					return false;
+				}
+			}
+			else{
+				return false;
+			}
+		}
+		
+		public function removeTagRelationship($guid){
+		 	// add a new tag relationship e.g. add a tag to a page/file/image
+			global $db;
+			
+			$query =  "DELETE FROM tag_relationships WHERE guid = '$guid'";
+			if(@$db->query($query)){ //chek if query has worked
+				return true;
+			}
+			else{
+				return false;
+			}
+			
+		}
+		
+		public function showRelatedContent($guid){
+			//
+			global $db;
+			
+			$show = $this->getRelatedContentDetails($guid);		
+			if($show){
+				return true;
+			}
+			else{
+				return false;
+			}
+			
+		}
+		
+		public function suggestTags($guid, $type){
+			// suggest relevant tags based on content
+			global $db;
+			
+			$conditions = '';
+			
+			$query = "SELECT tag FROM tags  $conditions LIMIT 5";
+			$results = $db->get_results($query);
+			
+			if($results){
+					$content = "<ul id=\"suggesttags\">\n\t";
+					foreach ($results as $result) {
+						$content .= '<li><a href="?tag='.urlencode($result->tag).'" rel="tag">'.$result->tag."</a></li>\n\t";
+					}
+					$content .= "</ul>\n\t";	
+					return $content;
+				}
+				else{
+					return false;
+				}
+			
+		}
+		
+		public function updateIntelligentLinkPanelDetails($guid, $accuracy=25, $maxlinks=5, $show_related_content=0){
+			//when a page is updated, update the database with intelligent  link panel values
+			global $db;
+			
+			if($show_related_content && $show_related_content == 1 && $accuracy != 'xx' && $maxlinks != 'xx'){
+				if($this->showRelatedContent($guid)){
+				$query = "UPDATE tags_intelligent_link_panels SET maxlinks = $maxlinks, accuracy = $accuracy WHERE guid = '$guid' LIMIT 1";
+				}
+				else{
+					$query = "INSERT INTO tags_intelligent_link_panels VALUES('$guid', $maxlinks, $accuracy);";
+				}
+				if($db->query($query)){
+					return true;
+				}
+				else{
+					return false;
+				}
+			}
+			else{
+				$query = "DELETE FROM tags_intelligent_link_panels WHERE guid = '$guid' LIMIT 1";
+				if($db->query($query)){
+					return true;
+				}
+				else{
+					return false;
+				}
+			}		
+		}
+		
+		
+		
+		
+		public function drawResourceTags($current=false){
+			//display tags for all resources
+			global $db, $siteID, $site;
+			//variables
+			$tags = ''; // set up varaiables as empty to begin with (this will be returned)
+
+			$query = "SELECT t.tag FROM tags t
+						LEFT JOIN tag_relationships tr ON t.id=tr.tag_id
+						LEFT JOIN files f ON tr.guid=f.guid
+						WHERE f.site_id=". $siteID ." AND f.resource=1 
+						GROUP BY t.tag
+						ORDER BY t.tag ASC";
+//print "$query<br>";
+			$results = $db->get_results($query);
+			if($results){
+				$tags .= "<option value=\"\">-- select a tag --</option>\n\t";
+				foreach($results as $result){
+					$selected = ($current==$result->tag) ? ' selected="selected"' : '';
+					$tags .= '<option value="'. $result->tag .'"'. $selected .'>'. ucwords($result->tag) ."</option>\n\t";
+				}
+			}
+			else $tags='<option value="0">No tags listed</option>';
+			
+			$tags = "<select name=\"tag\">\n\t$tags</select>\n\t"; // add wrapping list tags
+			return $tags;
+		}
+		
+		
+		
+		
+	}
+?>

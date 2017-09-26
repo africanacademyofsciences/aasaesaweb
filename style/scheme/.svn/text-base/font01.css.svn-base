@@ -1,0 +1,25 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+h1, h2, h3, h4, h5 {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+div#header_img p,h1 a {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* Landing panels + Normal panels*/
+div#primarycontent div.landing-panel,
+div#secondarycontent div.panel
+{
+	font-size: 90%;
+}
+	div#primarycontent div.landing-panel h3,
+	div#secondarycontent div.panel h3
+	{
+		font-size: 100%;
+		font-weight: bold;
+	}

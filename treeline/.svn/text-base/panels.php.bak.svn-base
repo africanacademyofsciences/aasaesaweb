@@ -1,0 +1,748 @@
+<?php
+
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");	
+	$tags = new Tags();// TAGS
+	
+	$action = read($_REQUEST,'action','');
+	if (!$action) header("Location: /treeline/");
+	
+	$guid = read($_REQUEST,'guid',false);
+	$mode = read($_REQUEST,'mode','');
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+	$view = read($_REQUEST,'view',false);
+	$type = read($_POST,'type',false);
+	$title = read($_POST,'title','');
+	$style = read($_POST,'style',8);
+	$tagslist = read($_POST,'tagslist',false); // Page tags
+	$treeline_panelcontent = read($_POST,'treeline_panelcontent',false);
+
+	$keywords = read($_REQUEST,'keywords',false);
+	$category = read($_REQUEST,'category','xx');
+	$findcat = read($_REQUEST,'findcat',false);
+	$thispage = read($_REQUEST,'p',1);
+	$page->setPage($thispage);
+	
+	if( substr_count($action,'poll')>0 ){
+		foreach( $_POST as $key => $value ){
+			if( substr_count($key,'poll')>0 ){
+				${$key} = $value;
+			}
+		}
+	}
+	
+	if( substr_count($action,'poll')>0 ){
+		include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/poll.class.php");
+		$poll = new Poll($guid);
+	}
+	
+	$thisURL = substr($_SERVER['REQUEST_URI'],0,strrpos($_SERVER['REQUEST_URI'],'_'));
+
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		if($action=='select'){
+		
+			if(!$type){
+				$message = 'You need to select a panel type';
+			}else{
+				//$message = $type;
+				if($type=='content'){
+					redirect($thisURL.'?action='.$mode);
+				}elseif( ($type=='rss' || $type=='poll' || $type=="news" || $type=="work") ){
+					redirect($thisURL.'?action='.$mode.$type.'&mode='.$mode);
+				}
+			}
+		}
+		
+		if ($action == 'create' || $action== "createnews" || $action=="creatework") {
+			if (!$title) {
+				$feedback = 'error';
+				$message = 'Please enter a title for this panel';
+			}
+			else {
+				// Create a new panel:
+
+				$panel_template_id=6;
+				if ($action=="createnews") $panel_template_id=65;	// Subscribe panel.
+				if ($action=="creatework") {
+					$panel_template_id=22;	// Workstreams panel.
+					$title="Our workstreams";
+				}
+				
+				$panel = new Page;
+				// Set it to be a child of this page -- that's how we know it's a panel belonging to this site
+				$panel->setParent($siteID);
+				// Set the title
+				$panel->setTitle($title);
+				// Set the style
+				$panel->setStyle($style);
+				
+
+				// Generate a unique name for the panel. Is this necessary?
+				$name = $panel->generateName();
+				if (!$name) {
+					$feedback = 'error';
+					$message = 'A panel with that name already exists';
+				}				
+				else {		
+								
+					$panel->setHidden('0');
+					$panel->setSortOrder();					
+					$panel->setTemplate($panel_template_id);
+					$panel->setMetaDescription('A new panel');
+					
+					$panel->create();
+					$guid=$panel->getGUID();
+
+					// add tags
+					$tags->addTagsToContent($guid, $tagslist, 4);
+					//redirect ("panels.html?action=edit&guid={$panel->getGUID()}&message=Panel created");
+					$redirectURL = $panel->drawLink()."?mode=edit&guid=$guid&referer=/treeline/";
+					//print "would go to($redirectURL)<br>\n";
+					redirect($redirectURL);
+				}
+			}
+		}
+		else if ($action == 'edit' || $action=="editnews" || $action=="editwork") {
+			if(!$findcat){
+				if (!$title) {
+					$feedback = 'error';
+					$message = 'Please enter a title for this pane;';
+				}
+	
+				else {
+					$panel = new Page();
+					$panel->loadByGUID($guid);
+					// This isn't necessary: you'd only want to change the parent of a panel to move it to another site
+					// $panel->setParent($page->getGUID());				
+					$panel->setTitle($title);
+					$name = $panel->generateName();
+					if (!$name) {
+						$feedback = 'error';
+						$message = 'A panel with that name already exists';
+					}				
+					else {			
+						$panel->save();
+						// add tags
+						$tags->addTagsToContent($guid, $tagslist, 4);
+						// We don't need a redirect here, although this will probably change as the user-journey is updated
+						// redirect("pages.html?action=edit&message=Page updated");
+						//$message = "Details updated";
+						$redirectURL=$page->drawLinkByGUID($guid).'?mode=edit&amp;referer=/treeline/panels/&amp;guid='.$guid;
+						//print "redirect to($redirectURL)<br>"; exit();
+						redirect($redirectURL);
+						//redirect("{$panel->drawLink()}?mode=edit&guid=$guid&referer=/treeline/");
+					}
+				}
+			}
+		}
+		else if ($action == 'publish') {
+			$panel = new Page();
+			$panel->loadByGUID($guid);
+			$panel->publish();
+			///treeline/panels/?action=publish
+			redirect('/treeline/panels/?action=publish&'.createFeedbackURL('success','Panel published'));
+		}
+		else if ($action == 'delete') {
+			if(!$findcat){
+				$newPage = new Page();
+				$newPage->loadByGUID($guid);
+				
+				// if we have a poll panel...
+				if($newPage->template_id==17){
+					include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/poll.class.php");
+					$poll = new Poll($guid);
+					$poll->delete($guid);				
+				}else{
+					$newPage->delete();
+				}
+				
+				redirect('/treeline/panels/?action=delete&'.createFeedbackURL('success','Panel deleted'));
+			}	
+					
+		}elseif($action=='createrss'){
+			//$message = $title .' -> '.$treeline_panelcontent;
+			
+			if(!$title){
+				$feedback = 'error';
+				$message = 'You need to enter a title for this panel';
+			}elseif(!$treeline_panelcontent){
+				$feedback = 'error';
+				$message = 'You need to specify the full URL for the RSS feed';
+			}else{
+				//// Now add to the system...
+				// Create a new panel:
+				$panel = new Page;
+				// Set it to be a child of this page -- that's how we know it's a panel belonging to this site
+				$panel->setParent($siteID);
+				// Set the title
+				$panel->setTitle($title);
+				// Generate a unique name for the panel. Is this necessary?
+				$name = $panel->generateName();
+				if (!$name) {
+					$message = 'A panel with that name already exists';
+				}				
+				else {						
+					$panel->setHidden('0');
+					$panel->setSortOrder();					
+					$panel->setTemplate(7);
+					$panel->setMetaDescription('A new RSS panel');
+
+					$panel->create(4); // 4 = panel (content type)
+					
+					// add tags
+					$tags->addTagsToContent($page->getGUID(), $tagslist, 4);
+					
+					$content = new HTMLPlaceholder();
+					$content->parent = $panel->getGUID();
+					$content->name = 'panelcontent';
+					$content->guid = uniqid();
+					if($content->save()){$message .= ' -> content saved too...'; }
+					//$message .= $panel->getGUID() .' -> '. $content->getGUID() .'<br />';
+					
+					redirect ('/treeline/?section=create&'.createFeedbackURL('success','Your RSS panel was created'));
+				}
+			}
+			
+		}elseif($action=='editrss'){
+			//$message = $title .' -> '.$url;
+			
+			if(!$title){
+				$feedback = 'error';
+				$message = 'You need to enter a title for this panel';
+			}elseif(!$treeline_panelcontent){
+				$feedback = 'error';
+				$message = 'You need to specify the full URL for the RSS feed';
+			}else{
+				$panel = new Page();
+				$panel->loadByGUID($guid);
+				$content = new HTMLPlaceholder();
+				$content->load($guid,'panelcontent');
+				// This isn't necessary: you'd only want to change the parent of a panel to move it to another site
+				// $panel->setParent($page->getGUID());				
+				$panel->setTitle($title);
+				$name = $panel->generateName();
+				if (!$name) {
+					$message = 'A panel with that name already exists';
+				}				
+				else {			
+					$content->save();
+					$panel->save();
+					// add tags
+					$tags->addTagsToContent($guid, $tagslist, 4);
+					// We don't need a redirect here, although this will probably change as the user-journey is updated
+					redirect('/treeline/?section=edit&'.createFeedbackURL('success','Your RSS panel has been updated'));
+					//$message = "Details updated";
+					//redirect("{$panel->drawLink()}?mode=edit&guid=$guid&referer=/treeline/");
+				}
+			}
+			
+		}else if($action=='createpoll'){
+// ADD POLL
+			//echo '<pre>'. print_r($_POST,true) .'</pre>';
+			$tmp = array();
+			$numberText = array('one'=>1, 'two'=>2, 'three'=>3, 'four'=>4, 'five'=>5);
+			
+			foreach( $_POST as $key => $value ){
+				if( preg_match('/poll_/',$key) ){
+					$key = preg_replace('/poll_/','',$key);
+					
+					if( substr_count($key,'answer')>0 ){
+						if( $value>'' ){
+							$answerKey = preg_replace('/answer/','',$key);
+							$answerKey = str_replace('_','',$answerKey);
+							if( array_key_exists($answerKey,$numberText) ){
+								$answerKey = $numberText[$answerKey];
+								$tmp['answers'][$answerKey] = $value;
+							}else{
+								$tmp[$answerKey] = $value;
+							}
+						}
+					}else{
+						$tmp[$key] = $value;
+					}
+				}
+			}
+			
+			//echo '<pre>'. print_r($tmp,true) .'</pre>';
+			
+			if( $poll->create($tmp['title'], $tmp['question'], $tmp['response'],$tmp['answers'],$tmp['default']) ){
+				redirect ('/treeline/?section=create&'.createFeedbackURL('success','Your poll panel was created'));
+			}else{
+				$feedback = 'error';
+				$message = 'Your poll could not be saved';			
+			}
+			
+			
+		}else if($action=='editpoll'){
+// EDIT POLL
+			//echo '<pre>'. print_r($_POST,true) .'</pre>';
+			$tmp = array();
+			$numberText = array('one'=>1, 'two'=>2, 'three'=>3, 'four'=>4, 'five'=>5);
+			
+			foreach( $_POST as $key => $value ){
+				if( preg_match('/poll_/',$key) ){
+					$key = preg_replace('/poll_/','',$key);
+					
+					if( substr_count($key,'answer')>0 ){
+						if( $value>'' ){
+							$answerKey = preg_replace('/answer/','',$key);
+							$answerKey = str_replace('_','',$answerKey);
+							if( array_key_exists($answerKey,$numberText) ){
+								$answerKey = $numberText[$answerKey];
+								$tmp['answers'][$answerKey] = $value;
+							}else{
+								$tmp[$answerKey] = $value;
+							}
+						}
+					}else{
+						$tmp[$key] = $value;
+					}
+				}
+			}
+			
+			//echo '<pre>'. print_r($tmp,true) .'</pre>';
+			
+			if( $poll->update($guid,$tmp['title'], $tmp['question'], $tmp['response'],$tmp['answers'],$tmp['default']) ){
+				redirect ('/treeline/?section=edit&'.createFeedbackURL('success','Your poll panel was updated'));
+			}else{
+				$feedback = 'error';
+				$message = 'Your changes could not be saved';			
+			}
+		}
+	}// end if $_POST
+	
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = '
+	.optional {
+		font-size:smaller;
+		color:#999;
+	}
+	.url {
+		font-size:smaller;
+		color:#66;
+		font-family:Arial, Helvetica, sans-serif;
+	}
+	
+	
+	/*** try and style the answers section ***/
+	
+/*form fieldset fieldset{
+	position:relative;
+}
+
+
+	form fieldset fieldset p {
+		margin-bottom:10px;
+	}
+
+	form fieldset fieldset label#poll_default {
+		font-weight:normal;
+		width:auto;
+		position:absolute;
+		top:35px;
+		left:33.5em;
+	}
+
+	form fieldset fieldset input.radio {
+		width:auto;
+		margin-left:2em;
+	}*/
+	
+	fieldset#answers p.instructions{
+		margin-bottom: 2em;
+	}
+	
+	fieldset#answers label#poll_default{
+		clear: none;
+		float: left;
+		font-weight: normal;
+		margin: -1.5em 0 0;
+		width: 30px;
+	}
+	
+	
+	fieldset#answers input{
+		width: 150px;
+	}
+	
+	fieldset#answers input.checkbox{
+		clear: none;
+		float: left;
+		margin-left: 10px;		
+		width: 1em;
+	}
+	
+		fieldset#answers input#poll_default_answer1{
+			
+		}
+	
+	
+	
+div.styleOption {
+		float: left;
+		margin: 10px 20px 10px 0;
+		padding: 82px 0 0;
+	}
+	
+	div.styleOption *{
+		float: none;
+		margin: 0 !important;
+	}
+	'."\n"; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Panels : '.ucwords(str_replace('rss',' RSS',$action)) : 'Panels';
+	$pageTitle = ($action) ? 'Panels : '.ucwords(str_replace('rss',' RSS',$action)) : 'Panels';
+	
+	
+	
+	$pageClass = 'panels';
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+	
+	// thickBox preview URL variables
+	$thickBoxURL = '&amp;KeepThis=true&amp;TB_iframe=true&amp;height=520&amp;width='.$site->getConfig("site_page_width");
+		
+?>
+<div id="primarycontent">
+<div id="primary_inner">
+<?=drawFeedback($feedback,$message)?>
+<?php if ($action == 'select') { ?>
+    <form id="treeline" action="<?= $thisURL ?><?php if ($DEBUG) echo '?debug'?>" method="post">
+        <fieldset>
+            <legend>Select Panel Type</legend>
+            <input type="hidden" name="action" value="<?=$action?>" />
+            <input type="hidden" name="guid" value="<?=$guid?>" />
+            <input type="hidden" name="mode" value="<?=$mode?>" />
+            <p class="instructions">Please select a panel type from the list below:<?//=$mode?></p>
+            	<div>
+                    <label for="type">Panel Type:</label>
+                    <select name="type" id="type">
+                        <option value="content">Content Panel</option>
+                        <option value="rss">RSS Feed Panel</option>
+                        <option value="poll">Poll Panel</option>
+                        <option value="news">Subscribe Panel</option>
+                        <?php if (!$db->get_var("select guid from pages where template=22")) { ?>
+                        <option value="work">Workstreams Panel</option>
+						<?php } ?>
+                    </select>
+                </div>
+                <fieldset class="buttons">		
+                    <button type="submit" class="submit">Submit</button>
+                </fieldset>
+        </fieldset>
+    </form>
+<?php }elseif ($action == 'create') { ?>
+	<form id="treeline" action="<?=$_SERVER['REQUEST_URI']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+        <fieldset>
+            <legend>Create content</legend>
+            <input type="hidden" name="action" value="<?=$action?>" />
+            <input type="hidden" name="guid" value="<?=$guid?>" />
+            <input type="hidden" name="mode" value="<?=$mode?>" />
+            <p class="instructions">To create a new panel, please complete the form below:</p>
+            <div>
+                <label for="title">Title:</label>
+                <input type="text" name="title" id="title" value="<?=$title?>"/>
+            </div>
+            <fieldset>
+                <legend>Appearance:</legend>
+				<?php
+					$currentStyle = ($_POST['style']) ? $_POST['style'] : $page->style_id;
+					include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/functions/pages.php");
+					echo $page->drawStyleList($currentStyle, 6);	// The six means draw the styles availble for panels (which have a template id of 6)
+				?>
+            </fieldset>    
+            <div id="tagsElement" class="hasHelp">
+                <label for="tagslist">Tags: <span class="hint"><a href="/treeline/includes/ajax/tagsHelp.php?height=500&amp;width=500" class="thickbox">What are tags?</a></span></label>
+                <textarea name="tagslist" id="tagslist" cols="30" rows="2" class="lessText"><?=$tagslist?></textarea><span class="help">Separate your tags with a comma.</span><br />
+            </div>
+            <fieldset class="buttons">		
+            	<button type="submit" class="submit">Save &amp; Create Content</button>
+            </fieldset>
+        </fieldset>
+    </form>	
+<?php }
+	else if ($action == 'edit') { ?>
+	<?php if (!$guid) { ?>
+
+		<p>Please select the panel you would like to edit from the list below.</p>
+		<?php if($view == 'map'){ ?>
+			<p>To edit a panel, please select it from the list below below or go back to <a href="<?=$_SERVER['PHP_SELF']?>?action=edit">form view</a>.</p>
+			<?=$treeline->drawEditablePanelsByParent($page->getGUID(), $siteID)?>
+		<?php }else{ ?>
+        <form id="treeline" action="/treeline/panels/<?php if ($DEBUG) echo '?debug'?>" method="post">
+            <fieldset>
+                <legend>Edit content</legend>
+                <input type="hidden" name="action" value="<?=$action?>" />
+                <input type="hidden" name="guid" value="<?=$guid?>" />
+                <input type="hidden" name="mode" value="<?=$mode?>" />
+                <p class="instructions">Can't find the panel you need?  Try <a href="<?=$_SERVER['PHP_SELF']?>?action=edit&amp;view=map">List</a> view.</p>
+                <div>
+                    <label for="keywords">Search for: </label>
+                    <input type="text" name="keywords" id="keywords" value="<?=$keywords ?>" />
+                </div>
+                <div>
+                    <label for="category">Search by:</label>
+                    <select name="category" id="category">
+                        <option value="title">Select:</option>
+                        <option value="title" <?php if($category=='title'){ echo 'selected="selected"'; }?>>Title</option>
+                        <option value="content" <?php if($category=='content'){ echo 'selected="selected"'; }?>>Content</option>
+                    </select>
+                </div>
+                <input type="hidden" name="findcat" value="1" />
+                <fieldset class="buttons">		
+                    <button type="submit" class="submit">submit</button>
+                </fieldset>
+             </fieldset>
+         </form>
+
+		<?
+				$category = ($category=='xx')?'':$category;
+				if(!$category && $_POST){
+					echo drawFeedback('error','You need to specify a field to search by.');
+				}else if(!$keywords && $_POST){
+					echo drawFeedback('error','You need to specify keywords to search with.');
+				}else if( (!$category && !$keywords) || ($category && $keywords) || (!$_POST) ){
+					echo $page->drawPageList($thispage,$action,$category,$keywords,$page->getGUID(),1,$siteID);
+				}
+		 } ?>
+        
+	<?
+		} else {
+			$panel = new $page;
+			$panel->loadByGUID($guid);
+		?>
+        <form id="treeline" action="<?=$_SERVER['REQUEST_URI']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+            <fieldset>
+                <legend>Edit panel:  <?=$panel->getTitle()?></legend>
+                <input type="hidden" name="action" value="<?=$action?>" />
+                <input type="hidden" name="guid" value="<?=$guid?>" />
+                <input type="hidden" name="mode" value="<?=$mode?>" />
+                <p class="instructions">To edit the details of this panel, complete the form below and press submit.</p>
+                <div>
+                    <label for="title">Title:</label>
+                    <input type="text" name="title" id="title" value="<?=$panel->title?>"/>
+                </div>
+                <fieldset>
+                <legend>Appearance:</legend>
+				<?php
+					$currentStyle = ($_POST['style']) ? $_POST['style'] : $panel->style_id;
+					$currentStyle = ($currentStyle) ? $currentStyle : 8;
+					include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/functions/pages.php");
+					echo $panel->drawStyleList($currentStyle, 6);	// The six means draw the styles availble for panels (which have a template id of 6)
+		
+				?>
+            </fieldset> 
+                <div id="tagsElement" class="hasHelp">
+                	<label for="tagslist">Tags: <span class="hint"><a href="/treeline/includes/ajax/tagsHelp.php?height=500&amp;width=500" class="thickbox">What are tags?</a></span></label>
+                	<textarea name="tagslist" id="tagslist" cols="30" rows="2" class="lessText"><?=($tagslist)?$tagslist:$tags->drawTags($guid,'list')?></textarea><span class="help">Separate your tags with a comma.</span>
+            	</div>
+                <fieldset class="buttons">		
+                	<button type="submit" class="submit">Save &amp; Edit Content</button>
+                </fieldset>
+            </fieldset>
+        </form>
+		<?
+			}
+		?>
+<?php }
+	else if ($action == 'delete') { ?>
+	<?php if (!$guid) { ?>
+	<!--//
+		<legend>Delete content</legend>
+		
+		<p class="instructions">To delete a panel, please select it from the list below below:</p>
+		<p class="instructions"><?//=$treeline->drawDeleteablePanelsByParent($page->getGUID())?></p>
+	//-->
+		<?php if($view == 'map'){ ?>
+			<p class="instructions">To delete a page, please select it from the list below below or go back to <a href="<?=$_SERVER['PHP_SELF']?>?action=edit">form view</a>.</p>
+			<?=$treeline->drawDeleteablePanels($siteID)?>
+		<?php }else{ ?>
+        	<p>Please select the page you would like to edit from the list below.</p>
+        	<form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+            <fieldset>
+            <legend>Delete content</legend>
+            <input type="hidden" name="action" value="<?=$action?>" />
+            <input type="hidden" name="guid" value="<?=$guid?>" />
+            <input type="hidden" name="mode" value="<?=$mode?>" />
+			<p class="instructions">Can't find the panel you're after?  Try <a href="<?=$_SERVER['PHP_SELF']?>?action=delete&amp;view=map">Site Map</a> view.</p>
+			
+				<label for="keywords">Search for: </label>
+				<input type="text" name="keywords" id="keywords" value="<?=$keywords ?>" /><br />
+				<label for="category">Search by:</label>
+				<select name="category" id="category">
+					<option value="title">Select:</option>
+					<option value="title" <?php if($category=='title'){ echo 'selected="selected"'; }?>>Title</option>
+					<option value="content" <?php if($category=='content'){ echo 'selected="selected"'; }?>>Content</option>
+				</select><br />
+				<input type="hidden" name="findcat" value="1" />
+				<fieldset class="buttons">		
+               	 <button type="submit" class="submit">submit</button>
+                </fieldset>
+             </fieldset>
+         </form>
+		<?
+				$category = ($category=='xx')?'':$category;
+				if(!$category && $_POST){
+					echo '<div class="feedback error"><h3>Warning</h3><p>You need to specify a field to search by.</p></div>';
+				}else if(!$keywords && $_POST){
+					echo '<div class="feedback error"><h3>Warning</h3><p>You need to specify keywords to search with.</p></div>';
+				}else if( (!$category && !$keywords) || ($category && $keywords) || (!$_POST) ){
+					echo $page->drawPageList($thispage,$action,$category,$keywords,$page->getGUID(),1,$siteID);
+				}
+		 } ?>
+         
+	<?
+		} else {
+			$panel = new $page;
+			$panel->loadByGUID($guid);
+		?>
+        <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+            <fieldset>
+                <legend>Delete panel:  <?=$panel->getTitle()?></legend>
+                <input type="hidden" name="action" value="<?=$action?>" />
+                <input type="hidden" name="guid" value="<?=$guid?>" />
+                <input type="hidden" name="mode" value="<?=$mode?>" />
+                <p class="instructions">You are about to delete this panel. <strong>Are you sure?</strong></p>
+                <p class="instructions">To <strong>preview</strong> this panel first, <a href="<?=$panel->drawLink()?>?mode=preview<?=$thickBoxURL?>" class="thickbox" title="<?=$panel->getTitle()?> Panel preview">click here</a>.</p>			
+                <fieldset class="buttons">		
+                	<button type="submit" class="submit">Delete</button>
+                </fieldset>
+            </fieldset>
+            </form>
+		<?
+			}
+		?>		
+	
+<?php }	else if ($action == 'publish') { ?>
+	<?php if (!$guid) { ?>
+		<p>To publish a panel, please select it from the list below below:</p>
+		<?=$treeline->drawPublishablePanelsByParent($page->getGUID(),$siteID)?>
+	<?
+		} else {
+			$panel = new $page;
+			$panel->loadByGUID($guid);
+		?>
+        <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+            <fieldset>
+                <legend>Publish panel:  <?=$panel->getTitle()?></legend>
+                <input type="hidden" name="action" value="<?=$action?>" />
+                <input type="hidden" name="guid" value="<?=$guid?>" />
+                <input type="hidden" name="mode" value="<?=$mode?>" />
+                    <p class="instructions">You are about to publish this panel. <strong>Are you sure?</strong></p>
+                    <p class="instructions">To <strong>preview</strong> this panel first, <a href="<?=$panel->drawLink()?>?mode=preview<?=$thickBoxURL?>" class="thickbox">click here</a>.</p>			
+                <fieldset class="buttons">		
+                	<button type="submit" class="submit">Publish</button>
+                </fieldset>
+            </fieldset>
+            </form>
+		<?
+			}
+		?>	
+
+<?php }else if ($action=='createrss'){ ?>
+<form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+	<fieldset>
+        <legend>Create RSS panel</legend>
+        <input type="hidden" name="action" value="<?=$action?>" />
+        <input type="hidden" name="guid" value="<?=$guid?>" />
+        <input type="hidden" name="mode" value="<?=$mode?>" />   
+        <p class="instructions">To create a new RSS panel, please enter the full address (url) of the feed:</p>
+        <div>
+			<label for="title">Title:</label>
+			<input type="text" id="title" name="title" value="<?=$title?>" />
+        </div>
+        <div>
+			<label for="treeline_content">Feed URL:</label>
+			<input type="text" id="treeline_content" name="treeline_panelcontent" value="<?=$treeline_panelcontent?>" />
+        </div>
+        <div id="tagsElement" class="hasHelp">
+                <label for="tagslist">Tags: <span class="hint"><a href="/treeline/includes/ajax/tagsHelp.php?height=500&amp;width=500" class="thickbox">What are tags?</a></span></label>
+                <textarea name="tagslist" id="tagslist" cols="30" rows="2" class="lessText"><?=($tagslist)?$tagslist:$tags->drawTags($guid,'list')?></textarea><span class="help">Separate your tags with a comma.</span><br />
+         </div>
+		<fieldset class="buttons">		
+        	<button type="submit" class="submit">Save</button>
+        </fieldset>
+    </fieldset>
+</form>
+
+<?php }else if ($action=='editrss'){ ?>
+	<?php if($guid){ 
+		$panel = new Page();
+		$panel->loadByGUID($guid);
+		$content = new HTMLPlaceholder();
+		$content->load($guid,'panelcontent');
+	?>
+    <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+        <fieldset>
+            <legend>Edit RSS panel</legend>
+            <input type="hidden" name="action" value="<?=$action?>" />
+            <input type="hidden" name="guid" value="<?=$guid?>" />
+            <input type="hidden" name="mode" value="<?=$mode?>" />
+            <p class="instructions">To edit a new RSS panel, please enter the full address (url) of the feed:</p>
+			<label for="title">Title:</label>
+			<input type="text" name="title" id="title" value="<?=($title)?$title:$panel->title?>"/><br />
+			<label for="treeline_content">Feed URL:</label>
+			<input type="text" name="treeline_panelcontent" id="treeline_panelcontent" value="<?=($treeline_panelcontent)?$treeline_panelcontent:$content->content?>"/>
+            <div id="tagsElement" class="hasHelp">
+                	<label for="tagslist">Tags: <span class="hint"><a href="/treeline/includes/ajax/tagsHelp.php?height=500&amp;width=500" class="thickbox">What are tags?</a></span></label>
+                	<textarea name="tagslist" id="tagslist" cols="30" rows="2" class="lessText"><?=($tagslist)?$tagslist:$tags->drawTags($guid,'list')?></textarea><span class="help">Separate your tags with a comma.</span><br />
+            	</div>
+			<fieldset class="buttons">		
+            	<button type="submit" class="submit">Save</button>
+            </fieldset>
+        </fieldset>
+     </form>	
+     <h3>RSS Panel Content preview</h3>
+	<?php
+    	$rssFeed = ($treeline_panelcontent)?$treeline_panelcontent:$content->content;
+    	echo drawRSSFeed($rssFeed); 
+    ?>
+	<?php } ?>
+
+
+<?php 
+}
+else if ($action=='createpoll' || $action=='editpoll') {  
+
+	if( $action=='editpoll' ){
+		// load poll by ID here...
+		$poll->loadByGUID($guid);
+		$polldata = $poll->structure;
+		
+		$poll_title = $polldata['title'];
+		$poll_question = $polldata['question'];
+		$poll_response = $polldata['response'];
+		$poll_answer_one = $polldata['answers'][1]['text'];
+		$poll_answer_two = $polldata['answers'][2]['text'];
+		$poll_answer_three = $polldata['answers'][3]['text'];
+		$poll_answer_four = $polldata['answers'][4]['text'];
+		$poll_answer_five = $polldata['answers'][5]['text'];
+		$poll_default_answer = $polldata['default'];
+		
+	}
+	
+	include($_SERVER['DOCUMENT_ROOT'] .'/treeline/includes/ajax/forms/addEditPollPanels.php');
+
+}
+else if ($action=='createnews' || $action=='editnews') { 
+
+	include($_SERVER['DOCUMENT_ROOT'] .'/treeline/includes/ajax/forms/addEditNewsPanels.php');
+
+} 
+else if ($action=='creatework' || $action=='editwork') { 
+
+	include($_SERVER['DOCUMENT_ROOT'] .'/treeline/includes/ajax/forms/addEditWorkPanels.php');
+
+} 
+
+?>
+</div>
+</div>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>

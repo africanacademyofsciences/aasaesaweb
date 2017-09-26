@@ -1,0 +1,35 @@
+/* 
+
+	VANILLA TREELINE WEBSITE CSS
+	
+	description: 2 columns inc secondary
+	
+*/
+
+div#sidebar{
+	display: none;
+}
+
+div#contentholder {
+	width: 751px;
+}
+div#primarycontent{
+	float: left;
+	width: 467px;
+}
+
+div#secondarycontent{
+	display: block;
+}
+
+
+
+
+/* comments form layout */
+div#primarycontent form#f-add-comment fieldset fieldset {
+	width: 425px;
+}
+div#primarycontent form#f-add-comment textarea.text,
+div#primarycontent form#f-add-comment input.text {
+	width: 215px;
+}

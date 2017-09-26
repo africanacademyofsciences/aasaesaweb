@@ -1,0 +1,63 @@
+<settings>
+	<projection>xy</projection>
+	<drag_map>false</drag_map>
+	<redraw>true</redraw>                                           <!-- [false] (true / false) if redraw is set to true, the map will be resized then screen size changes -->
+
+	<background>
+		<color>#ffffff</color>
+		<alpha>0</alpha>
+		<border_color>#ffffff</border_color>
+	</background>
+
+	<zoom>
+		<enabled>false</enabled>
+		<outline_color>#ffffff</outline_color>
+		<color_hover>#c9b89b</color_hover>
+		<color>938671</color>
+		<zoom_on_click>1</zoom_on_click>
+		<min>2810%</min>
+		<max>2810%</max>
+		<locked>true</locked>                                         <!-- [false] (true / false) whether it would be possible to drag zoom bar when dragging "home" icon -->
+		<mouse_wheel_enabled>true</mouse_wheel_enabled>               <!-- [true] (true / false) whether to enable zooming with mouse wheel. Mouse wheel work only after user clicks somewhere on a flash. To workaround this issue, you have to add: onLoad="ammap.focus()" to your html <body> -->    
+		<arrows_enabled>false</arrows_enabled>                         <!-- [true] (true / false) whether to display navigation arrows or not -->
+		<home_link_enabled>false</home_link_enabled>                   <!-- [true] (true / false) whether to display home link or not (home link is only displayed if arrows are enabled) -->    
+	    <background_zooms_to_top>true</background_zooms_to_top>   <!-- [false] (true / false) If this is set to true, clicking on background would be the same as clicking on "home" button -->    
+	</zoom>
+
+  <small_map>
+	<enabled>false</enabled>
+  </small_map>
+
+  <navigation_path>
+    <enabled>false</enabled>
+  </navigation_path>
+
+	<area>
+		<balloon_text>
+			<![CDATA[{description}]]>
+		</balloon_text>
+		<border_color>#000000</border_color>
+		<active_only_if_value_set>false</active_only_if_value_set>
+		<color_solid>#ff0000</color_solid>
+		<color_light>#00ff00</color_light>
+		<color_unlisted>#F76E00</color_unlisted>
+		<color_hover>#aaaaaa</color_hover>
+		<disable_when_clicked>true</disable_when_clicked>
+	</area>
+	
+	<!-- text box is displayed when user clicks on an object and the object contains description. You can disable text box for individual objects in data file -->
+	<text_box>                                                  
+		<enabled>false</enabled> 
+	</text_box>
+
+	<balloon>
+		<color>#FFFFFF</color>
+		<alpha>85</alpha>
+		<text_color>#000000</text_color>
+		<border_color>#B71E28</border_color>
+		<border_alpha>90</border_alpha>
+		<border_width>2</border_width>
+		<corner_radius>7</corner_radius>
+	</balloon>
+
+</settings>

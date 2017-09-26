@@ -1,0 +1,174 @@
+<?php
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");
+
+session_start();
+
+$curPage = "newsletters_download";
+$pageTitle = "Newsletters - Download Subscribers Database";
+
+$refreshCSV = addslashes($_REQUEST["refresh"]);
+if($refreshCSV != "1"){
+	$refreshCSV = false;
+}else{
+	$refreshCSV = true;
+}
+
+
+
+function createRandomCSVFilename($site_id="1"){
+	// Creates a filename for the CSV file.
+	$alpha = "abcdefghijklmnopqrstuvwxyz0123456789012345678901234567890123456789";
+	$filename_ok = false;
+	$filename = "ch_subs_" . $site_id. "_" . $alpha{rand(0, strlen($alpha) - 1)};
+	for($i = 0; $i < 6; $i++){
+		$filename .= $alpha{rand(0, strlen($alpha) - 1)};
+	}
+	return($filename . ".csv");
+}
+
+	$from="members m 
+		LEFT JOIN newsletter_user_preferences nup ON m.member_id = nup.member_id
+		LEFT JOIN newsletter_preferences np ON nup.preference_id = np.preference_id
+		LEFT JOIN store_address_book sab ON m.member_id=sab.member_id
+		LEFT JOIN store_countries sac on sab.country_id=sac.country_id
+		WHERE np.site_id=$siteID
+		AND (sab.title is null or sab.title='mailing')
+		AND np.deleted=0 ";
+	$query="select count(*) FROM ".$from;
+	//print "$query<Br>";
+	$subs_count = 0;
+	if($db->query($query)) $subs_count = $db->get_var();
+
+
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = 'Newsletters Download Subscribers';
+	$pageTitle = 'Newsletters Download Subscribers';
+	
+	$pageClass = 'newsletters';
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+
+<div id="primarycontent">
+  <div id="primary_inner">
+    <?=drawFeedback($feedback,$message)?>
+<?php
+if($subs_count == 0) $page_title = 'Sorry there are no records in the mailing list.';
+else $page_title = $subs_count.' record'.($subs_count==1?"":"s").' found in the mailing list';
+
+$csvFilename = "";
+
+if($refreshCSV){
+// They have requested to refresh the CSV file
+
+/*
+mysql> describe newsletter_subscription;
++--------------+---------------------+------+-----+---------------------+----------------+
+| Field        | Type                | Null | Key | Default             | Extra          |
++--------------+---------------------+------+-----+---------------------+----------------+
+| id           | int(10) unsigned    |      | PRI | NULL                | auto_increment |
+| email        | varchar(255)        | YES  |     | NULL                |                |
+| fullname     | varchar(255)        | YES  |     | NULL                |                |
+| organisation | varchar(255)        | YES  |     | NULL                |                |
+| jobtitle     | varchar(255)        | YES  |     | NULL                |                |
+| postcode     | varchar(255)        | YES  |     | NULL                |                |
+| opted_in     | tinyint(3) unsigned |      |     | 0                   |                |
+| date_changed | datetime            |      |     | 0000-00-00 00:00:00 |                |
++--------------+---------------------+------+-----+---------------------+----------------+
+8 rows in set (0.00 sec)
+*/
+
+	$select = "SELECT email, concat(firstname, ' ', surname) as name, date_added, np.preference_title,
+		sab.addr_id, sab.house, sab.street, sab.address_2, sab.locality, sab.town_city, sab.county, sab.post_code, sac.title
+		FROM ";
+	$order="ORDER BY np.preference_title, date_added ASC";
+	$query=$select.$from.$order;
+	//print "$query<Br>";
+
+	if($db->query($query)){
+
+		$thisCSVOutput = "email,fullname,date_changed,preferences,house,street,address_2,locality,town,county,postcode,country\r\n";
+
+		$num_in_db_when_downloaded = 0;
+		if(isset($db->num_rows) && $db->num_rows > 0){
+			$num_in_db_when_downloaded = $db->num_rows;
+			foreach($db->get_results() as $c){
+				$firstColDone = false;
+				$thisRow = "";
+				foreach($c as $v){
+					if($firstColDone){
+						$thisRow .= ",";
+					}else{
+						$firstColDone = true;
+					}
+					$val = stripslashes($v."" == "" ? "" : trim($v));
+					$val = str_replace("\"", "\"\"", $val);
+
+					$thisRow .= "\"" . $val . "\"";
+				}
+				$thisRow .= "\r\n";
+				$thisCSVOutput .= $thisRow;
+			}
+		}
+
+		$localPath = "/silo/tmp/";
+		//$filePath=$_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/db/";
+		$filePath = $_SERVER['DOCUMENT_ROOT'].$localPath;
+		
+		$fileName = createRandomCSVFilename($siteID);
+//print "try to open ($filePath $fileName)<br>";		
+		$handle = @fopen($filePath.$fileName, "w");
+		if ($handle) {
+			fwrite($handle, $thisCSVOutput);
+			fclose($handle);
+		}
+		else $fileName = "";
+		
+		//$link="/treeline/newsletters/download/?id=".$fileName;
+		$link = $localPath.$fileName;
+
+	}
+	//else print "Query fail()<br>";
+	
+	if($fileName == ""){
+		echo drawFeedback('error', 'Unable to create CSV file('.$fileName.')');
+	}
+	else{
+		echo drawFeedback('success', 'The subscriber database has been written to a CSV file');
+
+	$page_html = '
+<p>To download this file right-click on the link below and choose \'Save Target As...\'.</p>
+<p><a href="'.$link.'" target="_blank" title="Download susbscribers file">'.$fileName.'</a> ('.$num_in_db_when_downloaded.' record'.($num_in_db_when_downloaded==1?"":"s").')</p>
+<p><strong>Please note that for security reasons, the file will only be available for 1 hour. After that time it will be automatically deleted. But you can recreate it as often as you like.</strong></p>
+	';
+	}
+
+$page_html.='
+<p>To refresh the CSV file <a href="/treeline/newsletters/subsdownload/?refresh=1">click here</a>.</p>
+';
+
+}
+else {
+
+	$page_html ='
+		<p>To download the subscribers database, you first need to create the CSV file.</p>
+		<p>To create the CSV file <a href="/treeline/newsletters/subsdownload/?refresh=1">click here</a>.</p>
+	';
+	
+}
+echo treelineBox($page_html, $page_title, "blue");
+?>
+</div>
+</div>
+
+<?php 
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); 
+?>

@@ -1,0 +1,26 @@
+/*
+print styles for Treeline
+This hides the menu and removes the 'logged in as...' section plus the body background...
+*/
+
+body {
+background:#fff;
+}
+
+div#footer,
+ul#menu,
+p#userinfo {
+display:none;
+}
+
+div#midholder {
+background:none;
+float:left;
+margin-left:0;
+}
+div#primarycontent {
+margin-left:0px;
+}
+
+
+

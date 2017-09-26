@@ -1,0 +1,330 @@
+body {
+	background:#dae3e3;
+	color:#5E7072;
+	font: 85%/1.2em Arial, Helvetica normal;
+	text-align:center; /* to centre the page in old browsers */
+}
+
+h1 {}
+h2 {}
+h3 { font-size:135%; }
+h4 {}
+h5 {}
+h6 {}
+
+
+a {
+	color:#06C;
+	text-decoration:none;
+}
+a:hover {
+text-decoration:underline;
+}
+
+.hide {
+	display:none;
+	text-indent:-5000px;
+}
+.last {
+	border:none;
+}
+p {margin:.5em 0}
+strong { font-weight:bold; }
+
+
+
+
+
+
+
+/* HOLDER */
+div#holder {
+	background:url(/treeline/themes/img/bk_holder_mid.gif) repeat-y;
+	margin:20px auto;
+	text-align:left; /* reset text alignment */
+	width:960px;
+}
+
+	
+	/* HEADER */
+	div#header {
+		background:url(/treeline/themes/img/bk_holder.gif) no-repeat top;
+		clear:both;
+margin-bottom:20px;
+position:relative;
+		width:960px;
+	}
+	
+		div#header h1#logo a {
+			background:url(/treeline/themes/img/treeline_logo.gif) no-repeat;
+			display:block;
+			float:left;
+			height:40px;
+			margin:20px 0 0 10px;
+			_margin-left:5px;
+			text-indent:-5000px;
+			width:150px;
+		}
+		
+		div#header h2#pagetitle {
+			color:#607072;
+			font-size:145%;
+			line-height:1.4em;
+			/*margin:25px 0 0 35px;*/
+			margin-left:160px;
+			_margin-left:135px;
+			padding:25px 0 0 35px;
+			width:250px;
+		}
+
+		div#header ul#loginDetails{
+			font-size:80%;
+			_font-size:75%;
+			line-height:1.1em;
+			position:absolute;
+			right:20px;
+			text-align:right;
+			top:20px;
+			width:350px;
+		}
+
+
+	/* MENU */
+	div#sidebar {
+		background:#EDF1F2 url(/treeline/themes/img/bk_menu_bottom.gif) no-repeat bottom center;
+		float:left;
+		height:100%;
+		/*margin-left:10px;*/
+		margin:0 0 -15px 10px;
+		_margin:0 0 0 5px;
+		padding:10px 0 20px 0;
+		width:155px;
+	}
+	
+		div#sidebar ul {
+			font-size:90%;
+			line-height:1.7em;
+			padding:10px 0;
+		}
+		
+		div#sidebar ul#mainMenu {
+			background:url(/treeline/themes/img/bk_menu_top.gif) no-repeat top center;
+			margin-top:-10px;
+		}
+		
+			div#sidebar ul li{
+				padding:0 10px;
+			}
+			
+			div#sidebar ul li.selected {
+				background:#F3F7F8;
+				border:1px solid #DDE1E2;
+				border-width:1px 0;
+				padding:0 10px;
+			}
+
+
+
+		
+	
+	/* PRIMARY CONTENT */
+	div#primarycontent {
+		margin:10px 0px 10px 195px;
+		width:740px;
+	}
+	
+div#primarycontent ul {
+	list-style:outside disc none;
+	margin-left:35px;
+}
+
+div#primarycontent ol {
+	list-style:outside decimal none;
+	margin-left:38px;
+}
+
+div#stepHeader {
+background:#CA3B7B url(/treeline/themes/img/section_title_top.gif) top center no-repeat;
+margin-bottom:20px;
+padding-top:10px;
+width:736px;
+}
+
+div#stepHeader h2 {
+background:url(/treeline/themes/img/section_title_footer.gif) bottom center no-repeat;
+color:#fff;
+font-size:120%;
+margin-bottom:0px;
+padding:0 18px 10px;
+}
+	
+	
+		/* small BLUE BOX */
+		.box_blue {
+			background: url(/treeline/themes/img/box_blue_mid.gif) repeat-y;
+			float:left;
+margin:0 0 0 -2px;
+			width:743px;
+		}
+		
+		.box_blue div.box_blue_top{
+			background:url(/treeline/themes/img/box_blue_top.gif);
+			float:left;
+			margin-bottom:10px;
+			_margin-bottom:0px;
+			_padding-bottom:10px;
+			width:100%;
+		}
+		
+.contentBox {
+	font-size:90%;
+	margin-bottom:15px;
+}
+
+
+		.contentBox h3 {
+			color:#fff;
+			float:left;
+			font-weight:bold;
+			margin:10px 0 10px 20px;
+			_margin:10px 0 10px 10px;
+			padding:0;
+			width:520px;
+		}
+
+.contentBox p,
+.contentBox ol,
+.contentBox ul {
+	float:left;
+	margin:.5em 20px;
+}
+		
+		.contentBox a.getHelp {
+			background:url(/treeline/themes/img/icon_gethelp.gif) no-repeat right center;
+			color:#FEFF01;
+			float:right;
+			font-size:11px;
+			margin:10px 24px 0 20px;
+			padding-right:12px;
+			text-align:right;
+			width:120px;
+		}
+		
+		
+		.box_blue div.box_blue_footer {
+			background:url(/treeline/themes/img/box_blue_footer.gif) no-repeat left bottom;
+			clear:left;
+			float:left;
+			margin:0;
+			_margin-bottom:-12px;
+			padding-bottom:12px;
+			_padding-bottom:0px;
+			width:100%;
+		}
+		
+		/* small GREY BOX */
+		div.box_grey {
+			background:url(/treeline/themes/img/box_grey_mid.gif) repeat-y;
+float:left;
+margin:0 0 0 -2px;
+			width:743px;
+		}
+		
+			div.box_grey div.box_grey_top {
+				background:url(/treeline/themes/img/box_grey_top.gif) no-repeat top center;
+				float:left;
+				margin-bottom:10px;
+				_padding-bottom:10px;
+				width:100%;
+			}
+			
+			.box_grey div.box_grey_footer {
+				background:url(/treeline/themes/img/box_grey_footer.gif) no-repeat left bottom;
+				clear:left;
+				float:left;
+				margin:0;
+				_margin-bottom:-12px;
+				padding-bottom:12px;
+				_padding-bottom:0px;
+				width:100%;
+			}
+		
+.contentBox.lastBox {
+margin-bottom:0;
+}		
+	
+table#myTasks {
+font-size:90%;
+width:500px;
+}
+
+table#myTasks th {
+font-size:90%;
+}
+table#myTasks td,
+table#myTasks th {
+padding:3px;
+}
+
+table#myTasks td.task {
+width:250px
+}
+table#myTasks td.taskDate {
+width:100px
+}
+
+table#myTasks td.task a {
+background:url(/treeline/themes/img/bullet_arrow.gif) no-repeat left center;
+padding-left:15px;
+}
+	
+	
+	
+	/* FOOTER */
+	div#footer{
+		background:#dae3e3 url(/treeline/themes/img/bk_holder_footer.gif) no-repeat 0 -10px;
+		font-size:70%;
+		/*margin-top:-15px;*/
+
+		padding-top:25px;
+
+		width:100%;
+	}
+	
+		div#footer ul {
+			list-style:none;
+		}
+			
+			div#footer a {
+				color:#AD0D53;
+			}
+		
+		div#footer ul#links {
+			float:left;
+			margin-left:10px;
+			width:650px;
+		}
+		
+			ul#links li {
+				background:url(/treeline/themes/img/line_sm.gif) no-repeat right center;
+				display:inline;
+				margin-right:8px;
+				padding-right:8px;
+			}
+		
+		div#footer ul#credits{
+			float:right;
+			margin-right:10px;
+			text-align:right;
+			width:200px;
+		}
+		
+			ul#credits li {
+				display:inline;
+				margin-left:8px;
+				padding-left:8px;
+			}
+			
+			div#footer ul li.last {
+				background:none;
+			}

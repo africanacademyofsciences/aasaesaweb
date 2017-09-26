@@ -1,0 +1,323 @@
+<?php	
+	class Menu {
+		
+
+		// 16/12/2008 Comment
+		// Primary menu is the main menu for the site. 
+		// It displays all sections configured in Treeline
+		// It usually appears across the top of all pages
+		public function drawPrimary($guid) {
+			global $db, $mode, $page, $site, $labels, $location;
+			$i = 0;
+			$html = '';
+			$use_homepage=true;
+
+			// Get information about all children of the homepage
+			$query = "SELECT p.guid, p.name, p.title
+				FROM pages p
+				LEFT JOIN sites_versions msv ON p.msv=msv.msv
+				LEFT JOIN pages_templates pt ON p.template=pt.template_id
+				WHERE p.hidden=0 and p.offline=0 AND pt.template_type=3
+				AND p.date_published IS NOT NULL AND p.parent=".$site->id."
+				AND p.msv=".$site->id." AND p.guid!=p.msv
+				GROUP BY p.guid ORDER BY sort_order ASC";
+			//print "<!-- $query -->\n";
+			$items = $db->get_results($query);
+			
+			if( is_array($items) && count($items)>0 ){
+			
+				$selected = false;
+				
+				// Load details of the current page [should we use a global here?]
+				$tmp_page = new Page();
+				$parentGUID = $tmp_page->getParent();
+				
+				foreach ($items as $item) {
+					$i++;
+					
+					// Position of this element in the list
+					$position='';
+					if(sizeof($items) == $i) $position = 'last';
+					else if($i==1 && !$use_homepage) $position = 'first';
+
+					// Class for selected
+					$class="";
+					//print "<!-- item->guid(".$item->guid.") guid($guid) parent($parentGUID) name(".$item->name.") loc[0](".$location[0].") --> \n";
+					if ($item->guid == $guid || $item->guid == $parentGUID || $item->name == $location[0]) {
+						$class="selected";
+						$selected=true;
+					}
+					if($class) $class = ' class="'.$class.' '.$position.'"';
+					else if($position) $class = ' class="'.$position.'"';
+
+
+					$html .= '<li id="'.$item->name.'-link"'.$class.'>';
+					if ($mode == 'edit' || $mode == 'preview') {
+						$html .= '<a href="#" title="This links is not clickable in '.$mode.' mode">'.ucfirst($item->title).'</a>';
+					}
+					else {
+						//$html .= '<a href="'.$page->drawLinkByGUID($item->guid).'" title="view the '.strtolower($page->drawTitleByGUID($item->guid)).' section">'.$page->drawTitleByGUID($item->guid).'</a>';
+						$html .= '<a href="'.$tmp_page->drawLinkByGUID($item->guid).'" title="view the '.strtolower($item->title).' section">';
+						$html .= ucfirst($item->title) .'</a>';
+					}
+					$html .= '</li>'."\n\t";
+
+				}
+				// Throw the home page onto the start of the list
+				$html .= '</ul>'."\n";
+			}else{
+				$html .= '<li></li></ul>'."\n\n";
+			}
+			
+			// Add the link the the homepage
+			if ($use_homepage) {
+				if ($mode=="edit" || $mode=="preview") $homepage_link = '<li class="'.($guid==$site->id?"selected":"").' first"><a href="#" title="This link is not clickable in '.$mode.' mode">'.$labels['home']['txt'].'</a></li>';
+				else $homepage_link = '<li class="'.($guid==$site->id?"selected":"").' first"><a href="'.$page->drawLinkByGUID($site->id).'">'.$labels['home']['txt'].'</a></li>';
+			}
+						
+			$html ='<ul id="menu">'.($use_homepage?$homepage_link:'').$html;
+			return $html;
+			
+		}
+		
+		// 16/12/2008 Comment
+		// The secondary menu is a sub menu within each section 
+		// It is usually drawn vertically on the left side of the page
+		public function drawSecondaryByParent($guid, $this_guid = false, $orderBy='p.sort_order ASC', $level=1) {
+			
+			//print "dSBP($guid, $this_guid, $orderBy, $level)<br>";
+			global $db, $mode, $page, $site;
+
+			// Use page's parent and draw all the children
+			$html = "\n";
+			
+			$query = "SELECT 
+				unix_timestamp(p.date_published), p.guid, p.name, p.title, p.private, p.template,
+				DATEDIFF(e.end_date, date_format(NOW(), '%Y-%m-%d')) AS days_ahead
+				FROM pages p
+				LEFT OUTER JOIN events e ON p.guid=e.guid 
+				WHERE p.parent = '$guid' AND p.msv=".$site->id."
+				AND p.hidden = 0 AND p.offline=0
+				AND p.date_published IS NOT NULL AND unix_timestamp(p.date_published)>0
+				ORDER BY $orderBy ";
+			
+			// Check if this is a menu for a news section?
+			// Show most recent 10 stories if this is a news page
+			if ($db->get_var("select template from pages where guid='$guid'")==4) {
+				$query.="LIMIT 10";
+			}
+			//print "$query<br>";
+			if ($items = $db->get_results($query)) {	
+
+				foreach ($items as $item) {
+					
+					$thisguid = $item->guid;
+					$class = '';
+					
+					if ($item->guid == $this_guid) {
+						// if this page in the menu is the page we're looking at
+						$class = "subon";
+					}
+					if ($item->private) $class.=$class?" private":"private";
+					
+					for ($i=0;$i<(($level-1)*2);$i++){
+						$indent.="&nbsp;";
+					}
+					$indent='';
+					
+					// Dont allow active menu links in edit/preview modes
+					if ($mode == 'edit' || $mode == 'preview') {				
+						//$html .= '<a href="#"'.$class.' style="padding-left:'. $indent .'px">'.$item->title.'</a>';
+						$html .= '<li class="'.$class.'"><a href="#" title="These links aren\'t clickable in edit/preview mode" class="level-'.$level.'">'.$indent.$item->title.'</a>';
+						if ($thisguid == $guid || in_array($guid, $page->getDescendentsByGUID($thisguid))) {
+							$html .= $this->drawSecondaryByParent($thisguid, $this_guid, $orderBy, $level+1);
+						}
+						$html .= '</li>'."\n";
+					}
+					// Show the menu item.
+					else {
+					
+						//if ($item->template==19) {
+						//	print "<!-- showing events page for (".$item->days_ahead.") days ahead -->\n";
+						//}
+						
+						if ($item->days_ahead<0 && $level==1) ;
+						else {
+							$html .= '<li class="'.$class.'"><a href="'.$page->drawLinkByGUID($thisguid).'" class="level-'.$level.'">'.$indent.$item->title.'</a>';
+							if ($thisguid == $this_guid || in_array($this_guid, $page->getDescendentsByGUID($thisguid))) {
+								$html .= $this->drawSecondaryByParent($thisguid, $this_guid, $orderBy, $level+1);
+							}
+							$html .= '</li>'."\n";
+						}
+					}
+				}
+			}
+			return $html;	
+		}
+		
+		
+		public function drawFooterMenu($guid) {
+			// draw links to gloabl items e.g. contact, accessibility, privacy policy
+			global $db, $MODE;
+			$i = 0;
+				
+			$query = "SELECT p.guid, p.name, p.title 
+						FROM pages p 
+						WHERE p.parent = ". $guid ." AND p.hidden = 1 AND p.type_id!=4
+						AND p.offline=0
+						AND (p.locked = 0 OR p.name='sitemap' ) AND p.date_published IS NOT NULL 
+						ORDER BY p.sort_order ASC";	
+			// print "$query<br>\n";
+			$items = $db->get_results($query);
+
+			if( is_array($items) && count($items)>0 ) {
+				//echo 'ok on line: '. __LINE__ .'<br />';
+				$page = new Page();
+				//$page->loadByGUID($guid);	
+				
+				$parentGUID = $page->getParent();
+				
+				foreach ($items as $item) {
+					//echo 'ok on line: '. __LINE__ .'<br />';
+					$i++;
+					// add first/last class for CSS
+					if(sizeof($items) == $i){
+						$position = 'last';
+					} 
+					else if($i == 1){
+						$position = 'first';
+					}
+					else{
+						$position = '';
+					}
+					//echo 'ok on line: '. __LINE__ .'<br />';
+					// Class for selected
+					$class = ($item->guid == $guid || $item->guid == $parentGUID) ? 'selected' : '';
+					if($class){
+							$class = ' class="'.$class.' '.$position.'"';
+					}
+					else if($position){
+						$class = ' class="'.$position.'"';
+					}
+					else{
+						$class = '';
+					}
+					//echo 'ok on line: '. __LINE__ .'<br />';
+					$html .= '<li id="'.$item->name.'-link"'.$class.'>';
+					
+					if ($MODE == 'edit' || $MODE == 'preview') {
+						$html .= '<a href="#" title="These links aren\'t clickable in edit/preview mode">'.$item->title.'</a>';
+					}
+					else {
+						//echo 'GUID: '. $item->guid .'<br />';
+						//$html .= '<a href="'.$page->drawLinkByGUID($item->guid).'">'.$page->drawTitleByGUID($item->guid).'</a>';
+						$html .= '<a href="'.$page->drawLinkByGUID($item->guid).'">'.$item->title.'</a>';
+					}
+					$html .="</li>\n\t";
+					//echo 'ok on line: '. __LINE__ .'<br />';
+				}
+			}
+			//$html .= "</ul>\n";
+			
+			return $html;
+		}
+
+
+		// This function returns a list of all pages
+		public function drawSiteMapByParent($parent = 0, $siteID=1, $level=0) {
+			global $db, $labels;
+
+
+			// Disable main site news stories
+			if ($siteID==1 && $parent=="47f10c47d90f7") return;
+			
+			// Load details of the current page [should we use a global here?]
+			$thispage = new Page();
+			$query = "SELECT p.parent, p.guid, p.name, p.title, p.locked, p.hidden
+				FROM pages p
+				LEFT JOIN pages_templates pt ON p.template=pt.template_id
+				WHERE parent = '$parent' AND msv='$siteID'
+				AND p.offline=0
+				AND pt.template_type!=2
+				ORDER BY p.sort_order, p.name ASC";
+			//print "$query<br>";
+			$db->query($query);
+
+			if ($pages = $db->get_results($query)) {
+
+				foreach ($pages as $page) {
+					if(($page->locked == 1 && $page->hidden == 1) || $page->hidden==1){ /* hide certain pages */
+						$html .= '';
+						$i = 0;
+					} 
+					else {
+						$link = $thispage->drawLinkByGUID($page->guid);
+						if( $page->guid==$siteID ){
+							$html .= '<li><a href="'.$link.'">'. $labels['home']['txt'] .'</a>';
+						}else{
+							if($page->type!='microsite'){ // quick fix to hide microsites from site map for Website Launch
+								$html .= '<li><a href="'.$link.'">'. ucfirst($page->title) .'</a>';
+							}
+						}
+						if( isset($page->type) && $page->type=='microsite' ){
+							//$html .= ' (microsite)';
+						}
+						$html .= $this->drawSiteMapByParent($page->guid,$siteID, $level+1); /* Get children if they exist */
+						$html .= '</li>'."\n\t";
+					}
+
+				}
+
+			}
+			
+			if (!$html && $level==0) $html='<li>No pages exist for this site</li>';
+			$html = '<ul>'.$html.'</ul>';
+			
+			
+			return str_replace("<ul></ul>", "", $html);
+
+		}
+		
+		public function drawXMLSiteMapByParent($parent=1,$loop=0) {
+			// This function returns a list of all pages within the site in an XML format for Google sitemaps
+			global $db;
+			
+			// Load details of the current page [should we use a global here?]
+			$thispage = new Page();
+			//$thispage->loadByGUID(1);	
+
+			$html = ''; // setup varaible (avoid array errors)
+			//$condition = ($loop==0) ? "(parent = '$parent' OR guid='$parent')" : "parent = '$parent'";
+			$query = "SELECT parent, guid, name, title, locked, hidden, date_published, date_created 
+				FROM pages 
+				WHERE msv=$parent AND title!='Treeline' AND template=2 AND offline=0
+				ORDER BY sort_order, name ASC";
+			
+			if ($pages = $db->get_results($query)) {
+				foreach ($pages as $page) {
+						$link = $thispage->drawLinkByGUID($page->guid);
+						
+						if($page->date_published == '0000-00-00 00:00:00'){
+							$lastMod = date('Y-m-d',strtotime($page->date_created));
+						} 
+						else{
+							$lastMod = date('Y-m-d',strtotime($page->date_published));
+						}
+						
+						$html .= '<url>'."\n\t\t";
+						$html .= '<loc><![CDATA[http://'.$_SERVER['HTTP_HOST'].urlencode($link).']]></loc>'."\n\t\t";
+						$html .= '<lastmod>'.$lastMod.'</lastmod>'."\n\t\t";
+						$html .= '<changefreq>monthly</changefreq>'."\n\t\t";
+						$html .= '<priority>1</priority>'."\n\t";
+						$html .= '</url>'."\n\t";
+						$html .= $this->drawXMLSiteMapByParent($page->guid,$loop+1);
+				}
+			}
+
+			return $html;
+		}
+
+	
+		
+	}
+?>

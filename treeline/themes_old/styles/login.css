@@ -1,0 +1,52 @@
+div#primarycontent {
+	margin:10px 0px 10px 10px;
+	padding-top:10px;
+	width:940px;
+}
+
+
+/* log-in box */
+div.box_blue_footer a#forgotPass{
+	display:block;
+	font-size:70%;
+	margin-left:90px;
+	padding-top:5px;
+	width:160px;
+}
+
+div.box_blue_footer .submit {
+	padding:2px 2em;
+	position:absolute;
+	right:61px;
+	top:0;
+}
+
+/* supported browsers */
+.box_grey table#browsers {
+	clear:left;
+	margin:0 0 8px 20px;
+	_margin-bottom:10px;
+	border-collapse:collapse;
+	width:400px;
+}
+
+	table#browsers thead {
+		display:none;
+	}
+	
+	table#browsers td {
+		font-size:80%;
+		padding:5px 6px;
+	}
+	
+	table#browsers td#browserWin, 
+	table#browsers td#browserMac {
+		border-right:1px solid #ccc;
+		font-size:100%;
+		font-weight:bold;
+	}
+	
+	table#browsers td.browserBorder {
+		border-top:1px solid #ccc;
+	}
+

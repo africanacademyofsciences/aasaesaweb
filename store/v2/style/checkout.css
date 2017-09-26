@@ -1,0 +1,240 @@
+
+form.checkout {
+}
+
+div#basket {
+}
+
+
+
+div#breadcrumb {
+	border-bottom: none;
+}	
+	
+/* PAYPAL PAYMENT FORM */	
+form#f_paypal {
+}
+	form#f_paypal legend {
+	}
+
+
+form#paymentForm {
+	background-color: #fff;
+	padding: 0;
+}
+	form#paymentForm fieldset {
+	}
+		form#paymentForm fieldset label {
+			width: 110px;
+			margin-top: 4px;
+		}
+		form#paymentForm fieldset input {
+		}
+			form#paymentForm fieldset input.text {
+				width: 270px;
+				clear: none;
+			}
+			form#paymentForm fieldset select.text {
+				width: 270px;
+				width: 282px; /* hmm */
+				clear: none;
+			}
+			form#paymentForm fieldset select#ccExMonth {
+				width: 168px;
+				width: 180px; /* hmm */
+			}
+			form#paymentForm fieldset select#ccExYear {
+				width: 92px;
+				margin-left: 10px;
+			}
+			form#paymentForm fieldset select#ccStMonth {
+				width: 180px;
+			}
+			form#paymentForm fieldset select#ccStYear {
+				width: 92px;
+				margin-left: 10px;
+			}
+			form#paymentForm fieldset input#del_post_code,
+			form#paymentForm fieldset input#bill_post_code,
+			form#paymentForm fieldset input#ccCVV,
+			form#paymentForm fieldset input#ccIssue {
+				width: 70px;
+			}
+		form#paymentForm fieldset h4 {
+		}
+
+		form#paymentForm fieldset#checkout-ccdata {
+			float: left;
+			width: 420px;
+		}
+		form#paymentForm fieldset div#checkout-cvv {
+		}
+			form#paymentForm fieldset div#checkout-cvv input.text {
+				margin-bottom: 0;
+			}
+			form#paymentForm fieldset div#checkout-cvv p {
+				clear: left;
+				font-size: 90%;
+				padding-bottom: 0;
+			}
+		form#paymentForm fieldset.address {
+			float: left;
+			width: 420px;
+		}
+		form#paymentForm fieldset div#checkout-maestro-only {
+			margin-top: 10px;
+		}
+			form#paymentForm fieldset div#checkout-maestro-only p {
+				padding-bottom: 5px;
+			}
+
+
+	form#paymentForm div#store-addresses {
+	}
+		form#paymentForm div#store-addresses a#deliveryLink {
+			background-repeat: no-repeat;
+			padding-left: 30px;
+			background-position: 0 8px;
+		}
+		form#paymentForm div#store-addresses a.delivery-link {
+			background-image: url('/img/layout/res-open.png');
+		}
+		form#paymentForm div#store-addresses a.delivery-link-open {
+			background-image: url('/img/layout/res-close.png');
+		}
+
+
+div#optional-extras {
+	margin-top: 40px;
+	padding-top: 30px;
+	border-top: 1px solid #ADADAD;
+}
+	div#optional-extras fieldset.block {
+	}
+		div#optional-extras fieldset.block p {
+		}
+			div#optional-extras fieldset.block p.larger {
+				padding-bottom: 10px;
+			}
+				div#optional-extras fieldset.block p.giftaid-link {
+					background: url('/img/layout/bottom-fade-white.png') repeat-x bottom left;
+					padding-bottom: 14px;
+					margin-bottom: 3px;
+				}
+				div#optional-extras fieldset.block p.larger a.giftaid-link {
+					background: url('/img/layout/res-open.png') no-repeat 0 4px;
+					padding-left: 30px;
+					display: block;
+				}
+
+div#checkout-register-block,
+div#checkout-campaign-block,
+div#giftaid-block {
+	display: none;
+	padding: 10px 20px 30px;
+}
+
+div#giftaid {
+}
+	div#giftaid p {
+	}
+		div#optional-extras div#giftaid p.giftaid-logo {
+			padding-left: 182px;
+			background: url('/img/layout/giftaid.png') no-repeat;
+			padding-bottom: 20px;
+		}
+		div#giftaid div#declaration {
+		}
+			div#giftaid div#declaration input {
+				float: left;
+				width: 20px;
+				margin-right: 10px;
+				margin-left: 0;
+			}
+			div#giftaid div#declaration p {
+				float: left;
+				width: 770px;
+			}
+			
+
+	div#giftaid a.giftaid-link {
+	}
+	
+
+div#checkout-campaign-block {
+}
+	div#checkout-campaign-block ul {
+		padding: 0;
+		list-style: none;
+		float: left;
+		clear: left;
+	}
+		div#checkout-campaign-block ul li {
+			font-size: 140%;
+			float: left;
+			clear: both;
+			margin-bottom: 20px;
+		}
+			div#checkout-campaign-block ul li label {
+				width: auto;
+				margin-top: 0;
+			}
+			div#checkout-campaign-block ul li input.radio {
+				float: left;
+				margin-right: 20px;
+			}
+
+div#checkout-register-block {
+}
+	div#checkout-register-block div.field {
+		clear: both;
+		margin: 0;
+		float: left;
+		width: 800px;
+		padding: 0;
+	}
+		div#checkout-register-block div.field label {
+			width: auto;
+			margin-right: 20px;
+		}
+		div#checkout-register-block div.field input.text {
+			margin-bottom: 20px;
+		}
+
+
+
+
+div#payment-controls {
+	float: left;
+	margin-top: 20px;
+	width: 840px;
+}
+	div#payment-controls div.left {
+		width: 590px;
+		text-align: right;
+	}
+		div#payment-controls div.left p {
+		}
+			div#payment-controls div.left p.donation-totals {
+				font-size: 220%;
+				line-height: 100%;
+				margin-top: 10px;
+				padding-bottom: 10px;
+			}
+	div#payment-controls div.right {
+		background: url('/img/layout/don-arrow.png') no-repeat #C4161C;
+		width: 227px;
+		height: 79px;
+	}
+		div#payment-controls div.right input { 
+			font-size: 160%;
+			background: 0;
+			border: 0;
+			padding: 0;
+			color: #fff;
+			width: 200px;
+			height: 67px;
+			text-align: left;
+			padding: 12px 0 0 20px;
+		}
+

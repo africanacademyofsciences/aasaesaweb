@@ -1,0 +1,119 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/treeline/!svn/ver/2/treeline/includes/templates
+END
+branding.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/treeline/!svn/ver/2/treeline/includes/templates/branding.inc.php
+END
+commonJS.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/treeline/!svn/ver/2/treeline/includes/templates/commonJS.inc.php
+END
+browserinfo.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/treeline/!svn/ver/2/treeline/includes/templates/browserinfo.php
+END
+header.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/treeline/!svn/ver/2/treeline/includes/templates/header.inc.php
+END
+userinfo.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/treeline/!svn/ver/2/treeline/includes/templates/userinfo.inc.php
+END
+footer.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/treeline/!svn/ver/2/treeline/includes/templates/footer.inc.php
+END
+head.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/treeline/!svn/ver/2/treeline/includes/templates/head.inc.php
+END
+commonCSS.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/treeline/!svn/ver/2/treeline/includes/templates/commonCSS.inc.php
+END
+menu.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/treeline/!svn/ver/2/treeline/includes/templates/menu.inc.php
+END
+browserdetect.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/treeline/!svn/ver/2/treeline/includes/templates/browserdetect.php
+END
+footer_t4.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/treeline/!svn/ver/2/treeline/includes/templates/footer_t4.inc.php
+END
+globaltasks.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/treeline/!svn/ver/2/treeline/includes/templates/globaltasks.inc.php
+END
+accessnav.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/treeline/!svn/ver/2/treeline/includes/templates/accessnav.inc.php
+END
+topcurve.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/treeline/!svn/ver/2/treeline/includes/templates/topcurve.inc.php
+END
+sidebar.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/treeline/!svn/ver/2/treeline/includes/templates/sidebar.inc.php
+END
+bottomcurve.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/treeline/!svn/ver/2/treeline/includes/templates/bottomcurve.inc.php
+END
+commonJSBottom.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/treeline/!svn/ver/2/treeline/includes/templates/commonJSBottom.inc.php
+END
+treeline_message.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/treeline/!svn/ver/2/treeline/includes/templates/treeline_message.inc.php
+END
+contentcurve.inc.php
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/treeline/!svn/ver/2/treeline/includes/templates/contentcurve.inc.php
+END

@@ -1,0 +1,33 @@
+      <?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/contentcurve.inc.php"); ?>
+    </div>
+    <?php // include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/menu.inc.php"); ?>
+    <?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/bottomcurve.inc.php"); ?>
+  </div>
+</div>
+<div id="footer">
+	<ul>
+    	<?php if(!$noMenu) { ?>
+		<li id="terms-link" class="first footer-left"><a href="/treeline/terms/">Terms and conditions</a></li>
+	    <li id="about-link" class="footer-left"><a href="/treeline/about/">About Treeline</a></li>
+	    <li id="accessibility-link" class="footer-left"><a href="/treeline/accessibility/" accesskey="0">Accessibility information</a></li>
+	    <li id="feedback-link" class="footer-left"><a href="/treeline/feedback/" accesskey="9">Feedback</a></li>
+	    <li id="requests-link" class="footer-left"><a href="/treeline/requests/">Function requests</a></li>
+	    <!-- <li id="bugs-link" class="footer-left"><a href="/treeline/bugs/">Bug reports</a></li> -->
+        <? } ?>
+	    <li class="footer-left"><a href="http://www.ichameleon.com/" target="_blank">&copy;<?=date('Y')?> Chameleon Interactive</abbr></a></li>
+	</ul>
+</div>
+
+<div id="nfoholder" style="display: none; visibility: hidden;">
+<div id="nfotopline"></div>
+<div id="nfotext">
+<p class="bodytext"><span id="nfo">Welcome to Treeline</span></p></div>
+</div>
+
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/commonJSBottom.inc.php"); ?>
+
+</body>
+
+
+</html>
+

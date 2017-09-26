@@ -1,0 +1,17 @@
+/* CSS Document */
+
+
+body header {
+	position: relative;
+}
+body div.content {
+	margin-top: 0;
+}
+
+.page-title {
+	position: relative;
+}
+
+.main-content {
+	margin-top: 25px;
+}

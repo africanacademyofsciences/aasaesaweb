@@ -1,0 +1,23 @@
+
+
+div#gallery div.image {
+	width: 180px;
+	font-size: 14px;
+}
+	div#gallery div.image a {
+	}
+	div#gallery div.image i {
+		line-height: 140%;
+	}
+		div#gallery div.image i span {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+div#gallery div.image4, 
+div#gallery div.image9 {
+	margin-right: 15px;
+}
+
+div#controls {
+	margin-top: 20px;
+}

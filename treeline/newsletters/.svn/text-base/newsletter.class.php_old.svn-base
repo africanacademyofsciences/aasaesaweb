@@ -1,0 +1,628 @@
+<?php
+
+	/*
+	
+	  Newsletter Class
+	  
+	  last edited: 03/08/2007 
+	  last edited by: by Phil T phil.thompson@ichameleon.com
+	  changes made: Modified drawPreferences HTML
+	  
+	  
+	  Table of contents
+	  
+	  includes: html2text class
+	  # newsletter config
+	  # isValid
+	  # reuse
+	  # createNew
+	  # subscribe
+	  # unsubscribe
+	  # update
+	  # validate
+	  # validateSubject
+	  # validateHTMLText
+	  # Email design
+	  	- getCSS
+		- getHTMLHeader
+		- GEtHTMLHEader
+		- convertImages
+		- convertLinks
+		- getBodyText
+		-setUnsubscribe
+		- getBodyTExt
+		- getHTMLEmail
+		- getPlainEmail
+	  # Preferences
+	  
+	
+	*/
+
+
+require_once('html2text.class.php');
+//require_once($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/ezSQL.class.php');
+
+
+class newsletter{
+
+	var $id;
+	var $subject;
+	var $html_text;
+	var $plain_text;
+	var $send_date;
+	var $done;
+	var $errorMsg;
+	var $siteID;
+	var $header;
+
+	public function newsletter($id = null, $html_text= null){
+
+		$this->id = null;
+		$this->subject = null;
+		$this->html_text = null;
+		$this->plain_text = null;
+		$this->send_date = null;
+		$this->done = null;
+		$this->siteID = null;
+		$this->header = null;
+
+		if($id){
+
+			global $db;
+
+			// Pull newsletter data out
+
+			$query = "SELECT subject, text, send_date, done, site_id, header FROM newsletter WHERE id = " . $id;
+			if($db->query($query)){
+
+				$n = $db->get_row(null);
+
+				$this->id = $id;
+				$this->subject = stripslashes($n->subject);
+				$this->html_text = stripslashes($n->text);
+
+				$h2t =& new html2text($this->html_text);
+				$this->plain_text = $h2t->get_text();
+
+				$this->send_date = $n->send_date;
+				$this->done = $n->done;
+				$this->siteID = $n->site_id;
+				$this->header = $n->header;
+
+			}
+		}
+		
+		if ($html_text) { //This means it's a digest.
+			
+			global $siteID;
+				
+			$this->html_text = stripslashes($html_text);
+			$this->siteID = $siteID;
+			$h2t =& new html2text($this->html_text);
+			$this->plain_text = $h2t->get_text();
+			
+		}
+	}
+
+	public function isValid(){
+
+		if($this->id){
+			return(true);
+		}else{
+			return(false);
+		}
+	}
+
+
+	public function reuse($id){
+
+		global $db;
+
+		// Pull newsletter data out
+
+		$query = 
+			"SELECT subject, text, send_date, done, site_id, header" .
+			"FROM newsletter " .
+			"WHERE id = " . $id;
+
+		if($db->query($query)){
+
+			$n = $db->get_row(null);
+
+			$this->id = null; // Creating a new newsletter based on an old one
+			$this->subject = stripslashes($n->subject);
+			$this->html_text = stripslashes($n->text);
+
+			$h2t =& new html2text($this->html_text);
+			$this->plain_text = $h2t->get_text();
+
+			$this->send_date = $n->send_date;
+			$this->done = $n->done;
+			$this->siteID = $n->site_id;
+			$this->header = $n->header;
+		}
+	}
+
+
+	public function createNew(){
+
+		global $_SESSION, $db, $siteID;
+
+		$preference = $_POST['preference'];
+		$query = "INSERT INTO newsletter (subject, text, site_id, header) VALUES ('" . $db->escape($this->subject) . "', '" . $db->escape($this->html_text) . "', $siteID, '" . $db->escape($this->header) . "' )";
+		//echo $query; exit;
+		$db->query($query);
+
+		$this->id = $db->insert_id;
+		
+		
+			while (list ($key,$val) = @each ($preference)) { 
+					$query = "INSERT INTO newsletter_send_preferences (newsletter_id, preference_id) VALUES (".$this->id.",".$val.")";	
+					
+						//	print_r($query); exit;
+					if ($db->query($query)){ // update their status to opted in
+						$message .= "<br />Newsletter preference group added";
+					}
+					else {
+						$error++;
+						$message .= "<br />Didn't add newsletter preference group";
+					}
+		}
+	
+		
+		return $this->id;
+
+	}
+
+	public function subscribe() {
+		global $db, $siteID;
+		
+		$error = 0; // error counter. increment for every error
+		
+		$subscriber = new Subscriber();
+		
+		$email = $db->escape($_POST['email']);
+		$name = $db->escape($_POST['name']);
+		$preference = $_POST['preference'];
+		
+		
+		
+		if (!$email) return $message1 = array("error", "No email address entered.");
+		if (!$subscriber->validateEmail($email)) return $message1 = array("error", "Email address is not valid.");
+		$subscriber->set("email", $email);
+		$subscriber->set("fullname", $name);
+		
+		
+		// Should really check if this email address is already
+		// subscribed and opt_in etc as this will fail if they are in the table already.
+		$query = "SELECT COUNT(*) FROM newsletter_subscription WHERE email = '".$email."' AND site_id = $siteID ";
+		$count = $db->get_var($query);
+		
+		if ($count == 0) { // Check for existing presence in database
+			if($message = $subscriber->createNew($name, $email)){ // doesn't exist so add new record
+				$message = 'You have successfully signed up to our newsletter.';
+				$query = "SELECT id FROM newsletter_subscription WHERE email = '".$email."' AND site_id = $siteID ";
+
+				$subscribeid = $db->get_var($query);
+				
+				//Now add preferences to subscriber
+				if ($subscribeid) {
+					if ($_POST['all'] == 1) { //Subscriber gets all newsletters
+					
+						$query = "SELECT preference_id FROM newsletter_preferences n WHERE deleted != 1 AND site_id = $siteID ";
+						$preferencelist = $db->get_results($query);
+						while (list ($key, $val) = @each ($preferencelist)) {
+							$query = "INSERT INTO newsletter_user_preferences (subscription_id, preference_id) VALUES (".$subscribeid.",".$val->preference_id.")";
+							$db->query($query);
+						}
+					} else {
+						while (list ($key,$val) = @each ($preference)) { 
+							$query = "INSERT INTO newsletter_user_preferences (subscription_id, preference_id) VALUES (".$subscribeid.",".$val.")";
+							if ($db->query($query)){ // update their status to opted in
+								//$message .= "<br />Custom preferences added";
+							}
+							else {
+								$error++;
+								$message .= "<br />We were unable to add your custom preferences.";
+							}
+						}
+					}
+					
+				}
+			}
+			else{
+				$error++;
+				$message[] = 'Sorry, we could not subscribe you at this time, please try again later';
+			}
+		}
+		else { // does exist
+			$query = "SELECT id, opted_in FROM newsletter_subscription WHERE email = '".$email."' AND site_id = $siteID ";
+			$row = $db->get_row($query);
+			if (!$row->opted_in || $row->opted_in == 0) { // they are in database but set as opted out
+				$query = "UPDATE newsletter_subscription SET opted_in = 1 WHERE email = '".$email."'";
+				if ($db->query($query)){ // update their status to opted in
+				 	$message = 'You have successfully signed up for our newsletter.';
+				}
+				else {
+					$error++;
+					$message =  "Sorry, we failed to update your details, please try again later";
+				}
+			}
+			else {
+				$error++;
+				$message =  "This email address has already subscribed to this newsletter";
+			}
+		}
+		
+		if ($error > 0){
+			$message1 = array("error", $message);
+			return $message1;
+		}
+		else {
+			$message1 = array("success", $message);
+			return $message1;			
+		}
+
+	}
+	
+	public function unsubscribe() {
+		global $db, $siteID;
+		
+		$email = $db->escape($_POST['email']);
+
+			// Assume unsubcribing an email address
+			$query = "UPDATE newsletter_subscription SET opted_in = 0, date_changed = Now() WHERE email = '$email' AND site_id = $siteID ";
+			if ($db->query($query)) {
+				return true;
+			}
+			else{
+				return false;
+			}
+	}
+	
+	public function _unsubscribe($id) {
+		global $db;
+		if ($id>0) {
+			$subscriberid = $id;
+		}
+		else {
+			// Assume unsubcribing an email address
+			$query = "SELECT id, opted_in FROM newsletter_subscription WHERE email = '$id'";
+			if ($result=$db->get_row($query)) {
+				//print "got optin(".$result->opted_in.") id(".$result->id.")<br>";
+				if ($result->opted_in == 0){
+				 return 1;	// Already opted out so say success anyway.
+				}
+				$subscriberId = $result->id;
+			}
+		}
+		
+		if (!$subscriberId) {
+			return "Failed to get subscriber details for ($id)";
+		}
+
+		$subscriber = new Subscriber($subscriberId);
+		return $subscriber->unsubscribe();
+	}
+	
+	
+	public function update(){
+
+		global $db;
+		
+		$query = 
+			"UPDATE newsletter 
+			SET subject = '" . $db->escape($this->subject) . "', 
+			text = '" . $db->escape($this->html_text) . "',
+			header = '" . $db->escape($this->header) ."'
+			WHERE id = " . $this->id;
+
+		$db->query($query);
+		$preference = $_POST['preference'];
+			if ($preference){
+				$query = "DELETE FROM newsletter_send_preferences WHERE newsletter_id = ".$this->id;
+				$db->query($query);
+				
+				while (list ($key,$val) = @each ($preference)) { 
+					$query = "INSERT INTO newsletter_send_preferences (newsletter_id, preference_id) VALUES (".$this->id.",".$val.")";
+					if ($db->query($query)){ // update their status to opted in
+						$message .= "<br />Added newsletter preference.";
+					}
+					else {
+						$message .= "<br />Error adding preference.";
+					}										
+				}
+		}
+		
+	}
+
+	public function validate()
+	{
+		$this->errMsg .= $this->validateSubject();
+		$this->errMsg .= $this->validateHTMLText();
+		return !strlen($this->errMsg);		
+	}
+	public function validateSubject()
+	{
+		// Test subject for stuff...
+		$error='';
+		if (strlen($this->subject) < 4){
+		 $error .= "Subject too short\n";
+		 }
+		return $error;
+	}
+	public function validateHTMLText()
+	{
+		$error = '';
+		if (strlen($this->html_text)<4){
+			$error .= "Email text too short\n";
+		}
+		return $error;
+	}
+	
+	
+	public function validateEmail($email)
+	{
+		$regExpEmail = "/^([^\@ \.]+\.)*[^\@ \.]+\@([^\@ \.]+\.)+[^\@ \.]+$/";
+
+		if(preg_match($regExpEmail, $email) < 1){
+			return (false);
+		}else{
+			return (true);
+		}
+	}
+	
+
+	
+	
+	
+public function getHTMLheader($style = 'amref') {
+
+	$host = SERVER_NAME;
+
+	if ($style == 'amref')
+	{
+
+		$html = <<<EOT
+		
+<style type="text/css">
+  p,ul,ol{font-family:arial;font-size:11px;color:#333}
+  p{margin-left:10px}
+  ul{list-style:square}
+  h1,h2,h3{font-family:sans-serif;color:#b9232d;margin-left:10px;font-weight:normal;margin-bottom:0}
+  h1{font-size:28px}
+  h2{font-size:23px}
+  h3{font-size:20px}
+  small{display:block;font-family:arial;font-size:10px;color:#999;margin-left:10px}
+  a{color:#b9232d;font-weight:bold}
+  a img{border:0}
+</style>
+<table style="width:500px">
+  <tr>
+    <td>
+      <a href="#"><img src="http://$host/img/newsletters/email_header_1.gif" alt="Amref" style="margin-bottom:10px" /></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+		
+EOT;
+	
+	}
+	else if ($style == 'guardian')
+	{
+
+		$html = <<<EOT
+		
+<style type="text/css">
+  p,ul,ol{font-family:arial;font-size:11px;color:#333}
+  p{margin-left:10px}
+  ul{list-style:square}
+  h1,h2,h3{font-family:serif;color:#444;margin-left:10px;font-weight:normal;margin-bottom:0}
+  h1{font-size:28px}
+  h2{font-size:23px}
+  h3{font-size:20px}
+  small{display:block;font-family:arial;font-size:10px;color:#999;margin-left:10px}
+  a{color:#b9232d;font-weight:bold}
+  a img{border:0}
+</style>
+<table style="width:500px">
+  <tr>
+    <td>
+      <img src="http://$host/img/newsletters/email_header_2.jpg" alt="Katine it starts with a village" style="margin-bottom:10px" />
+    </td>
+  </tr>
+  <tr>
+    <td>
+		
+EOT;
+	
+	}
+
+	return $html;
+}
+
+public function getHTMLfooter($style = 'amref') {
+
+	$host = SERVER_NAME;
+
+	if ($style == 'amref')
+	{
+
+		$html = <<<EOT
+		
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="http://$host/img/newsletters/email_footer_1.gif" alt="" style="margin-top:10px;margin-bottom:10px" />
+      <small>You have received this email because you have subscribed to an email list held by AMREF. To change your email settings please visit <a href="http://amref.ichameleon.com/enewsletters/" style="font-weight:normal;text-decoration:none">http://amref.ichameleon.com/enewsletters/</a><br />AMREF is a registered UK charity. U.K - Charity No: 261488<br />Email and web services provided by <a href="http://ichameleon.com/" style="font-weight:normal;text-decoration:none">Ichameleon</a>.</small>
+    </td>
+  </tr>
+</table>
+		
+EOT;
+	
+	}
+	else if ($style == 'guardian')
+	{
+
+		$html = <<<EOT
+		
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="http://$host/img/newsletters/email_footer_2.gif" alt="" style="margin-top:10px;margin-bottom:10px" />
+      <small>You have received this email because you have subscribed to an email list held by AMREF. To change your email settings please visit <a href="http://amref.ichameleon.com/enewsletters/" style="font-weight:normal;text-decoration:none">http://amref.ichameleon.com/enewsletters/</a><br />AMREF is a registered UK charity. U.K - Charity No: 261488<br />Email and web services provided by <a href="http://ichameleon.com/" style="font-weight:normal;text-decoration:none">Ichameleon</a>.</small>
+    </td>
+  </tr>
+</table>
+		
+EOT;
+	
+	}
+
+	return $html;
+}	
+
+
+
+
+
+
+
+
+
+
+public function convertImages($content){
+	// add full web address to all images so they appear in email clients
+	$content = str_replace('src="/silo','src="http://'.SERVER_NAME.'/silo',$content);
+	return $content;
+}
+
+public function convertLinks($content){
+	// add full web address to all site links to they work in email clients
+	$content = str_replace('href="/','href="http://'.SERVER_NAME.'/',$content);
+	return $content;
+}
+
+public function setUnsubscribe($s, $email) {
+	// WTF is this?
+	return str_replace("e=xxx", "ema=".$email, $s);
+}
+
+public function getBodyText(){
+	// convert body text/email content into usual content
+	$body = $this->convertLinks($this->html_text);
+	$body = $this->convertImages($body);
+	$body = nl2br($body);
+	return $body;
+}
+
+
+public function getHTMLEmail($style = 'amref'){
+	// Return the HTML for this email. Header+Body+Footer
+	$content = $this->getHTMLheader($style).$this->getBodyText().$this->getHTMLfooter($style);
+	
+	return($content);
+}
+
+
+	public function getPlainEmail(){
+	// Return the Plain text for this email
+
+		$content = "
+
+{$this->plain_text}
+
+Why you have received this email
+
+You have received this email because you subscribe to the '.SITE_NAME.' newsletter. If you would like to stop receiving this email click the following link:\nhttp://".SERVER_NAME."/newsletters/?action=unsubscribe
+
+";
+	return $content;
+	}
+	
+	public function drawPreferences($siteID){
+		global $db;
+		
+				$query = "SELECT * FROM newsletter_preferences n ".
+						 "WHERE deleted != 1 AND site_id = $siteID ".
+						 "ORDER BY preference_title ASC";
+			
+				//echo $query;
+				$results = $db->get_results($query);
+	
+				if($results){
+					echo '<fieldset>'."\n";
+					echo '<legend>Preferences</legend>'."\n";
+					foreach($results as $result){
+						
+						echo '<input class="checkbox" type="checkbox" id="'.str_replace(' ','_',$result->preference_title).'" name="preference[]" value="'.$result->preference_id.'" />'."\n";
+						echo '<label class="checklabel" for="'.str_replace(' ','_',$result->preference_title).'">'.$result->preference_title.'</label><br />'."\n";
+					}
+					echo '<input class="checkbox" type="checkbox" id="All" name="all" value="1" />'."\n";
+					echo '<label for="All" class="checklabel">Receive All</label><br />'."\n";
+					echo '</fieldset>'."\n";
+				}
+	}
+	
+	public function drawAdminPreferences($id, $siteID){
+		global $db;
+				
+				
+				$temp = ($id > 0? ", IF(np.newsletter_id=".$id.",1,0) as flag" : " ");
+				
+				if ($id){
+					$query = "SELECT n.preference_id, n.preference_title ".$temp." ".
+						"FROM newsletter_preferences n ".
+						"LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id ".
+						"WHERE n.preference_id NOT IN (SELECT n.preference_id FROM newsletter_preferences n ".
+						"LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id WHERE np.newsletter_id=".$id.") ".
+						"AND n.deleted!=1 ".
+						"AND n.site_id = $siteID ".	
+
+						"UNION ".
+
+						"SELECT n.preference_id, n.preference_title ".$temp." ".
+						"FROM newsletter_preferences n ".
+						"LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id ".
+						"WHERE np.newsletter_id=".$id." AND n.deleted!=1 ".
+
+						"ORDER BY preference_id ";
+					
+				} else {
+					$query = "SELECT * FROM newsletter_preferences n ".
+						 "WHERE deleted != 1 AND site_id = $siteID ORDER BY preference_title ASC";
+				}
+
+				//echo $query;
+				/*$query = "SELECT *, n.preference_id ".$temp." ".
+						 "FROM newsletter_preferences n ".
+						 "LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id ".
+						 "WHERE deleted != 1 GROUP BY n.preference_id";*/
+				
+				$results = $db->get_results($query);
+				
+				if($results){
+					echo '<fieldset>'."\n";
+					echo '<legend>Select audience</legend>'."\n";
+					foreach($results as $result){
+						if ($result->flag == 1){
+							echo '<input type="checkbox" class="checkbox" id="'.$result->preference_title.'" name="preference[]" value="'.$result->preference_id.'" checked="checked" />';
+						} else {
+							echo '<input type="checkbox" class="checkbox" id="'.$result->preference_title.'" name="preference[]" value="'.$result->preference_id.'" />';
+						}
+						echo '<label for="'.$result->preference_title.'" class="checklabel">'.$result->preference_title.':</label><br />'."\n";
+					}
+					echo '</fieldset>'."\n";
+				}
+	}
+	
+	
+	
+}
+
+
+?>

@@ -1,0 +1,15 @@
+@charset "utf-8";
+/* CSS Document */
+
+div#media-tester p.media-769 {
+	display: block;
+}
+
+
+
+h1.pagetitle,
+div#primarycontent,
+div#tagslist
+ {
+	width: 100%;
+}

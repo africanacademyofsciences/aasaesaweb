@@ -1,0 +1,122 @@
+<?php
+
+
+class Abuse {
+
+	public function Abuse() {
+		//print "abuse created";
+	}
+	
+	public function report($id, $type) {
+		global $db, $site;
+		//print "A::r($id, $type)<br>\n";
+		if (!$id || !$type) return array("Failed to report abuse - data error");
+			
+		$table=$type; 
+		$field="id";
+		if ($type=="forum") { $table="forum_posts"; $field="post_id"; }
+
+		// 1 - Suspend the item
+		$query = "UPDATE $table SET suspended=-1 WHERE $field=$id";
+		//print "$query<br>\n";
+		$db->query($query);
+		
+		if (addHistory(-1, "abuse", '', $id, $type)) {				
+
+			$tasks = new Tasks($site->id);
+			// Add a task for all superusers
+			$tasks->add(0, "Abuse reported", '', $type." id:".$id, 1);
+			$data = array("ABUSE-PAGE"=>$type,
+				"ABUSE-SECTION"=>$type,
+				"MEMBER-ID"=>$_SESSION['member_id'],
+				"ITEM-TITLE"=>$db->get_var("SELECT title from $table WHERE $field=".$id)
+			);
+			$tasks->notify("abuse-report", $data);
+			return true;
+		}		
+		
+		return false;
+	}
+	
+	// This updates any outstanding reports associated with and id
+	// there might not be any so we dont worry if the query does not update any records.
+	public function update($id, $type, $status) {
+		global $db, $site;
+		//print "u($id, $type, $status)<br>\n";
+		$query = "UPDATE history SET 
+			completed_date=NOW(), completed_by=".$_SESSION['treeline_user_id'].",
+			completed_action = '".strtoupper($status)."'
+			WHERE msv=".$site->id." 
+			AND action='abuse' AND `table`='$type' 
+			AND info='$id' AND completed_date IS NULL";
+		$db->query($query);
+		//print "$query<br>\n";
+		
+		// Also need to check if there are any tasks relating to this report and remove them from 
+		// the task list
+		$query = "UPDATE tasks SET completed=NOW() 
+			WHERE description='".$type.' id:'.$id."'
+			AND completed IS NULL";
+		//print "$query<br>\n";
+		$db->query($query);
+	}
+	
+
+	// Manage abuse reports....
+	public function manage($type) {
+		global $db, $site, $help;
+		$html = '';
+		
+		$table=$type; 
+		$field="id";
+		$action_page = '';
+		if ($type=="forum") { $table="forum_posts"; $field="post_id"; $action_page="forum"; $action_field="post_id"; }
+		else if ($type=="blogs") {  $action_page="blogs"; $action_field="bid"; }
+				
+		$query = "SELECT h.info as id, date_format(h.date_added, '%D %b %Y') as added,
+			count(h.info) as report_count,
+			t.* 
+			FROM history h
+			LEFT JOIN $table t ON h.info = t.$field
+			WHERE h.msv=".$site->id."
+			AND h.action='abuse' AND h.completed_date IS NULL 
+			AND `h`.`table`='$type'
+			GROUP BY h.info
+			ORDER BY date_added DESC";
+		//print "$query<br>\n";
+		
+		if ($results = $db->get_results($query)) {
+			foreach ($results as $result) {
+				$html.='<tr>
+<td><a '.$help->drawInfoPopup("View full post").' href="'.$site->link.$action_page.'/?'.$action_field.'='.$result->id.'&amp;admin" target="_blank">'.$result->title.'</a></td>
+<td>'.$result->report_count.'</td>
+<td align="center" nowrap>'.$result->added.'</td>
+<td class="action">
+	<a '.$help->drawInfoPopup("Delete this item").' href="?'.$action_field.'='.$result->id.'&amp;action=abuse-delete" class="delete">Suspend</a>
+	<a '.$help->drawInfoPopup("Unsuspend this item").' href="?'.$action_field.'='.$result->id.'&amp;action=abuse-restore" class="publish">Unsuspend this item</a>
+</td>
+</tr>
+';
+			}
+			if ($html) $html = '<table class="tl_list"><thead>
+<tr>
+	<th>Author</th>
+	<th>Reports</th>
+	<th>Last report</th>
+	<th>Manage</th>
+</tr>
+</thead>
+<tbody>
+	'.$html.'
+</tbody>
+</table>';
+		}
+		return $html;
+		
+		
+	}
+		
+}
+
+
+?>

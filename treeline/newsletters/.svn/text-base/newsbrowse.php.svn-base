@@ -1,0 +1,271 @@
+<?php
+
+session_start();
+
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");
+//include ($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+
+$showFrom = addslashes($_REQUEST["sf"]);
+if(!$showFrom) $showFrom = 0;
+
+$showRows = addslashes($_REQUEST["sr"]);
+if(!$showRows) $showRows = 10;
+
+$searchSubject = $_REQUEST["ss"];
+$currentPage = read($_REQUEST, 'page', 1);
+
+$order = ($_REQUEST['ob']?$_REQUEST['ob']:"added_date")." ".($_REQUEST['od']?$_REQUEST['od']:"ASC")." ";
+
+$action = $_REQUEST["action"];
+$news_status=read($_REQUEST, "status", "N");
+$follow_up = ($news_status == "S");
+
+
+if (!$action) $action="newsletter";
+$pageTitle = "Newsletters - Browse";
+$curPage = "newsletters_browse";
+
+
+
+function smartTruncate($str, $maxLen){
+	if(strlen($str) >= $maxLen) return substr($str, 0, $maxLen - 4) . " ...";
+	return($str);
+}
+function htmlShortDate($strDate){
+	// Formats a date/time string for output to HTML
+	if(!$strDate) return '';
+	return(getUFDate($strDate));
+}
+
+$message = array();
+$feedback = "error";
+
+// PAGE specific HTML settings
+$css = array('forms','tables'); // all CSS needed by this page
+$extraCSS = ''; // extra on page CSS
+
+$js = array(); // all external JavaScript needed by this page
+$extraJS = ''; // extra on page JavaScript
+
+// Page title	
+$pageTitleH2 = ($action) ? 'Newsletters : '.ucwords($action) : 'Newsletters';
+//$pageTitle = ($action) ? 'Newsletters : '.ucwords($action) : 'Newsletters';
+
+$pageClass = 'newsletters';
+
+include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+
+?>
+
+<div id="primarycontent">
+<div id="primary_inner">
+<?php
+	echo drawFeedback($feedback,$message);
+
+    if ($follow_up) {
+		?>
+	    <h2 class="pagetitle rounded">Use the form below to browse and edit follow up emails.</h2>
+    	<?php
+	} 
+	else { 
+		?>
+        <h2 class="pagetitle rounded">Locate newsletter to manage</h2>
+        <?php
+		$page_html='
+    	<p>Use the list of existing newsletters to select one as the basis for a new newsletter or send out a saved one. </p>
+	    <p>A newsletter can only be sent out once, but you can re-use it as many times as you like to help prepare other newsletters.</p>
+    	'; 
+	} 
+	
+	$page_html.='
+    
+<form id="frmShowNewsletters" action="/treeline/newsletters/newsbrowse/" method="get">
+<fieldset>
+	<input type="hidden" name="status" value="'.$news_status.'" />
+	<input type="hidden" name="action" value="'.$action.'" />
+	<label for="subject">Search Subject:</label>
+	<input type="text" id="subject" name="ss" maxlength="255" size="30" value="'.htmlspecialchars(stripslashes($searchSubject)).'" />
+	<br />
+	<label for="orderby">Order by:</label>
+	<select class="newsfield" name="ob" id="orderby" style="width:140px; margin-right: 12px;">
+		<option value="added_date"'.($orderBy == "added_date" ? " selected=\"selected\"" : "").'>created date</option>
+		<option value="send_date"'.($orderBy == "send_date" ? " selected=\"selected\"" : "").'>send date</option>
+		<option value="subject"'.($orderBy == "subject" ? " selected=\"selected\"" : "").'>subject</option>
+	</select>
+	<label for="od" class="hide">Order by:</label>
+	<select name="od" id="od" class="newsfield" style="width:140px; margin-top: .5em;">
+		<option value="ASC"'.($orderDir == "ASC" ? " selected=\"selected\"" : "").'>ascending</option>
+		<option value="DESC"'.($orderDir == "DESC" ? " selected=\"selected\"" : "").'>descending</option>
+	</select>
+	<br />
+	<label for="results">Show Results:</label>
+	<select name="sr" id="results">
+		<option value="5"'.($showRows == "5" ? " selected=\"selected\"" : "").'>5 per page</option>
+		<option value="10"'.($showRows == "10" ? " selected=\"selected\"" : "").'>10 per page</option>
+		<option value="20"'.($showRows == "20" ? " selected=\"selected\"" : "").'>20 per page</option>
+		<option value="50"'.($showRows == "50" ? " selected=\"selected\"" : "").'>50 per page</option>
+	</select>
+	<br />
+	<fieldset class="buttons">
+		<input type="submit" class="submit" value="Search" />
+	</fieldset>
+</fieldset>
+</form>
+	';
+	echo treelineBox($page_html, "Find newsletters", "blue");
+
+
+	$totalPerPage  = ($_REQUEST['sr']) ? $_REQUEST['sr'] : 10;
+
+	$select = "SELECT id, subject, text, IFNULL(send_date, 0) as send_date, IFNULL(done, 0) as done ";
+
+	if ($follow_up) {
+		
+		if ($site->id>1) {
+			$select = "SELECT IF(n2.msv,n2.id,n1.id) AS id,
+				IF(n2.msv,n2.subject,n1.subject) AS subject, 
+				IF(n2.msv,n2.text,n1.text) AS text,
+				IF(n2.msv,IFNULL(n2.send_date, 0),IFNULL(n1.send_date, 0)) AS send_date, 
+				IF(n2.msv,IFNULL(n2.done, 0),IFNULL(n1.done, 0)) AS done ";
+			$from = "FROM newsletter n1 
+				LEFT JOIN newsletter n2 ON n1.text3=n2.text3 AND n2.msv=".$site->id."
+				WHERE n1.`status`='S' 
+				AND n1.msv=1
+				AND (n1.subject LIKE '%".$db->escape($searchSubject)."%' OR n2.subject LIKE '%".$db->escape($searchSubject)."%')
+				";
+			$order = "subject ";
+		}
+		else {
+			$from = "FROM newsletter n1 
+				WHERE n1.`status`='S'
+				AND n1.msv=1 
+				";
+			$order = "n1.subject ";
+		}
+	}
+	else {
+		$from = "FROM newsletter 
+			WHERE status='N'
+			AND subject LIKE '%".$db->escape($searchSubject)."%'
+			AND msv=".$site->id." 
+			";
+		if ($action=="test" || $action=="send") $from.=" AND send_date IS NULL ";
+	}
+	
+	$hits = $db->get_var("SELECT count(*) ".$from);
+
+	// Fetch old newsletters
+	$limit = "LIMIT ".(($currentPage-1)*$totalPerPage).', '.$totalPerPage;
+
+	$query .= $select.$from."ORDER BY ".$order.$limit;
+	//echo $query;
+
+	if($newsletters = $db->get_results($query)) {
+	
+		if ($follow_up) {
+			?><p><a href="/treeline/access/?action=notify">Manage notification preferences</a></p><?php
+		}
+		
+		$no_link = '<span class="no-action"></span>';
+		
+		$idx = 0;
+		?>
+        <table class="tl_list">
+        <caption><?php echo ($hits . " result" . ($hits == 1 ? "" : "s") . " found "); ?></caption>
+        <thead>
+            <tr>
+            <th scope="col">Newsletter Subject</th>
+            <th scope="col">Date Sent</th>
+            <th scope="col">Progress</th>
+            <th scope="col">Manage newsletter</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+
+		do{
+			$n = $newsletters[$idx];
+
+			if($n->send_date){
+				$sendlink = $no_link;
+				$editlink = $no_link;
+				$dellink = $no_link;
+			}else{
+				$sendlink = '<a '.$help->drawInfoPopup("Sending options").' class="send" href="/treeline/newsletters/newssend/?id='.$n->id.'&amp;mode='.$action.'">Send</a>';
+				$editlink = '<a '.$help->drawInfoPopup("Edit newsletter").' class="edit" href="/treeline/newsletters/newsedit/?action=edit&amp;id='.$n->id.'">Edit</a>';
+				$dellink = '<a '.$help->drawInfoPopup("Delete newsletter").' class="delete" href="/treeline/newsletters/newsproc1.php?action=delete&amp;id='.$n->id.'">Delete</a>';
+			}
+			$reuselink = '<a '.$help->drawInfoPopup("Re-use as a template").' class="reuse" href="/treeline/newsletters/newsedit/?action=reuse&amp;id='.$n->id.'">Re-use</a>';
+			$previewlink = '<a '.$help->drawInfoPopup("Prevew as HTML").' class="preview thickbox" href="/newsletter/?id='.$n->id .'&amp;mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=600&amp;width=700" target="_blank">Preview</a>';
+
+			// Lots of things we cant do in follow up mode...
+			if ($news_status=="S") {
+				$dellink=$sendlink=$reuselink='';
+			}
+			
+			if($n->send_date){
+				$sendDate = htmlShortDate($n->send_date);
+			}else{
+				$sendDate = "n/a";
+				$strProgress = "not sent";
+			}
+
+			if($n->send_date){
+				$strSQL =
+					"SELECT count(*) " .
+					"FROM newsletter_outbox " .
+					"WHERE newsletter_id = " . $n->id;
+
+				$tot_mails = $db->get_var($strSQL);
+				
+				$strSQL =
+					"SELECT count(*) " .
+					"FROM newsletter_outbox " .
+					"WHERE newsletter_id = " . $n->id . " " .
+					"AND date_sent IS NOT NULL";
+
+				$sent_mails = $db->get_var($strSQL);
+
+				if(!$tot_mails) $strProgress = "N/A";
+				else $strProgress = ceil(($sent_mails / $tot_mails) * 100) . "% ($sent_mails/$tot_mails)";
+			}
+
+			?>
+			<tr>
+			  <td><?php echo smartTruncate($n->subject, 40); ?></td>
+			  <td><?php echo $sendDate; ?></td>
+			  <td><?php echo $strProgress; ?></td>
+              <td class="action">
+              	<?php 
+				if ($action=="send" || $action=="test") { 
+			  		echo $sendlink;
+				} else {
+				 	echo $previewlink; 
+				  	echo $editlink; 
+					echo $reuselink; 
+				  	echo $dellink; 
+                } 
+				?>
+                </td>
+			</tr>
+			<?php
+		}
+		while(++$idx < count($newsletters));
+		
+		unset($newsletters);
+		?>
+	    </tbody>
+    	</table>
+    	<?php
+    
+	    echo drawPagination($hits, $totalPerPage, $currentPage, "?status=".$news_status."&amp;action=".$action);
+	}
+	// No newsletters returned for this search
+	else {
+		?><p class="warn">No newsletters found</p><?php
+	}
+	?>
+    
+  	</div>
+</div>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>

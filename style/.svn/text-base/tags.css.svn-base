@@ -1,0 +1,86 @@
+/* 
+
+	ICHAMELEON WEBSITE CSS
+	
+	media: all
+	page: tags page
+	
+	written by: Phil Thompson phil.thompson@ichameleon.com February 2006
+	last edited: Phil Thompson 28/2/07 by Phil Thompson
+	
+
+*/
+
+ul#tagcloud{
+	
+}
+
+ul#tagcloud li{
+	display: inline;
+	line-height: 1.35;
+	margin: 0 2em 0 0;
+}
+
+ul#tagcloud li.importance-level-1{
+	font-size: 95%;
+}
+
+ul#tagcloud li.importance-level-2{
+	font-size: 105%;
+}
+
+ul#tagcloud li.importance-level-3{
+	font-size: 125%;
+}
+
+ul#tagcloud li.importance-level-4{
+	font-size: 125%;
+}
+
+ul#tagcloud li.importance-level-5{
+	font-size: 135%;
+}
+
+ul#tagcloud li.importance-level-6{
+	font-size: 145%;
+}
+
+ul#tagcloud li.importance-level-7{
+	font-size: 155%;
+}
+
+ul#tagcloud li.importance-level-8 {
+	font-size:165%;
+}
+
+ul#tagcloud li.importance-level-9 {
+	font-size:175%;
+}
+
+ul#tagcloud li.importance-level-10 {
+	font-size:185%;
+}
+
+ul#tagcloud li.importance-level-11 {
+	font-size:195%;
+}
+
+ul#tagcloud li.importance-level-12 {
+	font-size:205%;
+}
+
+ul#tagcloud li.importance-level-13 {
+	font-size:215%;
+}
+
+ul#tagcloud li.importance-level-14 {
+	font-size:225%;
+}
+
+ul#tagcloud li.importance-level-15 {
+	font-size:235%;
+}
+
+ul#tagcloud li.importance-level-16 {
+	font-size:245%;
+}

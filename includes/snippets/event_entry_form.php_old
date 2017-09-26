@@ -1,0 +1,252 @@
+<?php
+
+	$form_member_id=$_SESSION['user_logged_in'];
+	if ($form_mode=="PREVIEW") {
+		$form_member_id=$member_id;
+	}
+	
+	// Calculate required time left on passport based on the event end date?
+	$end_date=$event->end_year."-".$event->end_month."-".$event->end_day;
+	$query="select date_format('$end_date' + INTERVAL 6 MONTH, '%D %M %Y') from events where guid='".$event->id."'";
+	//print "$query<br>";
+	$min_expiry_date = $db->get_var($query);
+	
+	// populat the form data from the database...
+	$query="select m.title as mem_title, m.firstname as mem_forenames, m.surname as mem_surname, m.gender as mem_gender, 
+		ee.id as entry_id,
+		eed.forenames, eed.surname, eed.prefname, eed.address, eed.day_tel, eed.eve_tel, eed.nationality, 
+		eed.pass_number, eed.pass_country, eed.pass_dob, eed.pass_pob, eed.pass_issue, eed.pass_expiry,
+		eed.specreq, eed.vegan, eed.vegetarian, eed.height, eed.ladies, eed.topsize,
+		eed.accom, eed.frnd_name, eed.frnd_email, eed.frnd_add, 
+		eed.cb_terms,
+		eed.cb_agree, eed.cb_spons, eed.cb_health, eed.cb_fotos, eed.cb_money,
+		sab.house as sab_house, sab.street as sab_street, sab.address_2 as sab_address_2, 
+		sab.locality as sab_locality, sab.town_city as sab_town_city, sab.county as sab_county, 
+		sab.post_code as sab_post_code, 
+		sc.title as sab_country
+		FROM events e
+		LEFT JOIN event_entry ee ON e.guid=ee.event_guid
+		LEFT JOIN event_entry_data eed on ee.id=eed.entry_id
+		LEFT JOIN members m ON ee.member_id=m.member_id
+		LEFT JOIN store_address_book sab on m.member_id=sab.member_id
+		LEFT JOIN store_countries sc ON sab.country_id=sc.country_id
+		WHERE e.guid='".$event->id."' 
+		".(($form_member_id>0)?"AND ee.member_id=".$form_member_id:"AND ee.id=3")."
+		LIMIT 1";
+	print "<!-- $query -- \n";	
+	if ($row=$db->get_row($query)) {
+		$ef_entry_id=$row->entry_id;
+		if (!$ef_title) $ef_title=$row->mem_title;
+		if (!$ef_forenames) $ef_forenames=$row->forenames;
+		if (!$ef_forenames) $ef_forenames=$row->mem_forenames;
+		if (!$ef_surname) $ef_surname=$row->surname;
+		if (!$ef_surname) $ef_surname=$row->mem_surname;
+		if (!$ef_prefnmae) $ef_prefname=$row->prefname;
+		if (!$ef_prefname) $ef_prefname=$ef_forenames." ".$ef_surname;
+		if (!$ef_address) $ef_address=$row->address;
+		if (!$ef_address) {
+			if ($row->sab_house) $ef_address=$row->sab_house;
+			if ($row->sab_street) $ef_address.=" ".$row->sab_street;
+			if ($row->sab_address_2) $ef_address.="\n".$row->sab_address_2;
+			if ($row->sab_locality) $ef_address.="\n".$row->sab_locality;
+			if ($row->sab_town_city) $ef_address.="\n".$row->sab_town_city;
+			if ($row->sab_county) $ef_address.="\n".$row->sab_county;
+			if ($row->sab_post_code) $ef_address.="\n".$row->sab_post_code;
+			if ($row->sab_country) $ef_address.="\n".$row->sab_country; // Should get the real contry here....
+		}
+		if (!$ef_day_tel) $ef_day_tel=$row->day_tel;
+		if (!$ef_eve_tel) $ef_eve_tel=$row->eve_tel;
+		if (!$ef_nationality) $ef_nationality=$row->nationality;
+		if (!$ef_sex) $ef_sex=$row->mem_gender;
+		
+		if (!$pass_number) $ef_pass_number=$row->pass_number;
+		if (!$pass_country) $ef_pass_country=$row->pass_country;
+		if (!$pass_dob) $ef_pass_dob=$row->pass_dob;
+		if (!$pass_pob) $ef_pass_pob=$row->pass_pob;
+		if (!$pass_issue) $ef_pass_issue=$row->pass_issue;
+		if (!$ef_pass_expiry) $ef_pass_expiry=$row->pass_expiry;
+
+		if (!$ef_specreq) $ef_specreq=$row->specreq;
+		if (!$ef_vegan) $ef_vegan=$row->vegan;
+		if (!$ef_vegetarian) $ef_vegetarian=$row->vegetarian;
+		if (!$ef_height) $ef_height=$row->height;
+		if (!$ef_ladies) $ef_ladies=$row->ladies;
+		if (!$ef_topsize) $ef_topsize=$row->topsize;
+		
+		if (!$ef_accom) $ef_accom=$row->accom;
+		if (!$ef_frnd_name) $ef_frnd_name=$row->frnd_name;
+		if (!$ef_frnd_email) $ef_frnd_email=$row->frnd_email;
+		if (!$ef_frnd_add) $ef_frnd_add=$row->frnd_add;
+		if (!$ef_cb_agree) $ef_cb_agree=$row->cb_agree;
+		if (!$ef_cb_spons) $ef_cb_spons=$row->cb_spons;
+		if (!$ef_cb_health) $ef_cb_health=$row->cb_health;
+		if (!$ef_cb_fotos) $ef_cb_fotos=$row->cb_fotos;
+		if (!$ef_cb_money) $ef_cb_money=$row->cb_money;
+		
+		$cb_terms=explode(",", $row->cb_terms);
+		
+		//if (!$) $ef_=$row->;
+		//if (!$) $ef_=$row->;
+		//if (!$) $ef_=$row->;
+		//if (!$) $ef_=$row->;
+		//if (!$) $ef_=$row->;
+
+		$evt_config=$db->get_row("select * from event_config where guid='".$event->id."'");
+		
+		if ($results=$db->get_results("select id, description from event_config_tnc where guid='".$event->id."' order by sort_order, id")) {
+			$cb_terms_required='';
+			foreach($results as $result) {
+				$thiscond="ef_cb_".$result->id;
+				$cb_terms_required.=$result->id.",";
+				if (!$$thiscond) $$thiscond=in_array($result->id, $cb_terms)?1:0;
+				//print "check condition(ef_cb_".$result->id.")=".$$thiscond."<br>";
+				$conditionsList.='<p><input type="checkbox" class="checkbox" name="cb_tnc'.$result->id.'" value="'.$result->id.'" '.(($$thiscond==1)?"checked":"").' /> '.$result->description.'</p>';
+			}
+			$conditionsList.='<input type="hidden" name="cb_terms_required" value="'.$cb_terms_required.'" />';
+		}
+	}
+?>
+
+
+<?php if ($event->id) { ?>
+
+<fieldset class="event_form">
+    <legend>Personal details</legend>
+    <table border="0" class="event_table" cellpadding="0" cellspacing="0">
+    <tr>
+    <td><label for="ef_title" class="inline">Title</label> <input id="ef_title" type="text" class="text" name="title" value="<?=$ef_title?>" /></td>
+    <td><label for="ef_forenames" class="inline">Forenames</label> <input id="ef_forenames" type="text" class="text" name="forenames" value="<?=$ef_forenames?>" /></td>
+    </tr><tr>
+    <td><label for="ef_surname" class="inline">Surname</label> <input id="ef_surname" type="text" class="text" name="surname" value="<?=$ef_surname?>" /></td>
+    <td><label for="ef_prefname" class="inline">Preferred name</label> <input id="ef_prefname" type="text" class="text" name="prefname" value="<?=$ef_prefname?>" /></td>
+    </tr><tr>
+    <td valign="top"><label for="ef_add1">Address</label><textarea id="ef_add1" class="text" name="address"><?=$ef_address?></textarea></td>
+    <td valign="top"><label for="ef_hearabout">Where did you hear about <?=$event->title?></label><input id="ef_hearabout" type="text" class="text" name="hearabout" value="<?=$ef_hearabout?>" /></td>
+    </tr><tr>
+    <td><label for="ef_tel_day">Daytime phone #</label><input id="ef_tel_day" type="text" class="text" name="day_tel" value="<?=$ef_day_tel?>" /></td>
+    <td><label for="ef_tel_eve">Evening phone #</label><input id="ef_tel_eve" type="text" class="text" name="eve_tel" value="<?=$ef_eve_tel?>" /></td>
+    </tr><tr>
+    <td><label for="ef_nationality">Nationality</label><input id="ef_nationality" type="text" class="text" name="nationality" value="<?=$ef_nationality?>" /></td>
+    <td valign="top">
+    <label for="ef_dummy_01">Sex</label>
+    <label for="ef_sex_m" class="sex">Male</label>
+    <input id="ef_sex_m" class="radio" type="radio" <?=(($ef_sex=="M")?"checked":"")?> name="sex" value="M"  />
+    <label for="ef_sex_f" class="sex">Female</label>
+    <input id="ef_sex_f" class="radio" type="radio" <?=(($ef_sex=="F")?"checked":"")?> name="sex" value="F" />
+    </td>
+	</tr>
+    </table>
+    <?php if ($evt_config->chk_passport) { ?>
+		<p style="width:608px;">(<i><strong>Names must be written exactly as they appear on your passport</strong></i>)</p>
+	<?php } ?>
+</fieldset>
+
+
+<?php if ($evt_config->chk_passport) { ?>
+    <fieldset class="event_form">
+        <legend>Passport details</legend>
+        <table border="0" class="event_table" cellpadding="0" cellspacing="0">
+        <tr>
+        <td><label for="ef_pass_number">Number</label> <input id="ef_pass_number" type="text" class="text" name="pass_number" value="<?=$ef_pass_number?>" /></td>
+        <td><label for="ef_pass_country">Country of issue</label> <input id="ef_pass_country" type="text" class="text" name="pass_country" value="<?=$ef_pass_country?>" /></td>
+        </tr><tr>
+        <td><label for="ef_pass_dob">Date of birth</label> <input id="ef_pass_dob" type="text" class="text" name="pass_dob" value="<?=$ef_pass_dob?>" /></td>
+        <td><label for="ef_pass_pob">Place of birth</label> <input id="ef_pass_pob" type="text" class="text" name="pass_pob" value="<?=$ef_pass_pob?>" /></td>
+        </tr><tr>
+        <td><label for="ef_pass_issue">Issue date</label> <input id="ef_pass_issue" type="text" class="text" name="pass_issue" value="<?=$ef_pass_issue?>" /></td>
+        <td><label for="ef_pass_expiry">Expiry date</label> <input id="ef_pass_expiry" type="text" class="text" name="pass_expiry" value="<?=$ef_pass_expiry?>" /></td>
+        </tr>
+        </table>
+        <p style="padding-top:10px;"><strong><i><?=$evt_config->passport?></i></strong></p>
+    </fieldset>
+<?php } ?>
+
+<?php if ($evt_config->chk_special) { ?>
+    <fieldset class="event_form">
+        <legend>Special requirements</legend>
+        <table border="0" class="event_table" cellpadding="0" cellspacing="0">
+        <tr>
+        <td><label for="ef_specreq">Do you have any special dietary requirements/food allergies?</label> <textarea id="ef_specreq" class="text" name="specreq"><?=$ef_specreq?></textarea></td>
+        <td>
+            <p style="width:200px;"><input type="checkbox" id="ef_vegan" class="checkbox_left" <?=(($ef_vegan==1)?"checked":"")?> value="1" name="vegan" /> <label for="ef_vegan">Vegan</label></p>
+            <p style="width:200px;"><input type="checkbox" id="ef_vegetarian" class="checkbox_left" <?=(($ef_vegetarian==1)?"checked":"")?> value="1" name="vegetarian" /> <label for="ef_vegetarian">Vegetarian</label></p>
+        </td>
+        </tr>
+        </table>
+        <p style="padding-top:10px;"><strong><i>*Those with special dietary requirements should bring supplementary food.</i></strong></p>
+    </fieldset>
+<?php } ?>
+
+
+<?php if ($evt_config->chk_bikes) { ?>
+    <fieldset class="event_form">
+        <legend>Bikes</legend>
+        <table border="0" class="event_table" cellpadding="0" cellspacing="0">
+        <tr>
+        <td><label for="ef_height">Height (metres)</label> <input id="ef_height" type="text" class="text" name="height" value="<?=$ef_height?>" /></td>
+        <td><label for="ef_ladies">Ladies frame</label> <input type="checkbox" id="ef_ladies" class="checkbox_left" name="ladies" <?=(($ef_ladies==1)?"checked":"")?> value="1" /></td>
+        </tr>
+        <tr>
+        <td>
+            <label for="ef_">Cycling top size</label>
+            <select name="topsize">
+                <option value="">Select</option>
+                <option value="S"<?=(($ef_topsize=="S")?" selected":"")?>>Small</option>
+                <option value="M"<?=(($ef_topsize=="M")?" selected":"")?>>Medium</option>
+                <option value="L"<?=(($ef_topsize=="L")?" selected":"")?>>Large</option>
+                <option value="XL"<?=(($ef_topsize=="XL")?" selected":"")?>>Extra Large</option>
+            </select>
+        </td>
+        <td></td>
+        </tr>
+        </table>
+        <p style="padding-top:10px;">(<i>Bikes with a ladies frame can be requested but are not guaranteed</i>)</p>
+    </fieldset>
+<?php } ?>
+
+<?php if ($evt_config->chk_accommodation) { ?>
+    <fieldset class="event_form">
+        <legend>Accommodation</legend>
+        <p style="padding-top:10px;">If there is anyone you would like to share with please write their full name here (otherwise participants will be allocated rooms on same sex sharing basis - rooms will be twins / triples / quads). <i>We will try to accommodate your request, however it cannot be guaranteed.</i></p>
+        <table border="0" class="event_table" cellpadding="0" cellspacing="0">
+        <tr>
+        <td colspan="2"><textarea id="ef_accom" class="text_accom" name="accom"><?=$ef_accom?></textarea></td>
+        </tr>
+        </table>
+    </fieldset>
+<?php } ?>
+
+
+<?php if ($evt_config->chk_friends) { ?>
+<fieldset class="event_form">
+    <legend>Friends</legend>
+	<p>Would you like us to send details of the <?=$event->title?> to a friend?</p>
+    <table border="0" class="event_table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td><label for="ef_frnd_name">Name</label> <input id="ef_frnd_name" type="text" class="text" name="frnd_name" value="<?=$ef_frnd_name?>" /></td>
+        <td rowspan="2"><label for="ef_frnd_add">Address</label> <textarea id="ef_frnd_add" class="text" name="frnd_add"><?=$ef_frnd_add?></textarea></td>
+	</tr>
+    <tr>
+        <td><label for="ef_frnd_email">Email</label> <input id="ef_frnd_email" type="text" class="text" name="frnd_email" value="<?=$ef_frnd_email?>" /></td>
+    </tr>
+    </table>
+</fieldset>
+<?php } ?>
+
+
+<fieldset class="event_form">
+<legend>DECLARATION (all options must be checked)</legend>
+<?=$conditionsList?>
+<input type="hidden" name="entry_id" value="<?=$ef_entry_id?>" />
+<?php if ($_SESSION['user_logged_in']) { ?>
+	<input type="hidden" name="action" value="process_entry_form" />
+	<input type="submit" class="submit" name="treeline" value="Submit entry" />
+<?php } ?>
+</fieldset>
+
+<p><input type="checkbox" class="checkbox" name="no_news" value="1" <?=(($ef_no_news==1)?"checked":"")?> /> We would like to keep you informed of future events and <?=$site->name?> news. If you prefer not to be contacted please tick here.</p>
+
+
+<?php } else { ?>
+<p>Please select an event</p>
+<?php } ?>

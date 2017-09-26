@@ -1,0 +1,196 @@
+/*********************** start styles *****************************/
+
+body {
+	background-color: #ebebeb;
+}
+
+div#header {
+	background: #EDF1F1 url('/treeline/img/linkpicker/bk-pop_top.gif') repeat-x;
+	background: none;
+	border-bottom: 1px solid #B6B6B6;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+	h1 {
+		color: #6C6996;
+	}
+	#header h1 {
+		background: url('/treeline/img/icons/treeline-icon.gif') no-repeat top left;
+		padding: 4px 0 14px 50px;
+		margin: 0;
+	}
+
+.noshow {
+	display: none;
+	visibility: hidden;
+}
+
+
+ul#main-menu {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+	ul#main-menu li {
+		margin: 0;
+		padding: 0 0 8px;
+	}
+		ul#main-menu li.title {
+			margin-top: 20px;
+		}
+		ul#main-menu li.first {
+			margin-top: 0;
+		}
+		ul#main-menu li h1 {
+			margin: 0;
+			padding: 0;
+		}
+		ul#main-menu li a {
+			background: url('/treeline/img/layout/arrow-li-lp.png') no-repeat 0 2px;
+			padding: 0 0 0 12px;
+		}
+
+	ul#main-menu li form {
+		background: url('/treeline/img/layout/arrow-li-lp.png') no-repeat 0 5px;
+		padding: 0 0 0 8px;
+	}
+		ul#main-menu li form input.submit {
+			border: 0; 
+			background: none;
+			padding: 0;
+			font-size: 13px;
+			color: #0067CB;
+		}
+
+#formwrap {
+}
+
+/***************** internal link specific ***********************/
+
+#intsection {
+}
+
+div#contentpane fieldset#intpages {
+	border: 1px solid #006;
+	padding-bottom: 0;
+	width: 600px;
+}
+	div#contentpane fieldset#intpages div#intpagelist {
+		overflow: scroll;
+		height: 330px;
+		width: 600px;
+	}
+		div#contentpane fieldset#intpages div#intpagelist span {
+			width: 580px;
+		}
+
+	div#contentpane fieldset#intpages table {
+		padding-right: 20px;
+		width: 585px;
+	}
+		div#contentpane fieldset#intpages table th {
+			font-size: 95%;
+			font-weight: bold;
+			color: #666;
+			text-align:left;
+			padding: 2px 0 2px 4px;
+		}
+			div#contentpane fieldset#intpages table th.pagename {
+				width: 400px;
+			}
+			div#contentpane fieldset#intpages table th.pagestatus {
+				width: 80px;
+			}
+
+span.pagestatus, span.pagevisibility {
+	color: #999;
+}
+
+
+div#contentpane fieldset#intpagelist {
+	padding-right: 20px;
+	width: 605px;
+	border: 1px solid #666;
+	border-width: 1px 0 0 0;
+	overflow: scroll;
+	margin: 0 auto;
+	padding: 0;
+}
+	div#contentpane fieldset#intpages div#intpagelist span {
+	}
+		div#contentpane fieldset#intpages div#intpagelist span span {
+			width: auto;
+			padding: 0 0 0 4px;
+		}
+			div#contentpane fieldset#intpages div#intpagelist span span.pagename {
+				width: 400px;
+			}
+			div#contentpane fieldset#intpages div#intpagelist span span.pagestatus {
+				width: 80px;
+			}
+
+
+
+#intpagelist span {
+	float: left;
+	width: 100%;
+}
+
+
+#intpagelist .row {
+	line-height:  2em;
+	display: block;
+	float: left;
+	text-align: left;
+	border-top: 1px solid #efefef;
+}
+
+#intpagelist .pale {
+	background: #fff;
+	border-bottom: thin solid #dedede;
+}
+
+#intpagelist .dark {
+	background: #EFefF3;
+	border-bottom: 1px solid #ccc;
+}
+
+#intpagelist .row: hover {
+	background: #ccc;
+	border-top: 1px solid #333;
+	border-bottom: 1px solid #333;
+}
+
+#intpagelist .on {
+	background: #EFCEDD;
+	border-top: 1px solid  #F1CFD2;
+	border-bottom: 1px solid #D16D9A;
+}
+
+#intpagelist .on: hover {
+	background: #333;
+	color: #fff;
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+
+
+/********************** email link specific **********************/
+
+.element_info {
+	font-size: 95%;
+	margin-left: 0.5em;
+}
+
+
+
+#intsection_btn, #intsection_btn_1 {
+	float: none;
+	font-weight: bold;
+	height: 18px;
+	font-size: 95%;
+	text-align: center;
+}
+
+/********************************************* end styles ***************************************************/

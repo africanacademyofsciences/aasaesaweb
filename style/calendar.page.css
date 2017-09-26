@@ -1,0 +1,109 @@
+/* CSS Document */
+
+
+
+ul.nav {
+}
+ul.nav li.nav-prev {
+	text-align: left
+}
+ul.nav li.nav-next {
+	text-align: right
+}
+ul.nav span.nav-item {
+	padding: 10px 15px;
+	text-align: center;
+	display: block;
+}
+
+
+/* 
+
+	
+*/
+
+
+div.calendar {
+	margin-bottom: 50px;
+}
+	div.calendar div.day {
+		float: left;
+		height: 150px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: #EBEBEB #B0B0B0 #B0B0B0 #EBEBEB;
+		padding-bottom: 8px;
+	}
+	div.calendar div.day-inner {
+		overflow: hidden;
+		float: left;
+		height: 142px;
+	}
+		div.calendar div.day p {
+			clear: left;
+			float: left;
+			padding: 5px;
+			color: #4D4D4D;
+		}
+			div.calendar div.day p.nday {
+				margin-bottom: 5px;
+				width :100%;
+			}
+				div.calendar div.day p.nday span {
+					display: block;
+					float: left;
+				}
+				div.calendar div.day p.nday span.day {
+				}
+				div.calendar div.day p.nday span.count {
+					font-size: 12px;
+					padding: 0px 0 0 8px;
+					text-align: right;
+					float: right;
+				}
+			div.calendar div.day p.image {
+				line-height: 100%;
+			}
+			div.calendar div.day p.title {
+				line-height: 100%;
+				padding: 0 0 4px 0;
+				margin: 0;
+			}
+
+	div.calendar div.early,
+	div.calendar div.late {
+		background-image: none;
+		background-color: #eee;
+		
+	}
+		div.calendar div.early p,
+		div.calendar div.late p {
+			color: #ccc;
+		}
+		
+	div.calendar div.wend {
+		float: left;
+		height: 150px;
+		padding: 0px;
+	}
+		div.calendar div.wend div.day {
+			float: left;
+			clear: left;
+			height: 75px;
+		}
+		div.calendar div.wend div.day-inner {
+			height: 67px;
+		}
+			div.calendar div.wend div.day p {
+				font-size: 90%;
+			}
+				div.calendar div.wend div.day p.title {
+					padding-bottom: 4px;
+				}
+		div.calendar div.wend div.Saturday {
+			border-bottom: 1px solid #000;
+		}
+		
+div#tags {
+	display: none;
+}		

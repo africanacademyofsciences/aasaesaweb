@@ -1,0 +1,17 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+div#media-tester {
+	clear: both;
+	display: block;
+	/*
+	display: none;
+	*/
+}
+	div#media-tester p {
+		margin:0;
+		padding: 2px 10px;
+		border: 1px solid #000;
+		display: none;
+	}

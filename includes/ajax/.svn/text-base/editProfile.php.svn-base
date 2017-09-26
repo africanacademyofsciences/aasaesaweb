@@ -1,0 +1,103 @@
+<?php
+
+//ini_set("display_errors", true);
+//error_reporting(E_ALL);
+
+$feedback = 'error';
+$message = array();
+
+$maxw = 680;
+
+$image = new Image;
+$access_id = $memberDetails->access_id;
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	// check for data
+		
+	if ($memberDetails->access_id>0) {
+		$dest = "mem-".$access_id;
+		$destination = $_SERVER['DOCUMENT_ROOT']."/silo/upload/members/".$dest;
+			//print "save to($destination)<br>\n";
+		$category = 2;
+		$title = 'Member - ';
+		$description =  'Photograph of ';
+		
+		$upload = read($_FILES,'image', NULL);
+		if ($upload['tmp_name']) {
+			$err = $image->uploadFromDesktop($upload, $destination, $maxw, "190x0");
+			//print_r($message);
+			//print "e($err) d($destination)<br>\n";
+			if (substr($err,0,strlen($destination))==$destination) {
+				$feedback = 'success';
+				$message[] = 'You have updated your image. You may need to clear your browsers cache before your new image will display.';
+			}
+			else $message[]=$err;
+		}
+		
+		// Update their profile text and their blog comment status
+		$query = "UPDATE member_profile 
+			SET 
+			blog_title = '".$db->escape($_POST['blogtitle'])."',
+			blog_comments = ".($_POST['blogcomments']+0).", 
+			profile_text='".$db->escape(censor($_POST['profile']))."' 
+			WHERE id=".$memberDetails->profile_id;
+		//print "$query<br>\n";
+		$db->query($query);
+		if ($db->last_error) {
+			//print "$query<br>\n";
+			print $db->last_error;
+			$message[]="Failed to update your profile data";
+		}
+		
+		//$message[] = print_r($memberDetails, true);
+	}
+	else $message[] = "Failed to located your access ID";
+	
+	if (!count($message)) {
+		$feedback="success";
+		$message[]="Your profile has been updated";
+	}
+	
+	// Reload the memberDetails object
+	$memberDetails = $member->getById($member_id, "all"); // get details of member
+}
+
+echo drawFeedback($feedback, $message);
+
+?>
+
+<form id="updatePassword" action="" method="post" enctype="multipart/form-data" class="contact">
+<fieldset class="border">
+	<fieldset>
+    	<legend>Add an image</legend>
+        <p class="instructions">Photos must not be bigger than <?=$maxw?> pixels wide.</p>
+        <label for="image">New photo:</label>
+        <input type="file" name="image" id="image" />
+	</fieldset>
+	<fieldset>
+    	<label for="f_desc">Profile</label>
+        <textarea name="profile"><?=$memberDetails->profile?></textarea>
+    </fieldset>        
+    <?php
+	if ($memberDetails->bloggable) { 
+		?>
+        <fieldset>
+            <label for="f_blogtitle">My blog title</label>
+            <input type="text" id="f_blogtitle" name="blogtitle" value="<?=$memberDetails->blogtitle?>" />
+        </fieldset>        
+        <fieldset>
+            <label for="f_desc">Allow comments</label>
+            <input type="checkbox" name="blogcomments" <?=($memberDetails->blogcomments?'checked="checked"':"")?> value="1" />
+        </fieldset>        
+    	<?php
+	}
+	?>
+    <fieldset>
+    	<label for="f_submit" style="visibility:hidden;">Submit</label>
+        <input type="submit" class="submit" value="Save" />
+    </fieldset>
+</form>
+
+<p>Here is your current photo: <br />
+    <img src="<?=$member->getMemberImage($access_id)?>" alt="" />
+</p>

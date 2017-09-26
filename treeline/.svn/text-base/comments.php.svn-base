@@ -1,0 +1,188 @@
+<?
+
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.init.php");
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/comment.class.php");
+
+	if (!$site->getConfig("setup_comments")) redirect("/treeline/");
+	
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/newsletter.class.php");
+	include ($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+	include ($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+
+	$action = read($_REQUEST,'action','list');
+	$guid = read($_REQUEST,'guid','');
+		
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+
+	$title = read($_POST,'title','');
+
+	if ($_SERVER['REQUEST_METHOD'] == "POST") {
+
+		if ($action=="reject") {
+			$feedback="error";
+			$comment_id=$_POST['id'];
+			if ($comment_id) {
+				if ($db->query("UPDATE pages_comments set status='X' where id=$comment_id")) {
+					$feedback='success';
+					$message[]='That comment has been rejected';
+
+					// Update this page in the history table also
+					$query = "UPDATE history 
+						SET completed_action='COMMENT-REJECTED', completed_date=now(), completed_by=".$user->id." 
+						WHERE action='publish' 
+						AND completed_action is null
+						AND info = 'Comment ".$comment_id." saved'";
+					//print "$query<br>\n";
+					$db->query($query);
+				}
+				else $message[]="Failed to reject that comment";
+			}
+			else $message[]="No comment ID passed, cannot reject";
+			$action="list";
+		}
+	}
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+	
+		//// ADD a new language to this site...
+		if ($action == 'approve') {
+			$feedback="error";
+			$comment_id = $_GET['id'];
+			if ($comment_id>0) {
+				$db->query("UPDATE pages_comments set status='A' where id=".$comment_id);
+				$feedback='success';
+				$message[]='That comment has been published';
+
+				// Update this page in the history table also
+				$query = "UPDATE history 
+					SET completed_action='PUBLISHED', completed_date=now(), completed_by=".$user->id." 
+					WHERE action='publish' 
+					AND completed_action is null
+					AND info = 'Comment ".$comment_id." saved'";
+				//print "$query<br>\n";
+				$db->query($query);
+			}
+			else $message[]="No comment ID passed, cannot publish";
+			$action="list";
+		}
+	}
+
+
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = '
+
+	
+';
+
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Comments : '.ucwords(str_replace("-", " ", $action)) : 'Comments';
+	$pageTitle =  $pageTitleH2;
+	$pageClass = 'publish-content';
+
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');
+
+
+
+
+?>
+
+
+<div id="primarycontent">
+<div id="primary_inner">
+<?php
+
+echo drawFeedback($feedback,$message);
+
+
+if ($action=="list") { 
+	?>
+    <h2 class="pagetitle rounded">Manage comments</h2>
+    <?php 
+	$query="SELECT pc.id, pc.name, pc.comment, date_format(pc.date_created, '%D %M %Y') as date_created, 
+			datediff(now(), pc.date_created) as age, pc.guid
+			FROM pages_comments pc 
+			LEFT JOIN pages p ON pc.guid=p.guid
+			WHERE pc.status='N'
+			AND p.msv=".$site->id."
+			ORDER BY pc.date_created ASC";
+	//print "$query<br>";
+	if ($results=$db->get_results($query)) {
+		foreach($results as $result) {
+			$html .= '<tr>
+<td nowrap valign="top">'.$result->name.'</td>
+<td valign="top">'.comment_summary($result->comment).'</td>
+<td valign="top">'.($result->age>3?$result->age.' days ago':($result->age==0?"today":$result->date_created)).'</td>
+<td valign="top" class="action">
+	<a class="preview thickbox" href="'. $page->drawLinkByGUID($result->guid) .'?mode=preview&amp;showcomments=1&amp;commentid='.$result->id.'&amp;KeepThis=true&amp;TB_iframe=true&amp;height=520&amp;width=1000" title="Preview this page">Preview this page</a>
+	<a class="publish" href="/treeline/comments/?action=approve&id='.$result->id.'" title="Publish comment">Approve comment</a>
+	<a class="reject" href="/treeline/comments/?action=reject&id='.$result->id.'" title="Reject comment">Reject comment</a>
+</td>
+</tr>
+';
+		}
+	}
+	else $html='<td colspan="5">There are no comments needing approval.</td>';
+	
+	$html='
+<p>The following is a list of comments that currently require approval by a '.$site->name.' publisher.</p>
+<table class="tl_list">
+<thead>
+	<tr>
+		<th scope="col">Author</th>
+		<th scope="col">Comment</th>
+		<th scope="col">Created</th>
+		<th scope="col">Manage comment</th>
+   </tr>
+</thead>
+<tbody>
+	'.$html.'
+</tbody>
+</table>
+	';
+	echo treelineBox($html, "Updated comments list", "blue");
+} 
+
+if ($action=="view") { ?>
+
+	<p>Display comment in edit mode with a publish button rather than a save button and redirect here</p>
+    
+<? }
+
+else if ($action=="reject") {
+	?>
+	<h2 class="pagetitle rounded">Reject comment</h2>
+    <?php
+	$page_html='
+
+	<p>You are about to reject <strong>'.$db->get_var("select name from pages_comments where id=".($_GET['id']+0)).'\'s</strong> comment</p>
+	<p><strong><em>Are you sure?</em></strong></p>
+	
+	<form id="treeline" action="'.$_SERVER['PHP_SELF'].($DEBUG?'?debug':"").'" method="post">
+	<input type="hidden" name="action" value="reject" />
+	<input type="hidden" name="id" value="'.$_GET['id'].'" />
+	<fieldset>
+		<fieldset class="buttons">
+			<label for="submit" style="visibility:hidden">Submit:</label>
+			<input type="submit" class="submit" value="Reject" />
+		</fieldset>
+	</fieldset>
+	</form>
+	';
+	echo treelineBox($page_html, "Please confirm comment rejection", "blue");
+	
+}
+
+?>
+</div>
+</div>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>
+
+
+<?php
+
+function comment_summary($s) {
+	return $s;
+}
+
+?>

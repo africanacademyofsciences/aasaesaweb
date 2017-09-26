@@ -1,0 +1,85 @@
+/* 
+
+	CSS for calendar.class.php
+	
+*/
+
+
+ul#calendar-header {
+	width: 223px;
+	margin:0;
+	padding:0;
+}
+	ul#calendar-header li {
+		float:left;
+		margin: 0;
+		width: 40px;
+		height: 25px;
+	}
+	ul#calendar-header li.header-link-left {
+		text-align:left;
+		padding: 5px 0 0 10px;		
+	}
+	ul#calendar-header li.header-link-right {
+		text-align:right;
+		padding:5px 10px 0 0;
+	}
+	ul#calendar-header li.header-month {
+		width: 123px;
+		text-align:center;
+		font-size:100%;
+		font-weight: bold;
+		padding: 4px 0 0;
+		height: 26px;
+	}
+	
+table#calendar {
+	float: left; 
+	width: 200px;
+	margin:0 20px 0 0;
+	border: none;
+	margin-bottom: 10px;
+
+}
+	table#calendar td {
+		border: 1px solid #fff;
+		border-left-width: 0px;
+		border-bottom-width: 0px;
+		text-align: center;
+		color: #333;
+	}
+		table#calendar td.header-cell {
+			border-right: 0px;
+		}
+		table#calendar td.w0 {
+			border-right-width: 0px;
+		}
+		div#row3 div.col table#calendar td p {
+			padding: 8px;
+			line-height: 125%;
+		}
+			table#calendar td p.today {
+				border: 1px solid #666;
+			}
+		table#calendar td a {
+			font-weight: bold;
+			/* color: #0080C0; */
+		}
+		
+
+table#calendar-header-table {
+	width: 100%;
+	margin:0;
+}
+	table#calendar-header-table td {
+		border: 0;
+		padding: 8px 4px 3px;
+	}
+		table#calendar-header-table td a {
+			font-weight: normal;
+		}
+	table#calendar-header-table td.header-month {	
+		font-weight: bold;
+		text-align:center;
+		font-size:100%;
+	}

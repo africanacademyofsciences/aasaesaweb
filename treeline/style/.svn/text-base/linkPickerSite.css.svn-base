@@ -1,0 +1,30 @@
+/*********************** start styles *****************************/
+
+#header {
+}
+
+#header h1 {
+}
+
+
+/*********************** ERROR PANE *****************************/
+
+#error_list {
+}
+
+
+/*********************** CONTENT *****************************/
+
+#formwrap {
+	text-align: left;
+}
+#contentpane form #extlinkwrap  {
+	margin: 0;
+}
+#contentpane form #linkwindow {
+	text-align: left;
+}
+div#footerlinks {
+	margin: 0;
+	width: 250px;
+}

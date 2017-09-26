@@ -1,0 +1,98 @@
+<?php 
+
+/*
+	TREELINE NAVIGATION MENUU
+*/
+if(!$noMenu && $user) {  // only show mneu onn pages where users are logged in.
+?>
+<ul id="menu" class="column">
+
+<li id="home-link"><a href="/treeline/" accesskey="1">Home</a></li>
+
+<?php if ($tasks->total>0) { ?>
+<li id="tasks-link"><a href="/treeline/tasks/" accesskey="1">My tasks(<?=$tasks->total?>)</a></li>
+<?php } ?>
+  
+<li id="create-content-link"><a href="/treeline/?section=create-content">Create content</a></li>
+<li id="edit-content-link"><a href="/treeline/?section=edit-content">Manage existing content</a></li><li id="edit-assets-link"><a href="/treeline/?section=edit-assets">Manage asset libraries</a></li>
+<?php if ($_SESSION['treeline_user_group']!="Author") { ?>
+<li id="edit-structure-link"><a href="/treeline/?section=edit-structure">Manage site structure</a></li>
+<?php } ?>
+	<li><br /></li>
+
+<?php 
+if($_SESSION['treeline_user_group']!='Author' && $site->getConfig("setup_newsletters")){  
+	?>
+	<li id="newsletters-link"><a href="/treeline/newsletters/">Newsletters</a></li>
+	<?php
+} 
+    
+
+if($site->getConfig("setup_members_area") && $_SESSION['treeline_user_group']!="Author"){ 
+	?><li id="members-link"><a href="/treeline/members/">Members</a></li><?php 
+} 
+
+if($site->getConfig("setup_events") && $_SESSION['treeline_user_group']!="Author"){ 
+	?><li id="events-link"><a href="/treeline/events/">Manage Events</a></li><?php 
+} 
+	
+if ($site->config['setup_worldmap']) { 
+	?><li id="map-link"><a href="/treeline/map/">Worldmap</a></li><?php 
+}
+
+if ($site->id==1 && $site->getConfig('setup_store')) { 
+	?>
+    <li id="store_inventory-link"><a href="/treeline/store/inventory.php">Store - Inventory</a></li>
+	<?php 
+	if ($_SESSION['treeline_user_group']!="Author") { 
+		?>
+        <li id="store_order-link"><a href="/treeline/store/orders.php">Store - Orders</a></li>
+        <li id="store_config-link"><a href="/treeline/store/config.php">Store - Configuration</a></li>
+        <?php 
+	}
+	?>
+    <li><br /></li>
+	<?php 
+} 
+
+if ($site->config['setup_forum'] && $_SESSION['treeline_user_group']!="Author") { 
+	?><li id="forums-link"><a href="/treeline/forums/">Manage Forums</a> </li><?php 
+} 
+
+if ($site->config['setup_blogs'] && $_SESSION['treeline_user_group']!="Author") { 
+	?><li id="blogs-link"><a href="/treeline/blogs/">Manage Blogs</a></li><?php
+} 
+
+if($_SESSION['treeline_user_group']=='Superuser' && $site->id==1 && $site->getConfig("setup_microsites")){  
+	?><li id="microsite-link"><a href="/treeline/?section=sites">Sites</a></li><?php 
+}
+
+if($_SESSION['treeline_user_group']!='Author' && $site->getConfig("setup_languages")) {  
+	?><li id="language-link"><a href="/treeline/?section=language">Languages</a></li><?php
+}
+
+if ($site->id==$_SESSION['treeline_user_default_site_id'] && $_SESSION['treeline_user_group']=="Superuser") {
+	?><li id="forms-link"><a href="/treeline/forms/">Manage forms</a></li><?php
+}
+
+if ($site->id==$_SESSION['treeline_user_default_site_id']) {
+	?><li id="access-link"><a href="/treeline/?section=access">Access Rights</a></li><?php
+}
+
+if($_SESSION['treeline_user_group']=='Superuser') {  
+    ?><li id="settings-link"><a href="/treeline/?section=settings">Settings</a></li><?php 
+}  
+?>
+    
+<li id="help-link"><a href="/treeline/help/">Help and support</a></li>			
+
+<?php
+if($_SESSION['treeline_user_group']!='Author') {  
+	?><li id="statistics-link"><a href="/treeline/stats/">Statistics</a></li><?php
+}
+?>
+
+<li id="logout-link"><a href="/treeline/?lo=1">Logout</a></li>
+<li id="menu-bottom-spacer"></li>
+</ul>
+<?php } ?>

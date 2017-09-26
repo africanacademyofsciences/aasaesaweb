@@ -1,0 +1,197 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+/* Standard text and link colours */
+body {
+}
+a {
+}
+a:hover {
+}
+a:active {
+}
+h1, h2, h3, h4, h5 {
+}
+
+
+/* ******************************************* */
+/* Access menu bar along the top of every page */
+div#access-menu {
+}
+	/* Access menu text colour */
+	div#access-menu ul#accessMenu {
+	}
+		/* Access menu link colours */
+		div#access-menu ul#accessMenu li a {
+		}
+		div#access-menu ul#accessMenu li a:hover {
+		}
+		div#access-menu ul#accessMenu li a:active {
+		}
+/* ******************************************* */
+
+
+/* Banner tagline colours */
+div#header_img p,h1 a {
+}
+	div#header_img p,h1 a:hover { 
+	}
+	div#header_img p,h1 a:active { 
+	}
+
+
+/* Forum bar colours colours */
+/* these mimic the main menu colours so have put them here */
+div#primarycontent table.treeline caption.title,
+div#primarycontent table.treeline td.title {
+}
+
+/* Main menu colours */
+ul#menu {
+}
+ul#menu li {
+}
+	ul#menu li a {
+	}
+	ul#menu li a:hover {
+	}
+	ul#menu li a:active {
+	}
+ul#menu li.selected {
+}
+	ul#menu li.selected a {
+	}
+	ul#menu li.selected a:hover {
+	}
+	ul#menu li.selected a:active {
+	}
+
+
+/* News ticker */
+li.update-title {
+}
+
+
+/* Line below the title on the home page and content pages */
+div#mainNews h2,
+h1.pagetitle {
+}
+
+
+
+/* Landing panels + Normal panels*/
+div#primarycontent div.landing-panel,
+div#secondarycontent div.panel
+{
+}
+	div#primarycontent div.landing-panel h3,
+	div#secondarycontent div.panel h3
+	{
+	}
+
+
+/* Extra CSS for workstream panels */
+/* Fonts/sizes are inherited from normal panels */
+div#secondarycontent div.workpanel {
+}
+	div#secondarycontent div.workpanel p a {
+	}
+	div#secondarycontent div.workpanel p a:hover {
+	}
+	div#secondarycontent div.workpanel p a:active {
+	}
+	div#secondarycontent div.workpanel p a.level-1 {
+	}
+		div#secondarycontent div.workpanel p a.level-1:hover {
+		}
+	div#secondarycontent div.workpanel p a.level-2 {
+	}
+		div#secondarycontent div.workpanel p a.level-2:hover {
+		}
+	div#secondarycontent div.workpanel p a.level-3 {
+	}
+		div#secondarycontent div.workpanel p a.level-3:hover {
+		}
+	div#secondarycontent div.workpanel p a.level-4 {
+	}
+		div#secondarycontent div.workpanel p a.level-4:hover {
+		}
+	div#secondarycontent div.workpanel p.level-5 {
+	}
+		div#secondarycontent div.workpanel p a.level-5:hover {
+		}
+	div#secondarycontent div.workpanel p.level-6up {
+	}
+		div#secondarycontent div.workpanel p a.level-6up:hover {
+		}
+	
+	
+	
+/* Calendar */
+/* Calendar header */
+ul#calendar-header li {
+}
+	ul#calendar-header li a {
+	}
+	ul#calendar-header li a:hover {
+	}
+	ul#calendar-header li a:active {
+	}
+	ul#calendar-header li.header-month,
+	table#calender-header-table td.header-month {
+	}
+	
+/* Calendar body */
+table#calendar td {
+}
+	table#calendar td.inactive {
+	}
+	table#calendar td.active {
+	}
+		table#calendar td.active a {
+		}
+		table#calendar td.active a:hover {
+		}
+		table#calendar td.active a:active {
+		}
+	table#calendar td p.today {
+	}
+
+
+/* And finally some nice footer stuff we can change */
+div#footer div#copyright {
+}
+	div#footer div#copyright a {
+	}
+	div#footer div#copyright a:hover {
+	}
+	div#footer div#copyright a:active {
+	}
+
+/* We suggest you ensure the footerMenu background colour is the same as the body above. */
+div#footerMenu {
+}
+	div#footerMenu p {
+	}
+		div#footerMenu p a {
+		}
+		div#footerMenu p a:hover {
+		}
+		div#footerMenu p a:active {
+		}
+		
+		
+	
+/* Content page stuff */
+
+/* Left hand menu */
+div#sidebar ul li a {
+}
+	div#sidebar ul li a:hover {
+	}
+	div#sidebar ul li a:active {
+	}
+div#sidebar ul li.subon a {
+}
+

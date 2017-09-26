@@ -1,0 +1,90 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+form label.option-value-label {
+	clear: none;
+	margin-left: 20px;
+}
+form input.field-option {
+	width: 130px;
+}
+
+
+
+
+/* ALL menu shifting CSS */
+	.page-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: block;
+	}
+		.page-list li {
+			margin: 0;
+		}
+	
+	.clear-element {
+		clear: both;
+	}
+	
+	.page-item1 > div,
+	.page-item2 > div,
+	.page-item3 > div,
+	.page-item4 > div {
+		margin: 0;
+	}
+	.page-item1 > div p {
+		padding-left:10px;
+	}
+
+	.sort-handle {
+		cursor:move;
+	}
+
+	.helper {
+		border:2px dashed #777777;
+		height: 21px;
+	}
+
+
+ul.page-list table.tl_list {
+	direction: ltr;
+}
+	ul.page-list table.tl_list td.title {
+		width: auto;
+		padding-left: 10px;
+	}
+		ul.page-list table.tl_list td.title span {
+			width: auto;
+		}
+	ul.page-list table.tl_list td.field-count { width: 70px; }
+	ul.page-list table.tl_list td.field-type { width: 90px; }
+	ul.page-list table.tl_list td.field-name { width: 120px; }
+	ul.page-list table.tl_list td.field-req { width: 40px; }
+	ul.page-list table.tl_list td.hidden { color: #ccc; }
+
+
+div#th span {
+	float: right;
+}
+	div#th span.title { float: left; }
+	div#th span.preview { margin-right: 140px; }
+	div#th span.field-name { margin-right: 110px; }
+	div#th span.field-type { margin-right: 65px; }
+	div#th span.field-req { margin-right: 20px; }
+	div#th span.field-count { margin-right: 40px; }
+
+form fieldset input.menu-submit {
+	float: right;
+	margin-right: 10px;
+}
+
+table.tl_list td {
+	font-size: 100%;
+}
+table.tl_list td.count {
+	width: 100px;
+	text-align: center;
+}
+

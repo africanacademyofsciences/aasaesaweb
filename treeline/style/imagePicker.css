@@ -1,0 +1,286 @@
+
+
+
+body {
+	background-color: #EBEBEB;
+}
+div#header {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border-bottom: 1px solid #B6B6B6;
+}
+	#header h1 {
+		background: url('/treeline/img/icons/treeline-icon.gif') no-repeat top left;
+		padding: 4px 0 14px 50px;
+		margin: 0;
+	}
+
+h1 {
+	color: #6C6996;
+}
+
+div#structure {
+	width: 100%;
+	padding: 0px;
+	float: left;
+}
+	div#structure div#inside_structure {
+		width: 100%;
+		padding: 0;
+		float: left;
+	}
+		div#structure div#inside_structure form {
+			width: 100%;
+			padding: 0;
+			float: left;
+		}
+
+div#content {
+	width:100%;
+	margin:0;
+	float:left;
+	border:none;
+	padding:0;
+}
+
+
+div#contentpane {
+	padding: 10px 0;
+}
+div#contentpane form {
+}
+	div#contentpane form fieldset {
+		width: 100%;
+	}
+		div#contentpane form fieldset input.btn {
+			font-weight: normal;
+		}
+	div#contentpane form fieldset label {
+		width: auto;
+		margin-right: 5px;
+		margin-top: 2px;
+	}
+	div#contentpane form fieldset input.text {
+		width: 120px;
+		margin-right: 5px;
+	}
+	div#contentpane form fieldset select {
+		width: 120px;
+		margin-right: 5px;
+	}	
+	
+div#contentpane form#categoryselector {
+}
+	div#contentpane form#categoryselector fieldset input.btn {
+		float: right;
+	}
+
+
+
+div#controls {
+	float:left;
+	width:100%;
+	height: 30px; 
+	margin:0;
+}
+	div#controls fieldset {
+	}
+
+
+div#gallery {
+	float: left;
+	width: 100%;
+	padding-top: 0; 
+}
+	div#gallery div.image0 {
+	}
+	div#gallery div.image4,
+	div#gallery div.image9 {
+		margin-right: 0;
+	}
+
+	div.image {
+		float: left;
+		width: 120px;
+		margin: 0px 15px 0px 0;
+	}
+		div.image div.frame {
+			width: 100px;
+			height: 100px;
+			border: 1px solid #878e95;
+			background-color: #f5f6f6;
+			padding: 9px;
+			text-align: center;
+			margin:0;
+		}
+		div.image div.name {
+			margin: 6px 0 9px 0;
+			height: 20px;
+			overflow:hidden;
+			font-family: Tahoma, Arial, Helvetica, sans-serif;
+			font-size: 11px;
+		}
+		
+		div.image a {
+			display: block;
+			padding-left: 18px;
+			background-repeat: no-repeat;
+			background-position: left center;
+			color: #ab0d54;
+			text-decoration: none;
+		}	
+	
+		div.image a img{margin-left: -18px; border: none;}
+
+
+
+
+
+#imagepicker,
+#categoryselector {
+		margin: 0;
+		padding:0;
+	}
+	form#imagepicker fieldset,
+	form#categoryselector fieldset {
+		border: none;
+		margin:0;
+		padding:0;
+	}
+	
+	#imagepicker td.field,
+	#categoryselector td.field {
+		padding-top:10px;
+	}
+	
+table#img-margin {
+	width: 400px;
+}
+	table#img-margin td {
+		
+	}
+		table#img-margin td.label {
+			padding-left:5px;
+		}
+		table#img-margin td.text {
+			text-align: right;
+		}
+	
+	#previous, #next {
+		font-weight:bold;
+	}
+	
+	#previous {
+		float: right;
+		border-color: #c5cfd9;
+	}
+	#next {
+		float: right;
+		
+	}
+	#next.hi, #previous.hi {
+		border-color: #878e95;
+		background: #c9d6e7 url('/treeline/img/imagepicker/grey_button_hi.gif') repeat-x;
+		color: #000;
+	}
+	#next.lo, #previous.lo {
+		border-color: #c5cfd9;
+		background: #e2e9f1 url('/treeline/img/imagepicker/grey_button_lo.gif') repeat-x;
+		color: #b4b4b4;
+	}		
+	
+	
+	/* Styles for the "insert image" stage: */
+	
+	div.size {
+		float: left;
+		width: 100%;
+		clear: left; 
+		padding: 0 0 40px 10px;
+		margin: 0;
+		background: url('/img/layout/arrow-red.png') no-repeat 0 4px;
+	}
+		div.size p.image {
+			clear: left;
+		}
+			div.size p.image img {
+				float: left; 
+				border: 1px solid #878e95;
+			}
+
+	div.size div.details {
+		float: left; 
+		margin-left: 0px;
+		margin-bottom: 5px;
+	}
+		div.size div.details p {
+			margin-top: 0;
+			padding-bottom: 0;
+		}
+			div.size div.details p a {
+				color: #ab0d54;
+			}	
+	
+div.img_file {
+	margin: 0 0 10px;
+	float: left;
+	clear: left;
+	width: 100%;
+}
+	div.img_file img {
+		float: left;
+	}
+		div#content div.img_file p {
+			clear: left;
+		}
+	div.img_file div#img-file-detail {
+		float: right;
+		width: 543px;
+		margin-left: 20px;
+	}
+	
+
+div#contentpane div.margins {
+	margin-bottom: 20px;
+}
+
+div.img_params {
+	float: left;
+}
+	div.img_params p {
+		clear:left;
+	}
+		div.img_params p.label {
+			font-weight: bold;
+			padding-bottom: 4px;
+		}
+	div#contentpane div.img_params fieldset {
+		padding-bottom: 0;
+	}
+		div#contentpane div.img_params fieldset.margin {
+			margin-bottom: 5px;
+		}
+			div#contentpane div.img_params fieldset.margin label {
+				font-weight: normal;
+			}
+		div.img_params fieldset p.tip {
+			color: #666666;
+			padding: 5px 0 20px;
+			margin: 0;
+		}
+		div#contentpane div.img_params fieldset label {
+			width: 100px;
+			font-weight: bold;
+			margin-right: 10px;
+		}
+		div#contentpane div.img_params fieldset input.text {
+			border: 1px solid #C0C0C0;
+			width: 427px;
+			margin: 0;
+			padding: 2px;
+		}
+		div#contentpane div.img_params fieldset input.short {
+			width: 50px;
+		}
+

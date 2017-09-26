@@ -1,0 +1,177 @@
+/* 
+
+	TREELINE (Edit Mode) CSS
+	
+	media: all
+	page: Treeline edit page
+	
+	written by: Chris Gibson chris@chrisgibson.com
+	last edited: Phil Thompson 15/08/07 by Phil Thompson
+	
+
+*/
+
+body{
+	padding: 0;
+}
+
+
+form#treeline_edit{
+	border: none;
+	float: left;
+	margin: 0 auto;
+	padding: 0;
+	width: 100%;
+}
+
+
+#toolbar {
+	background: #FFFFFF;
+	/* border-bottom: 4px solid #DAE3E3; */
+	float: left;
+	margin: 0;
+	padding: 0;
+	width: 100% !important;
+}
+
+/* EDIT MODE TOOLBAR STYLING */
+#toolbar div.logo {
+	float: left;
+	padding: 10px;
+}
+	#toolbar div#toolbar_container {
+		float:left;
+		clear:left;
+		padding-bottom:10px;
+		width: 100%;
+	}
+	#toolbar div.options {
+		float: left;
+		display: inline;
+		margin: 0 20px;
+		width: 330px;
+	}
+		#toolbar div.options p {
+			border-bottom: 1px solid #999;
+			padding: 0;
+			margin-bottom:5px;
+		}
+		#toolbar div.options a {
+			font-size:90%;
+		}
+		#toolbar div.options label {
+			font-weight:bold;
+			margin-right: 10px;
+		}
+		#toolbar div.options input.text {
+			border: 1px solid #7f9db9;
+			font-family:Verdana, Arial, Helvetica, sans-serif;
+			font-size: 10px;
+			width: 115px;
+		}	
+		#toolbar div.options input.button {
+			background: #CB417F url("/treeline/img/layout/button-submit-bg.gif") left top repeat-x;
+			border: 1px solid #AB0D54;
+			color: #FFF;
+			float: left;
+			margin: 0 10px 3px 0;
+			font-weight: bold;
+			padding-bottom: 2px;
+			font-size: 90%;
+		}
+		#toolbar div.options input.button.cancel{
+			background: #ACBDD3  url("/treeline/img/layout/button-cancel-bg.gif") left top repeat-x;
+			border: 1px solid #878E95;
+			color: #000;
+		}
+			#toolbar div.options input#btn_discard {
+				width:126px;
+			}
+			#toolbar div.options input#btn_preview {
+				width: 74px;
+			}
+			#toolbar div.options input#btn_save {
+				width: 110px;
+				margin-right:0;
+				float:right;
+			}
+
+		#toolbar div.options fieldset#styleSwitcher{
+			clear: both;
+			padding: 0;
+			padding-left: 0px;
+		}
+			#toolbar div.options fieldset#styleSwitcher select {
+				width: 200px;
+			}
+
+
+
+div#primarycontent table.mceToolbar td img {
+	margin:0 !important;
+}
+
+p#showDetails{
+	clear: left;
+}
+
+div#pageDetails{
+	background: #ddd;
+clear:left;
+	color: #333;
+float:left;
+margin:0;
+width:100%;
+}
+
+	div#pageDetails a{
+		color: #FFCFE5;
+		font-weight: bold;
+	}
+	
+	div#pageDetails h1{
+		background: transparent;
+		border-bottom: 1px solid #FFF;
+font-size:130%;
+		padding: .5em;
+	}
+div#pageDetails p {
+font-size:85%;
+padding: .2em .5em;
+}
+	
+	div#pageDetails ul#tags{
+		margin: 0;
+		padding: 0 20px 10px;
+	}
+	
+	div#pageDetails ul#tags li{
+		display: inline;
+		margin-left: 0;
+	}
+	
+	
+
+div.panel {
+	overflow:none;
+}
+
+fieldset#related_content_links {
+	margin-top: 20px;
+}
+
+fieldset#related_content_links label{
+	font-weight: normal;
+}
+
+fieldset#related_content_links select{
+	margin-top: 10px;
+}
+
+/* clear the page contents */
+div#holder{clear: both; margin-top: 20px;}
+
+	div#secondarycontent fieldset{
+		padding: 10px 0px;
+		
+	}

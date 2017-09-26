@@ -1,0 +1,36 @@
+<?php
+/* Commonly used JavaScript files. */
+?>
+<script type="text/javascript" src="/behaviour/jquery.js"></script>
+<script type="text/javascript" src="/behaviour/jquery.corner.js"></script>
+<?php
+if ($USEFLIR) {
+	?>
+	<script type="text/javascript" src="/behaviour/facelift1.2/flir.js"></script>
+    <?php
+}
+
+if (is_array($js)){
+	foreach($js as $src){
+		echo "\t".'<script type="text/javascript" src="/behaviour/'.$src.'.js"></script>'."\n";
+	}
+}
+
+if($extraJS){
+	echo '<script type="text/javascript">'."\n";
+	echo $extraJS."\n";
+	echo '</script>'."\n";
+}
+
+?>
+
+<script type="text/javascript" src="/behaviour/window.onload.js"></script>
+
+<?php
+if($mode == 'wysiwyg') { 
+	?>
+	<script type="text/javascript" src="/treeline/includes/tiny_mce/tiny_mce_popup.js"></script>
+	<?php 
+} 
+?>
+

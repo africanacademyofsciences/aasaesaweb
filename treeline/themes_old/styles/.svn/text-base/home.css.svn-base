@@ -1,0 +1,171 @@
+
+
+	/* NEWS */
+	div#treelineNews {
+		background:#edf1f1 url(/treeline/themes/img/bk_news_mid.gif) repeat-x;
+		font-size:85%;
+		_font-size:75%;
+		line-height:27px;
+		_line-height:26px;
+		margin:15px 20px 15px 10px;
+		overflow:hidden;
+	}
+	
+		div#treelineNews h3 {
+			background:#AD0D53 url(/treeline/themes/img/bk_news_redcorner.gif) no-repeat left center;
+			color:#fff;
+			float:left;
+			font-size:95%;
+			font-weight:normal;
+			line-height:26px;
+			margin:0;
+			padding-left:10px;
+			width:145px;
+		}
+		
+		div#treelineNews ul {
+			background:url(/treeline/themes/img/bk_news_right.gif) no-repeat right center;
+			line-height:26px;
+			list-style:none;
+			margin:0 0 0 187px;
+			padding:0;
+		}
+		
+			div#treelineNews ul li {
+			}
+			
+
+ul#mainTasks {
+background:url(/treeline/themes/img/icons_common_tasks.jpg) no-repeat top center;
+height:190px;
+margin:0 0 20px -3px;
+padding:0 3px;
+width:736px;
+}
+
+ul#mainTasks li {
+float:left;
+font-size:120%;
+font-weight:bold;
+line-height:1.1em;
+margin:0 30px 0 0px;
+padding:0 10px;
+text-align:center;
+width:141px;
+}
+
+ul#mainTasks li#siteStructure {
+margin-right:0;
+margin-left:2px;
+}
+
+ul#mainTasks li a {
+display:block;
+padding-top:136px;
+}
+
+
+ul#secondaryTasks {
+background:url(/treeline/themes/img/bk_other_tasks.gif) no-repeat top center;
+height:105px;
+margin:5px 0 20px -3px;
+padding:0 3px;
+width:736px;
+}
+
+ul#secondaryTasks li {
+background:url(/treeline/themes/img/icons_other_common_tasks.jpg) no-repeat top left;
+
+float:left;
+font-size:80%;
+line-height:1.1em;
+margin:5px 10px 0 10px;
+
+text-align:center;
+width:100px;
+}
+
+ul#secondaryTasks li a {
+display:block;
+padding:68px 0 0 0;
+}
+
+ul#secondaryTasks li#emailNewsletter {
+background-position:15px 5px;
+}
+ul#secondaryTasks li#microsites{
+background-position:-108px 5px;
+}
+ul#secondaryTasks li#languages{
+background-position:-233px 5px;
+}
+ul#secondaryTasks li#events{
+background-position:-358px 5px;
+}
+ul#secondaryTasks li#accessRights{
+background-position:-484px 5px;
+}
+ul#secondaryTasks li#stats{
+background-position:-610px 5px;
+}
+
+
+table#recentUpdates {
+margin-top:20px;
+width:740px;
+}
+
+table#recentUpdates th {
+font-size:70%;
+padding-bottom:4px;
+}
+table#recentUpdates th#colTitle {
+width:160px;
+}
+table#recentUpdates th#colType {
+width:90px;
+}
+table#recentUpdates th#colAbout {
+width:80px;
+}
+table#recentUpdates th#colUpdated{
+width:80px;
+}
+table#recentUpdates th#colLastusedby{
+width:100px;
+}
+table#recentUpdates th#colStatus {
+width:90px;
+}
+
+table#recentUpdates td.ruTitle {
+font-weight:bold;
+}
+
+table#recentUpdates td {
+font-size:80%;
+line-height:1.5em;
+}
+
+div#primarycontent ul.managePage {
+float:left;
+list-style:none;
+margin-left:0;
+width:100%;
+}
+
+
+ul.managePage li {
+float:left;
+margin-right:15px;
+width:14px;
+}
+ul.managePage li.last {
+margin-right:0;
+}
+ul.managePage li a{
+display:block;
+float:left;
+height:14px;
+width:14px;
+}

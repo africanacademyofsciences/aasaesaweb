@@ -1,0 +1,241 @@
+/* 
+
+	table.treelines CSS
+
+	Description: CSS for (accessible) table.treelines
+	NOTE: tables are prefixed with a class of treeline as styling all tables - annoys bits of Google Analytics/Tiny_mce
+
+	written by: Phil Thompson => phil.thompson@ichameleon.com
+	
+	last edited on:
+	last edited by: 
+
+	table.treeline of Contents
+		table.treeline
+		caption
+		headers (th)
+		table.treeline cells (td)
+		footer (tfoot)
+
+*/
+
+table.tl_list {
+	border:0;
+	padding: 0;
+	margin: 0;
+	width: 735px;
+	clear: left;
+	border-collapse: collapse;
+}
+	table.tl_list caption{
+		font-size: 160%;
+		padding: 0 0 .5em;
+		text-align: left;
+	}
+	table.tl_list th {
+		font-size: 90%;
+		text-align: left;	
+		font-weight: normal;
+		padding:0 2px 5px;
+	}
+	table.tl_list td {
+		font-size: 90%;
+		padding:0 2px 5px;
+	}
+		table.tl_list td.action {
+			text-indent: -9000em;
+			width: 180px;
+		}		
+		table.tl_list td.action a {
+			outline: none;
+			display: inline;
+			float: left;
+			width: 14px;
+			height: 14px;
+			line-height: 100%;
+			margin-right: 16px;
+		}
+			table.tl_list td.action a.preview {
+				background: url('/treeline/img/icons/blue_preview.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.edit {
+				background: url('/treeline/img/icons/blue_edit.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.edit_att {
+				background: url('/treeline/img/icons/blue_attributes.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.publish {
+				background: url('/treeline/img/icons/blue_publish.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.reuse {
+				background: url('/treeline/img/icons/blue_publish.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.send {
+				background: url('/treeline/img/icons/blue_send.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.reject {
+				background: url('/treeline/img/icons/blue_reject.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.suspend {
+				background: url('/treeline/img/icons/blue_suspend.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.delete {
+				background: url('/treeline/img/icons/blue_delete.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.ticket {
+				background: url('/treeline/img/icons/blue_ticket.gif') top left no-repeat;
+			}
+
+			/* events buttons */
+			table.tl_list td.action a.participants {
+				background: url('/treeline/img/icons/blue_applicant.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.event-links {
+				background: url('/treeline/img/icons/blue_event_links.gif') top left no-repeat;
+			}
+			table.tl_list td.action a.edit-form {
+				background: url('/treeline/img/icons/blue_entry_form.gif') top left no-repeat;
+			}
+
+		table.tl_list td span {
+			width:14px;
+			float: left;
+			height:14px;
+			margin-right: 16px;
+		}
+		table.tl_list td span.no-action {
+			background: url('/treeline/img/icons/blue_noaction.gif') top left no-repeat;
+		}
+		table.tl_list td span.locked {
+			background: url('/treeline/img/icons/blue_locked.gif') top left no-repeat;
+		}
+	
+		table.tl_list td span.suspended {
+			color: #FF0033;
+		}
+		
+	table.tl_list td.title {
+		font-weight: bold;
+	}
+	
+
+div.tl-content table.tl_list {
+	width: 690px;
+}
+	
+table.treeline{
+	border-top: 1px solid #CED3E0;
+	border-collapse: collapse;
+	clear: left;
+	margin: 1em 0 1em 0;
+	width: 100%;
+}
+
+	table.treeline caption{
+		color: #669;
+		font-size: 180%;
+		padding: 0 0 .5em;
+		text-align: left;
+	}
+	
+	table.treeline th{
+		background: url("/treeline/img/layout/table-td-bg.gif") 0 0 repeat-x;
+		border-bottom: 1px solid #CED3E0;
+		color: #669;
+		font-size: 82.5%;
+		font-weight: normal;
+		padding: 5px 25px 0 0;
+		text-align: left;
+		text-transform: capitalize;
+		white-space: nowrap;
+	}
+	
+		th.preview, td.preview{}
+		
+		th.pagetitle, td.pagetitle{
+			width: 45%;
+		}
+		th.status, td.status{}
+		
+		th.updatedon, td.updatedon{}
+		
+		th.updatedby, td.updatedby{}
+	
+		th.edit, td.edit{
+			padding-right: 0;
+		}
+	
+		table.treeline th[scope="col"]{}
+		
+		table.treeline th[scope="row"]{}
+	
+		table.treeline th a:hover, table.treeline td a:hover{}
+	
+	
+	table.treeline td{
+		background: url("/treeline/img/layout/table-td-bg.gif") 0 0 repeat-x;
+		border-bottom: 1px solid #CED3E0;
+		color: #669;
+		font-size: 100%;
+		font-weight: bold;
+		padding: 6px 25px 6px 0;
+	}
+	
+		table.treeline tr:hover td{
+			background-color: #F5F9F9;
+		}
+	
+	table.treeline td.action{
+		text-indent: -5000em;
+	}
+	
+		table.treeline td.action a{
+			background: url("/treeline/img/icons/preview.gif") 0 0 no-repeat;
+			display: block;
+			height: 16px;
+			outline: none;
+			width: 16px;
+		}
+		
+		table.treeline td.action.preview a{
+			background-image: url("/treeline/img/icons/preview.gif");
+		}
+
+		table.treeline td.action.send a {
+			background-image: url("/treeline/img/icons/newssend.gif");
+		}
+		
+		table.treeline td.action.edit a, 
+		table.treeline td.action.editrss a,
+		table.treeline td.action.reuse a
+		{
+			background-image: url("/treeline/img/icons/edit.gif");
+		}
+		
+		table.treeline td.action.editSettings a{
+			background-image: url("/treeline/img/icons/settings.gif");
+		}
+		
+		table.treeline td.action.delete a, table.treeline td.action.unapprove a, table.treeline td.action.unfeature a{
+			background-image: url("/treeline/img/icons/delete.gif");
+		}
+		
+		table.treeline td.action.publish a, table.treeline td.action.approve a, table.treeline td.action.feature a{
+			background-image: url("/treeline/img/icons/approve.gif");
+		}
+	
+	table.treeline tr.odd td{}
+	
+	table.treeline tfoot th, table.treeline tfoot td{}
+	
+	
+	/* FOrms in tables */
+	
+	table.treeline td form, table.treeline td fieldset, table.treeline input{
+		background: transparent;
+		border: none;
+		float: none;
+		margin: 0;
+		padding: 0;
+		width: auto;
+	}

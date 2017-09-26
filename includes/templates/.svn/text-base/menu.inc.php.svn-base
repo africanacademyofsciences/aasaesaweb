@@ -1,0 +1,26 @@
+<div id="menu_div">
+	<?php if( $mode == 'edit') { ?>
+	<ul id="menu">
+		<li class="menu"><a href="#" title="These links are clickable in edit mode">Home</a></li>
+		<li class="menu"><a href="#" title="These links are clickable in edit mode">Section</a></li>
+		<li class="menu"><a href="#" title="These links are clickable in edit mode">Section</a></li>
+		<li class="menu"><a href="#" title="These links are clickable in edit mode">Section</a></li>
+	</ul>
+	<?php } else {
+		echo $menu->drawPrimary($pageGUID);
+	} 
+	?>
+    
+	<?php
+	if ($page->getParent()==0 && is_object($news)) { 
+		$news_html=$news->drawLatestTicker();
+		?>
+		<ul id="news-ticker">
+			<li class="rss"><a class="link-rss" href="<?=$site->link?>rss/"><?=$labels['rss']['txt']?></a></li>
+			<li class="update-title">Latest updates:</li>
+			<li class="ticker"><?=$news_html?></li>
+		</ul>
+		<?php
+	}
+	?>    
+</div>

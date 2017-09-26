@@ -1,0 +1,39 @@
+/* 
+	ICHAMELEON SEARCH PAGE CSS
+	
+	media: all
+	page: search page
+	
+	written by: Phil Thompson phil.thompson@ichameleon.com October 2006
+	last edited: Phil Thompson 13/08/2007 by Phil Thompson
+
+	emptied : Phil Redclift 10/02/2008 by Phil Redclift
+*/
+
+ul#serps {
+	margin: 0;
+	padding: 0;
+}
+
+ul#serps li {
+	list-style: none;
+	background:none;
+	border-bottom:1px solid #ADAF9A;
+	padding:0;
+	padding-bottom:15px;
+	margin:0;
+	margin-bottom:20px;
+	list-style-image:none;
+}
+
+ul#serps li h1, ul#serps li h2, ul#serps li h3, ul#serps li p  {
+	padding-left:0;
+	padding-right:0;
+}
+ul#serps li p.links {
+}
+
+
+ul.pagination {
+	padding-bottom:10px;
+}

@@ -1,0 +1,222 @@
+/* CSS Document */
+
+div .main-content {
+	margin-top: 0;
+}
+
+p, ul {
+	font-size: 120%;
+}
+ul {
+	padding: 0 0 0 20px;
+	list-style: outside;
+	list-style-type: square;
+}
+	ul ul {
+		font-size: 100%;
+		padding-left: 50px;
+		list-style-type:circle;
+		
+	}
+	ul li {
+		margin-bottom: 8px;
+	}
+	.nav li {
+		margin-bottom: 0;
+	}
+
+.highlight {
+	border-radius: 8px;
+	padding-bottom: 20px;
+	margin-bottom: 20px;
+}
+
+.highlight1 {
+	background-color: #F2A900;
+	color: #fff;
+}
+
+.highlight2 {
+	background-color: #003a70;	
+	color: #fff;
+}
+
+.hero {
+	background-image: url('/img/reports/hero.jpg');
+	background-size: cover;
+	background-repeat: no-repeat;
+	color: #fff;
+}
+.hero .content {
+	/*background: rgba(0, 0, 0, 0.2);*/
+	/*background: rgba(0, 0, 0, 0.7);*/
+	background: rgba(10,10,60, 0.5);
+	border-radius: 8px;
+	padding: 20px;
+	width: 100%;
+	margin-top: 30px;
+}
+	.hero h1 {
+		margin-top: 0;
+	}
+	.hero p {
+		margin-bottom: 0;
+		font-size: 20px;
+		line-height: 140%;
+		padding-bottom: 50px;
+	}
+
+@media (min-width: 1200px) {
+	.hero { min-height: 500px; }
+}
+@media (max-width: 1199px) {
+	.hero { min-height: 600px; }
+}
+@media (max-width: 991px) {
+	.hero { min-height: 600px; }
+}
+@media (max-width: 767px) {
+	.hero { min-height: 600px; }
+}
+
+#hero2 {
+	margin-bottom: 20px;
+	background-image: url('/img/reports/hero2.jpg');
+}
+
+
+.contrast {
+	background-color: #003a70;
+	padding: 30px 0;
+	color: white;
+}
+.contrast .box {
+	border-color: white;
+}
+
+#videos {
+	clear: both;
+	padding: 30px 0;
+}
+
+.video-holder {
+	/*background: black;
+	height: 200px;*/
+}
+.video-holder p {
+	text-align: center;
+	color: #fff;
+	margin: 0;
+	padding-top: 80px;
+}
+
+.clearfix {
+}
+	.clearfix:before {
+		content: " ";
+		clear: both;
+	}
+
+.box {
+	border: 1px solid #003a70;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+section.testimonial {
+	background-image: none;
+	background-color: #A3A1AE;
+}
+
+.owl-carousel .item .content h3 {
+	font-size: 17px;
+}
+.owl-carousel .item .content.no-image {
+	width: 100%;
+}
+
+.sig
+{
+	padding-top: 20px;
+	max-width: 200px;
+}
+
+footer {
+	margin-top: 0px;
+}
+
+.counter-inner
+{
+	/*background-color: #FCD8C8;*/
+	min-height: 150px;
+	/*-webkit-box-shadow: 6px 6px 5px -4px rgba(0,0,0,0.75);
+	-moz-box-shadow: 6px 6px 5px -4px rgba(0,0,0,0.75);
+	box-shadow: 6px 6px 5px -4px rgba(0,0,0,0.75);
+	border-radius: 12px;*/
+	padding: 20px;
+}
+.box:hover {
+    background-color: #F7A37A;
+    opacity: 1;
+    color: #FFFFFF;
+}
+.box {
+	padding-top: 0px;
+    background-clip: initial;
+    background-color: #F7A37A;
+    opacity: 0.7;
+    transition: all .3s ease;
+    height: 100px;
+    width: 100px;
+    border: 2px solid #F26522;
+    color: #FFFFFF;
+    margin-left: auto;
+    margin-right: auto;
+	
+	font-size: 17pt;
+	font-weight: bold;
+}
+
+
+.bold-large
+{
+	font-size: 130%;
+	font-weight: bold;
+}
+
+.no-margin
+{
+	margin: 0px;
+}
+
+.white-border
+{
+	border: solid 2px #FFFFFF;
+	padding: 15px;
+}
+
+.hero-bottom
+{
+	position: relative;
+	width: 100%;
+	leFt: 0px;
+	max-width: 440px;
+}
+
+.top-hero
+{
+	position: relative;
+	right: -474px;
+}
+
+.author
+{
+	font-size: 85%;
+}
+
+@media (min-width: 1500px)
+{
+	.container {
+		width: 1350px;
+	}
+}

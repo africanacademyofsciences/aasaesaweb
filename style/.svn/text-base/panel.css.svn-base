@@ -1,0 +1,105 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+
+	div#secondarycontent div.panel{
+		margin: 0 0 20px;
+		padding-bottom:20px;
+	}
+		div#secondarycontent div.panel form {
+			padding:10px 20px 0;
+		}
+	
+		div#secondarycontent div.panel h2,
+		div#secondarycontent div.panel h3,
+		div#secondarycontent div.panel h4,
+		div#primarycontent div.landing-panel h2,
+		div#primarycontent div.landing-panel h3,
+		div#primarycontent div.landing-panel h4 {
+			padding: 8px 10px 5px;
+		}
+			div#secondarycontent div.panel h3,
+			div#primarycontent div.landing-panel h3 {
+				background-color: transparent;
+			}
+			div#secondarycontent div.panel h3 {
+				height: 20px;
+			}
+			
+		div#secondarycontent div.panel p,
+		div#secondarycontent div.panel ul, 
+		div#secondarycontent div.panel ol,
+		div#primarycontent div.landing-panel p,
+		div#primarycontent div.landing-panel ul, 
+		div#primarycontent div.landing-panel ol{
+			font-size: 100%;
+			padding: 10px 10px 0px;
+			line-height: 150%;
+		}
+
+
+
+	div#secondarycontent div.panel ul, 
+	div#secondarycontent div.panel ol {
+		padding-left:0
+	}
+	div#secondarycontent div.panel ul li {
+		list-style-image: url('/images/icons/3dots_bullet.gif');
+	}
+	
+	
+
+
+div#secondarycontent div.panel ul.feed {
+	padding: 10px;
+}
+	div#secondarycontent div.panel ul.feed li {
+		list-style: none;
+		margin: 0px;
+	}
+
+
+
+
+
+
+div#secondarycontent div.panel form.pollpanel {
+	padding: 10px;
+	padding-bottom: 0px;
+}
+	div#secondarycontent div.panel form.pollpanel p.pollquestion{
+		padding: 0;
+		padding-bottom: 10px;
+	}
+	div#secondarycontent div.panel form.pollpanel input#pollsubmit {
+		margin: 10px auto 0px;
+	}
+	div#secondarycontent div.panel ul.pollresults {
+		padding: 10px;
+	}
+		div#secondarycontent div.panel ul.pollresults li {
+			list-style: none;
+			clear: left;
+			margin:0;
+		}
+			div#secondarycontent div.panel ul.pollresults li span {
+			}
+			div#secondarycontent div.panel ul.pollresults li div.poll_result_bar {
+				margin: 0 0 5px 0;
+			}
+				div#secondarycontent div.panel ul.pollresults li div.poll_result_bar {
+					height: 5px;					
+				}
+					div#secondarycontent div.panel ul.pollresults li div.poll_result_bar span.colourBar {	
+						height: 5px;
+						background-color: #FFF;
+						display: block;
+					}
+
+
+
+
+
+
+

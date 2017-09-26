@@ -1,0 +1,153 @@
+<?php
+
+//ini_set("display_errors", "yes");
+//error_reporting(E_ALL);
+
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");
+include($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+include($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/subscriber.class.php");
+
+$curPage = "newsletters_sub_edit";
+$action = read($_REQUEST,'action','add');
+
+	// Process subscriber form	
+	if($_POST["save"] == "Save"){
+
+		if ($_POST['email']) {
+		
+			$subscriber = new subscriber($_POST["id"]);
+			// Check if this email address already exists in the member table?
+			if ($action=="add") $subscriber->loadByEmail($_POST['email']);
+			
+			$subscriber->set('email', $_POST["email"]);
+			$subscriber->set('firstname', $_POST["firstname"]);
+			$subscriber->set('surname', $_POST["surname"]);
+		
+			if ($subscriber->isValid(false)) {
+			
+				//print "action($action) id(".$subscriber->id.") updated(".$subscriber->updated.")<br>\n";
+				if ($subscriber->id && $subscriber->updated) {
+					$subscriber->update();
+				}
+				else if ($action=="add") {
+					$subscriber->createNew();
+					$_POST['id']=$subscriber->id;
+				}
+				Newsletter::updatePreferences($_POST['id']);
+				$message[]="Subscriber updated";
+				$feedback="success";
+				$nextsteps='<li><a href="/treeline/newsletters/subsbrowse">Browse subcribers</a></li>';
+			}
+			else $message[]="Subscriber data is not valid";
+		}
+		else $message[]="You must enter an email address";
+
+	} 
+	
+
+	// Processing complete, reload subscriber object
+	unset($subscriber);
+	switch($action){
+		case "edit":
+			$subscriber = new subscriber(addslashes($_REQUEST["id"]));
+			break;
+		default:
+			$subscriber = new subscriber(null);
+			break;
+	}
+
+
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Newsletters Subscribers : '.ucwords($action) : 'Newsletters Subscribers';
+	$pageTitle = ($action) ? 'Newsletters Subscribers : '.ucwords($action) : 'Newsletters Subscribers';
+	
+	$pageClass = 'newsletters';
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+
+<div id="primarycontent">
+  <div id="primary_inner">
+<?php
+	if ($nextsteps) echo treelineList($nextsteps, "Next steps", "blue");
+	echo drawFeedback($feedback,$message);
+	
+    if(($action == "edit" || $action=="delete") && !$subscriber->id){ 
+		?>
+    	<p class="error">Cannot find the subscriber you are trying to<?=$action?>.</p>
+    	<?php
+	}
+	else{
+		$page_html = '
+
+		<p>Use the form below to set up your subscriber, then click &quot;Save&quot; to continue to the next page or click &quot;Cancel&quot;.</p>
+		
+		<form action="" method="post" id="frmSubscriber">
+		  <fieldset>
+			  <p class="instructions">Fields marked * are required.</p>
+			  <input type="hidden" name="id" value="'.$subscriber->id.'" />
+	
+			  <label for="f_firstname" class="required">First name:</label>
+			  <input type="text" class="required" id="f_firstname" name="firstname" maxlength="255" value="'.$subscriber->firstname.'" />
+			  <br />
+	
+			  <label for="f_surname" class="required">Surname:</label>
+			  <input type="text" class="required" id="f_surname" name="surname" maxlength="255" value="'.$subscriber->surname.'" />
+			  <br />
+	
+			  <label for="email" class="required">Email:</label>
+		';
+		if ($action=="add") $page_html.='
+			  <input type="text" class="required" maxlength="255" id="email" name="email" value="'.$subscriber->email.'" />
+		';
+
+		else $page_html.='
+			  <input type="text" class="required" maxlength="255" id="email" readonly disabled value="'.$subscriber->email.'" />
+			  <input type="hidden" name="email" value="'.$subscriber->email.'" />
+		';
+		$page_html.='
+			  <br />
+		';
+		
+		if ($subscriber->id) {
+			//echo Newsletter::listPreferences("", $subscriber->id);
+	
+			// prefil the _POST array with current preferences.
+			$query = "SELECT nup.preference_id 
+				FROM newsletter_user_preferences nup
+				LEFT JOIN newsletter_preferences np ON nup.preference_id=np.preference_id
+				WHERE np.site_id=".$site->id." AND member_id=".$subscriber->id;
+			//print "$query<br>\n";
+			if ($results = $db->get_results($query)) {
+				foreach ($results as $result) {
+					$_POST['preference'][]=$result->preference_id;
+				}
+			}
+		}
+		
+		$page_html.=Newsletter::drawPreferences($site->id);
+
+		$page_html.='	
+			  <fieldset class="buttons">
+				<input type="submit" class="submit" name="save" value="Save" />
+			  </fieldset>
+		  </fieldset>
+		</form>
+		';
+		$page_title=($action == 'add')?'Add new subscriber':'Edit subscriber ('.$subscriber->fullname.')';
+		echo treelineBox($page_html, $page_title, "blue");
+    }
+
+	?>
+    
+</div>
+</div>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>

@@ -1,0 +1,220 @@
+<?php
+
+//ini_set("display_errors", 1);
+//error_reporting(E_ALL);
+	include $_SERVER['DOCUMENT_ROOT']."/treeline/includes/media.class.php";
+	$media=new Media();
+
+	$relatedHTML='';
+	$fileDesc='';
+	
+	$referer = urldecode(read($_REQUEST,'referer','/treeline/'));
+	$mode = read($_REQUEST,'mode','');
+
+	
+	// Content
+	$content = new HTMLPlaceholder();
+	$content->load($page->getGUID(), 'content');
+
+	$vid=$_REQUEST['guid'];
+	$media->loadVideo($vid);
+	
+	// Header image
+	$header_img = new HTMLPlaceholder();
+	// Does this site have a header image?
+	$header_img->load($siteID, 'header_img');
+	if (!$header_img->draw()) {
+		// If not see if the primary site has a header image
+		$header_img->load($siteData->primary_msv, 'header_img');
+		if (!$header_img->draw()) {
+			// If not use the banner fro the main website.
+			$header_img->load(1, 'header_img');
+		}
+	}
+	$header_img->setMode("view");
+
+	
+	// Tags
+	$tags = new Tags();
+	$tags->setMode($page->getMode());
+	$content->setMode($mode);
+
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		
+		if (strpos($referer,'?') > 0) {
+			// If we've already got a querystring in the referring URL, we need to append the message onto it
+			$referer .= '&';
+		}
+		else {
+			// Otherwise, create a new querystring
+			$referer .= '?';
+		}
+	
+		if (read($_POST,'treeline','') == 'Save changes') {
+			$content->save();
+			$page->save();
+
+			
+			// intelligent link panels
+			$tags->updateIntelligentLinkPanelDetails($page->getGUID(), $_POST['accuracy'], $_POST['maxlinks'], $_POST['show_related_content']);
+			
+			// Content is saved so redirect the user
+			$feedback .= createFeedbackURL('success',"Changes saved to page '<strong>".$page->getTitle()."</strong>' in section <strong>".$page->drawTitleByGUID($page->getSectionByPageGUID($page->getGUID()))."</strong>");
+			
+			$referer .= $feedback;
+			$referer .= '&action=edit';
+			
+			$publish_redirect = '/treeline/pages/?action=publish&guid='.$page->getGUID();
+			$publish_redirect .= '&'.$feedback;
+			
+			include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.class.php");
+			if($user->drawGroup() == 'Superuser' || $user->drawGroup() == 'Publisher'){ // can this user publish pages?
+				redirect($publish_redirect); // show them the publish option
+			} else{
+				redirect($referer); // otherwise take the user back to the edit pages page
+			}
+
+		}
+		else if (read($_POST,'treeline','') == 'Discard changes') {			
+			$referer .= 'action='.$page->getMode().'&'.createFeedbackURL('error','Your changes were not saved');
+			redirect ($referer);
+		}
+	}
+	
+	
+
+	// Page specific options
+	
+	$pageClass = 'mediaplayer'; // used for CSS usually
+	
+	$css = array('page', 'video', 'lytebox', '1col'); // all attached stylesheets
+	
+	//$js = array('floatImages', 'flash', 'lytebox'); // all atatched JS behaviours
+	$js = array('flash', 'lytebox'); // all atatched JS behaviours
+	if($page->getMode() == 'edit'){
+		$js[] = 'jquery';
+		$js[] = 'styleSwitcher';
+		$js[] = 'showHideDetails';
+		$js[] = 'toggleRelatedLinks';
+		$js[] = 'toggleDonateButton';
+	}
+	$extraJS = ''; // etxra page specific  JS behaviours
+	
+	
+
+	// These functions a bit messy
+	// should really tidy them up and add them to the resource class...
+	function getRelated($guids, $table) {
+		global $db, $page;
+		$related="";
+		if ($table=="files") $query="select f.guid, CONCAT(f.name,'.',f.extension) as link, f.title as title from files f where f.guid in ($guids) and f.extension in ('mp3', 'flv')";
+		else if ($table=="pages") $query="select guid, title from pages where guid in ($guids)";
+
+		if ($results=$db->get_results($query)) {
+			foreach($results as $result) {
+				if ($table=="files") $link="/media-player/?guid=".$result->guid;
+				else if ($table == "pages") $link=$page->drawLinkByGUID($result->guid);
+				$related.='<li><a href="'.$link.'">'.$result->title.'</a></li>';
+			}
+		}
+		if ($related) $related='<h3 class="related_title">Related '.$table.'</h3><ul class="related_'.$table.'">'.$related.'</ul>';
+		return $related;
+	}
+
+	function getFileFromGUID($guid) {
+		global $db, $relatedHTML, $fileDesc;
+		$html="";
+		
+		$query="select CONCAT(f.name,'.',f.extension) as link, f.description, t.id as tag from files f
+			left join tag_relationships tr on f.guid=tr.guid 
+			left join tags t on tr.tag_id=t.id 
+			where f.guid='$guid'";
+		//print "$query<br>";
+		if ($results=$db->get_results($query)) {
+			foreach($results as $result) {
+				$file=$result->link;
+				$fileDesc=$result->description;
+				$query="select * from tag_relationships where tag_id=".$result->tag." and guid<>'$guid'";
+				if ($results2=$db->get_results($query)) {
+					foreach($results2 as $related) {
+						if ($related->type_id==3) $relatedFiles.="'".$related->guid."',";
+						else if ($related->type_id==1) $relatedPages.="'".$related->guid."',";
+//						else print "found related guid({$result->guid}) type({$result->type_id})<br>";
+					}
+				}
+			}
+			if ($relatedFiles) $html.=getRelated(substr($relatedFiles, 0, -1), "files");
+			if ($relatedPages) $html.=getRelated(substr($relatedPages, 0, -1), "pages");
+		}
+		if ($file) $file="/silo/files/".$file;
+		
+		$relatedHTML=$html;	
+		return $file;
+	}
+	
+	if (isset($_GET['file'])) $file=$_GET['file'];	/// Dont mess looking for related/description
+	if (isset($_GET['guid'])) $file=getFileFromGUID($_GET['guid']);
+
+	//print "got file($file)<br>";
+	if ($file) $media->filename=$file;
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/header.inc.php');
+	include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/breadcrumb.inc.php');
+?>	
+<div id="midholder">
+
+	<h1 class="pagetitle"><?=$media->title?></h1>
+	<div id="primarycontent">
+        <div id="videocontent">
+    		
+			<div id="mediaplayer">
+			<?=highlightSearchTerms($content->draw(), $_GET['keywords'], 'span', 'keywords')?>
+
+            <?php if ($file) {
+				$extension=substr($file, -3, 3);
+				$player="player_v2"; $player_height=320;	// messy code but cant resize stage for mp3
+				if ($extension=="mp3") {	
+					$player="mp3player_v1";
+					$player_height="100";
+				}
+				?>
+                <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" width="450" height="<?=$player_height;?>" id="<?=$player?>" align="middle" >
+                <param name="allowScriptAccess" value="sameDomain" />
+                <param name="movie" value="/silo/files/<?=$player?>.swf?f=<?=$media->filename?>" />
+                <param name="quality" value="high" />
+                <param name="bgcolor" value="#ffffff" />
+                <embed src="/silo/files/<?=$player?>.swf?f=<?=$media->filename?>" quality="high" bgcolor="#ffffff" width="450" height="<?=$player_height;?>" name="player_v2" align="middle" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" />
+                </object>
+                <p class="file_desc"><?=$media->text?></p>
+                <p><a class="grey-arrow" href="javascript:history.go(-1);">Return to the last page I was viewing</a></p>
+	            <?php 
+			} ?>
+			</div>
+            
+		</div>
+        
+        <div id="relatedvideocontent">
+        	<h1>Related videos</h1>
+            <div id="inner">
+	            <?=$media->drawRelated($vid, "video")?>
+            </div>
+        </div>
+       	<div id="relatedgallerycontent">
+        	<h1>Related galleries</h1>
+            <div id="inner">
+	        	<?=$media->drawRelated($vid, "galleries")?>
+            </div>
+        </div>
+        <div id="relatedlinkcontent">
+        	<h1 style="margin-bottom:5px;">Related links</h1>
+        	<?=$media->drawRelated($vid, "links")?>
+        </div>
+	</div>
+    
+
+<?php
+	if ($vid) $pageGUID=$vid; // Need this to show the correct tags just pray nothing ever needs it again :o)
+	$tag_type=3;
+	include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/footer.inc.php'); 
+?>

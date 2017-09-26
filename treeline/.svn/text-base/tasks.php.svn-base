@@ -1,0 +1,300 @@
+<?
+
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.init.php");
+
+	//if (!$site->getConfig("setup_comments")) redirect("/treeline/");
+	
+	$action = read($_REQUEST,'action','');
+	$tid = read($_REQUEST,'tid',0);
+	$guid = read($_REQUEST, 'guid', '');
+	$hid = read($_REQUEST, "hid", 0);
+	//print "got tid($tid) guid($guid) hid($hid)<br>\n";
+		
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+
+	if ($_SERVER['REQUEST_METHOD'] == "POST") {
+
+		if ($action=="reject") {
+			$feedback="error";
+			$message[]="invalid action requested";
+			$action="";
+		}
+		
+	}
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+	
+		if ($action == 'mark-as-completed' && $tid>0) {
+			$tasks->completed($tid);
+			$tasks->loadList();
+			$action="list";
+			$tid=$guid='';
+		}
+		
+		if ($action == 'approve') {
+			$feedback="error";
+			$message[]="Invalid action requested";
+			$action="";
+		}
+		
+	}
+
+
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = '
+
+table.tl_list td {
+	padding-right: 20px;
+}
+	
+';
+
+	// Page title	
+	$pageTitleH2 = ($action) ? 'My Tasks : '.ucwords(str_replace("-", " ", $action)) : 'My Tasks';
+	$pageTitle =  $pageTitleH2;
+	$pageClass = 'tasks';
+
+	if (!$action) $action="list";
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');
+
+
+
+
+?>
+
+
+<div id="primarycontent">
+<div id="primary_inner">
+<?php
+
+echo drawFeedback($feedback,$message);
+
+
+if ($tid>0 || $guid>'') { 
+
+	if ($tid>0) $tasks->loadByID($tid);
+
+	// If there is a page/panel related to this task then load that too.
+	if ($guid>'' && !$tasks->guid>'') {
+		$tasks->loadByGUID($guid, $hid);
+	}
+
+	$extra_info='';
+
+	if ($tasks->guid>'') { 
+		//print "info(".$tasks->info.") title(".$tasks->title.")<br>\n";
+		if ($tasks->info=="Page saved" || $tasks->info=="Panel saved") {
+			$pageactions = $page->drawEditCheckboxes($tasks->guid, $tasks->type, $tasks->placeholder, $tasks->template, $tasks->publishable, $tasks->pagelocked, $tasks->pageoffline);
+			$pagetitle = ucfirst($tasks->type)." awaiting publishing";
+		}
+		else if ($tasks->title=="Page note") {
+			$pageactions = $page->drawEditCheckboxes($tasks->guid, $tasks->type, $tasks->placeholder, $tasks->template, $tasks->publishable, $tasks->pagelocked, $tasks->pageoffline);
+		}
+		else if (substr($tasks->info,0,7)=="Comment") {
+			$comment_id=substr($tasks->info,8,strpos($tasks->info," ", 9)-8);
+			$pageactions=$page->drawCommentsCheckboxes($tasks->guid, $comment_id);
+			$pagetitle = "A new comment has been added to: <strong>".$tasks->pagename."</strong>";
+		}
+		else if (substr($tasks->info,0,9)=="ENTRY ID:") { 
+			$pageactions = $page->drawEditCheckboxes($tasks->guid, $tasks->type, $tasks->placeholder, $tasks->template, $tasks->publishable, $tasks->pagelocked, $tasks->pageoffline);
+			// Set up options allowed for events applications
+			$entry_id = substr($tasks->info, 9);
+			$query = "SELECT * FROM event_entry ee 
+				LEFT JOIN event_entry_data eed on ee.id=eed.entry_id
+				WHERE ee.id=".$entry_id;
+			//print "$query<br>\n";
+			if ($entry=$db->get_row($query)) {
+				$entrant=($entry->title?$entry->title." ":"").($entry->forenames?$entry->forenames." ":"").$entry->surname;
+				$extra_info.='<tr><td>Requested by: </td><td>'.$entrant.'</td></tr>';			
+				if ($entry->registered==-1) $extra_info.='<tr><td>Status: </td><td>Application rejected</td></tr>';
+				// Registered, do they need a printed ticket??
+				else if ($entry->registered==1) {
+					$extra_info.='<tr><td>Status: </td><td>Application successful</td></tr>';
+					if ($tasks->title=="Event ticket") {
+						$ticket_link = "/silo/pdf/events/".$entry->event_guid."/ticket-".$entry->entry_id.".pdf";
+						//print "details ".print_r($entry, true)."<br>\n";
+						$applicant_data = $entry->forenames.($entry->surname?" ".$entry->surname:"");
+						$applicant_data .= $entry->address?"<br />".nl2br($entry->address):"";
+						$applicant_data = '<tr><td valign="top">Applicant</td><td><p class="taskinfo">'.($applicant_data?$applicant_data:"This applicant did not enter their name or address").'</p></td></tr>';
+						if (!$applicant_data) $no_applicant_data = " this applicant";
+						$extra_info.='<tr><td>Suggested action: </td><td>Please ensure a copy of the <a href="'.$ticket_link.'" target="_blank">ticket for this event</a> has been printed off and posted to'.$no_applicant_data.'</td></tr>';
+						$extra_info.=$applicant_data;
+							
+						//print "Send to ".$entry->member_id."<br>\n";
+						//print "ticket ".$ticket_link."<br>\n";
+						
+					}
+				}
+				else $extra_info.='<tr>
+					<td>Suggested action: </td>
+					<td>
+						<a href="/treeline/events/?guid='.$tasks->guid.'&amp;action=preview-register-form&amp;entry='.$entry_id.'">View entry form</a> 
+						then <a href="/treeline/events/?guid='.$tasks->guid.'&amp;entry='.$entry_id.'&amp;action=accept&amp;tid='.$tasks->id.'">accept</a> 
+						or <a href="/treeline/events/?guid='.$tasks->guid.'&amp;entry='.$entry_id.'&amp;action=reject&amp;tid='.$tasks->id.'">reject</a> their application
+					</td>
+					</tr>';			
+			}
+			else $extra_info.='<tr><td>Entry data: </td><td><strong>Could not locate eventy entry('.$tasks->info.')</strong></td></tr>';			
+			//print "set xi($extra_info)<br>\n";
+
+		}
+		else {
+			//print_r($tasks);
+		}
+	}
+	// Task only processing..
+	else {
+		if (preg_match("/^(blogs|forum) id:(\d*)$/", $tasks->info, $reg)) {
+			$tmp_pagelink = ($reg[1]=="forum"?"forums":$reg[1]);
+			$info_text='<tr><td>Please use the <a href="/treeline/'.$tmp_pagelink.'/">Manage '.$reg[1].'</a> page to view and process abuse reports. This task will be automatically removed from the list once this report has been dealt with.</td></tr>';
+			$deny_completed=true;
+		}
+		else if ($tasks->title=="Offline page hit") $info_text="Check the page ".$tasks->info." to ensure this offline page is not linked";
+	}
+	
+	if (!$pagetitle) $pagetitle = $tasks->title;
+	?>
+
+    <h2 class="pagetitle rounded">Step 2 of 2 : View task and take action</h2>
+    <h3><?=$pagetitle?></h3>
+
+	<?php 
+	// Create a pretty info box if we need one.
+	if ($tasks->info>'' && $tasks->id>0) { 
+		if ($entry_id>0) ;	// Dont show info for events tasks.
+		else {
+			if (!$info_text) $info_text=$tasks->info;
+			if ($info_text) $info_text='<p class="taskinfo">'.$info_text.'</p>';
+			echo $info_text;
+		}
+	} 
+	?>
+
+	<table class="tl_list" style="width: auto">
+    <?php if ($tasks->creator) { ?>
+    <tr>
+    	<td>Added by</td>
+    	<td><?=$tasks->creator?></td>
+    </tr>
+    <?php } ?>
+    
+    <?=$extra_info?>
+    
+    <?php if ($tasks->id>0 && !$deny_completed) { ?>
+    <tr>
+    	<td>Date completed</td>
+    	<td><?=($tasks->completed?$tasks->completed:'<a href="/treeline/tasks/?tid='.$tid.'&amp;action=mark-as-completed">Mark as completed</a>')?></td>
+    </tr>
+    <?php } ?>
+    </table>
+
+	<?php if ($tasks->guid>'') { ?>
+		
+	   	<h3>This tasks refers to the following</h3>
+        <table class="tl_list">
+        <thead>
+            <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Type</th>
+            <th scope="col">Updated</th>
+            <th scope="col">Last used by</th>
+            <th scope="col" colspan="5">Manage this page</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            	<td><strong><?=$tasks->pagename?></strong></td>
+                <td><?=(ucfirst($tasks->type))?></td>
+                <td><?=$tasks->updated?></td>
+                <td><?=$tasks->updated_by?></td>
+                <td class="action"><?=$pageactions?></td>
+            </tr>
+        </tbody>
+        </table>
+    <?php } ?>
+        
+    
+    <?php
+}
+// List all tasks allocated to this user
+else if ($action=="list") { 
+	?>
+
+    <h2 class="pagetitle rounded">Step 1 of 2 : Choose from tasks allocated to you</h2>
+
+    <?php 
+	if ($tasks->total>0) {
+		if (is_array($tasks->tasklist)) {
+			foreach($tasks->tasklist as $result) {
+			
+				$ex_link = $ex_class = '';
+				//print_r($result);
+				
+				//print "switch (".$result->title.")<br>\n";
+				switch($result->title) {
+					case "pages-comments" : 
+						$task_title="New comment";
+						break;
+					case "panels" :
+						$ex_link = "&KeepThis=true&TB_iframe=true&height=500&width=".$site->getConfig('site_page_width');
+						$ex_class="thickbox";
+					case "pages" :
+						$task_title="Awaiting publication";
+						break;
+					case "Page note": 
+						$task_title="Page note from ".$result->from;
+						break;
+					default: 
+						$task_title=$result->title;
+						break;
+				}
+				
+				$allocated_to=$result->uid>0?"You":"Any ".$result->group;
+				
+				if (!$result->id && $result->guid) $action_link="/treeline/tasks/?guid=".$result->guid."&amp;hid=".$result->hid;
+				else if ($result->id) $action_link="/treeline/tasks/?tid=".$result->id."&amp;guid=".$result->guid."&amp;hid=".$result->hid;
+				
+				$html.='<tr>';
+				$html.='<td nowrap><a href="'.$action_link.'">'.$task_title.'</a></td>';
+				$html.='<td>';
+				if ($result->page_title && $result->guid) $html.='<a class="'.$ex_class.'" href="'.$page->drawLinkByGUID($result->guid).'?mode=preview'.$ex_link.'" target="_blank">'.$result->page_title.'</a>';
+				$html.='</td>';
+				$html.='<td nowrap>'.$result->added.'</td>';
+				$html.='<td nowrap>'.$allocated_to.'</td>';
+				$html.='</tr>';
+			}
+		}
+	}
+	else $html='<tr><td>There are no tasks allocated to you</td></tr>';
+	
+	if ($html) {
+		?>
+        <table class="tl_list" style="width: auto;">
+        <thead>
+            <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Page</th>
+                <th scope="col">Date</th>
+                <th scope="col">Alloated to</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?=$html?>
+        </tbody>
+        </table>
+		<?php 
+    } 
+}
+
+
+
+?>
+</div>
+</div>
+<?php 
+
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php");
+
+?>

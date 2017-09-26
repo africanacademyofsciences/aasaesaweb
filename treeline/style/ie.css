@@ -1,0 +1,32 @@
+/* 
+
+	Treeline IE Fixes CSS
+
+	Description: Fixes layout bugs in Internet Explorer
+
+	written by: Phil Thompson => phil.thompson@ichameleon.com
+	
+	last edited on:
+	last edited by: 
+
+	Table of Contents
+
+*/
+
+ul#menu{
+	margin-left: 5px;
+}
+
+div.tl-box div.tl-head h2.tl-head-right {
+	line-height: 80%;
+}
+
+
+
+
+div.hasHelp{
+	clear: both;
+	float: left;
+}
+
+

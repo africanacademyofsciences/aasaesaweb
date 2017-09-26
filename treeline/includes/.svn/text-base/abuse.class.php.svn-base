@@ -1,0 +1,223 @@
+<?php
+
+
+class Abuse {
+
+	public $errmsg = array();
+	
+	public function Abuse() {
+		//print "abuse created";
+	}
+	
+	public function report($id, $type, $from_email="") {
+		global $db, $site;
+		//print "A::r($id, $type, $from_email, $captcha)<br>\n";
+		
+		if (!$id || !$type) $this->errmsg[]="Failed to report abuse - data error";
+		else if (!$from_email || !is_email($from_email)) $this->errmsg[]="Email address invalid";
+		else {
+			if ($history_id = addHistory(($_SESSION['member_id']+0), "abuse-report", $id, $from_email, $type)) {				
+				// Send email to the reporter
+				//print "got history id($history_id)<br>\n";
+				include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+				include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+				include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+				$report_link = '<a href="'.$site->link.'/'.$type.'/?action=report&id='.$history_id.'">Report this item as abusive</a>';
+				$data = array("REPORT_LINK"=>$report_link);
+				$newsletter = new Newsletter();
+				if ($newsletter->sendText($from_email, "ABUSE-REQUEST", $data)) return true;
+				else $this->errmsg[]="Failed to send report email to $from_email";
+
+				//return $this->suspend($type, $id);
+				return true;
+			}
+			else $this->errmsg[]="Unexpected failure to log report";
+		}
+		return false;
+	}
+	
+	// Suspend an item from the history table.
+	// we should be able to get the table, field and post id from the history id.
+	public function suspendFromHistory($history_id) {
+		global $db;
+		$max_report_days = 7;
+		if ($info = $this->getReportInfo($history_id)) {
+			//print "got details (".print_r($info, true).")<br>\n";
+			if ($info->complete) $this->errmsg[]="This abuse report has already been finalised. You can only click this link one time.";
+			else if ($info->age > $max_report_days) $this->errmsg[]="This abuse report was submitted ".$info->age." days ago. You will need to submit a new abuse report and click the follow up link within $max_report_days days if you still wish to report this item as abuse.";
+			else {
+				//if ($info->firstname) $this->errmsg[]="Reported by ".$info->firstname." ".$info->surname;
+				//$this->errmsg[]="Reported ".$info->age." days ago. Complete(".($info->complete+0).")";
+				//$this->errmsg[]="Would suspend(".$info->table.", ".$info->info.")<br>\n";
+				return $this->suspend($info->table, $info->id, $history_id);
+			}
+		}
+		else $this->errmsg[]="Failed to collect data for this report ID";
+		return false;
+
+	}
+	
+	public function suspend($table, $id, $history_id=0) {
+		global $db, $site;
+		
+		$email = '';
+		if (!$table || !$id) {
+			$this->errmsg[]="Suspend not passed enough information to proceed";
+		}
+		else {
+			$field = "id";
+			
+			// 1 - Suspend the item
+			if ($table=="forum") { 
+				// Little bit of fixing for forums.
+				$title = $db->get_var("SELECT title from forum_posts WHERE post_id=".$id);
+				$query = "UPDATE forum_posts SET suspended=-1 WHERE post_id=$id";
+			}
+			else {
+				$title = $db->get_var("SELECT title from $table WHERE $field=".$id);
+				$query = "UPDATE $table SET suspended=-1 WHERE $field=$id";
+			}
+			//print "$query<br>\n";
+			if ($db->query($query)) {
+
+				// Update the history record if we are using captcha/email
+				if ($history_id>0) {
+					$query = "UPDATE history SET completed_date=NOW(), completed_by=0, completed_action='SUSPENDED' WHERE id = ".$history_id;
+					if ($row = $db->get_row("SELECT user_id, info as email FROM history WHERE id=".$history_id." LIMIT 1")) {
+						$email = $row->email;
+						$member_id = $row->user_id;
+					}
+					//print "collected email($email) user($member_id)<br>\n";
+					$db->query($query);
+				}
+				else {
+					// Not using delayed email abuses system get member ID from session
+					$member_id = $_SESSION['member_id'];
+				}
+	
+				// 2 - Add report and email admin team to let them know they should investigate.
+				if (addHistory(-1, "abuse", $id, $history_id?"history-".$history_id:'', $table)) {				
+					$tasks = new Tasks($site->id);
+					// Add a task for all superusers
+					$tasks->add(0, "Abuse reported", '', $table." id:".$id, 1);
+					$data = array("ABUSE-PAGE"=>$type,
+						"ABUSE-SECTION"=>$type,
+						"MEMBER-ID"=>$member_id,
+						"EMAIL"=>$email,
+						"ITEM-TITLE"=>$title
+					);
+					$tasks->notify("abuse-report", $data);
+					return true;
+				}
+				else $this->errmsg[]="Failed to add history record for abuse report";		
+			}
+			else $this->errmsg[]="Failed to mark this post as suspended. Its possible this post has already been suspended.";
+		}
+		return false;
+	}
+
+	// This updates any outstanding reports associated with and id
+	// there might not be any so we dont worry if the query does not update any records.
+	public function update($id, $type, $status) {
+		global $db, $site;
+		//print "u($id, $type, $status)<br>\n";
+		$query = "UPDATE history SET 
+			completed_date=NOW(), completed_by=".$_SESSION['treeline_user_id'].",
+			completed_action = '".strtoupper($status)."'
+			WHERE msv=".$site->id." 
+			AND action='abuse' AND `table`='$type' 
+			AND guid='$id' AND completed_date IS NULL";
+		$db->query($query);
+		//print "$query<br>\n";
+		
+		// Also need to check if there are any tasks relating to this report and remove them from 
+		// the task list
+		$query = "UPDATE tasks SET completed=NOW() 
+			WHERE description='".$type.' id:'.$id."'
+			AND completed IS NULL";
+		//print "$query<br>\n";
+		$db->query($query);
+	}
+	
+
+	// Manage abuse reports....
+	public function manage($type) {
+		global $db, $site, $help;
+		$html = '';
+		
+		$table=$type; 
+		$field="id";
+		$action_page = '';
+		if ($type=="forum") { $table="forum_posts"; $field="post_id"; $action_page="forum"; $action_field="post"; }
+		else if ($type=="blogs") {  $action_page="blogs"; $action_field="bid"; }
+				
+		$query = "SELECT h.guid as id, 
+			date_format(h.date_added, '%D %b %Y') as added,
+			t.* 
+			FROM history h
+			INNER JOIN $table t ON h.guid = t.$field
+			WHERE h.msv=".$site->id."
+			AND h.action='abuse' AND h.completed_date IS NULL 
+			AND `h`.`table`='$type'
+			ORDER BY date_added DESC";
+		//print "$query<br>\n";
+		
+		if ($results = $db->get_results($query)) {
+			foreach ($results as $result) {
+				$html.='<tr>
+<td><a '.$help->drawInfoPopup("View full post").' href="'.$site->link.$action_page.'/?'.$action_field.'='.$result->id.'&amp;admin" target="_blank">'.$result->title.'</a></td>
+<td>'.$result->report_count.'</td>
+<td align="center" nowrap>'.$result->added.'</td>
+<td class="action">
+	<a '.$help->drawInfoPopup("Delete this item").' href="?'.$action_field.'='.$result->id.'&amp;action=abuse-delete" class="delete">Suspend</a>
+	<a '.$help->drawInfoPopup("Unsuspend this item").' href="?'.$action_field.'='.$result->id.'&amp;action=abuse-restore" class="publish">Unsuspend this item</a>
+</td>
+</tr>
+';
+			}
+			if ($html) $html = '<table class="tl_list"><thead>
+<tr>
+	<th>Author</th>
+	<th>Reports</th>
+	<th>Last report</th>
+	<th>Manage</th>
+</tr>
+</thead>
+<tbody>
+	'.$html.'
+</tbody>
+</table>';
+		}
+		return $html;
+		
+		
+	}
+		
+	private function getReportInfo($report_id) {
+		global $db, $site;
+		$msg = "<!-- Compile report info for abuse report ($report_id) --> \n";
+		$query = "SELECT 
+			h.guid as id, h.table, 
+			datediff(NOW(), h.date_added) AS age,
+			IF(h.completed_date IS NULL,0,1) AS complete,
+			m.member_id, m.firstname, m.surname
+			FROM history h
+			LEFT JOIN members m ON m.member_id=h.user_id 
+			WHERE h.id=".$report_id."
+			LIMIT 1";
+		$msg .= "<!-- $query -->\n";
+		$info = $db->get_row($query);		
+		$msg.="<!-- r info( \n".print_r($info, true).") -->\n";
+		//print $this->uncomment($msg);
+		//mail("phil.redclift@ichameleon.com", $site->title." abuse report checked(comments)", $msg);
+		return $info;
+	}
+
+	private function uncomment($s) {
+		return str_replace(array("<!--","-->","\n"), array("", "", "<br>\n"), $s);
+	}
+		
+}
+
+
+?>

@@ -1,0 +1,98 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+	padding: 0;
+	background-color: #fff;
+}
+h1.notes-header {
+	font-size: 135%;
+	background-color: #4B7EBF;
+	float: left;
+	margin: 0;
+	padding: 6px 0 6px 20px;
+	width: 315px;
+}
+h1.notes-header span {
+	float:left;
+	width: 173px;
+	font-weight: bold;
+	color: #fff;
+}
+
+
+form {
+	float: left;
+	clear: left;
+	width: 295px;
+	padding: 0px 20px;
+	border-bottom: 1px solid #CFD3DF;
+	background-color: #DAE2E4;
+}
+	form fieldset {
+		clear: left;
+	}
+	form fieldset label {
+		color: #60706F;
+		width: auto;
+		font-weight: normal;
+	}
+	form fieldset textarea,
+	form fielset select {
+		width: 295px;
+	}
+	form fieldset input.submit {
+		float: right;
+		font-size: 90%;
+	}
+			
+
+p.note-auto {
+	margin: 10px 20px 0;
+	padding: 10px;
+	float: left;
+	width: 275px;
+	border: 1px solid #819093;
+	background-color: #FEFFB3;
+	font-size: 90%;
+	color: #819093;
+	line-height: 110%;
+}
+p.message {
+	margin: 10px 0px;
+	padding: 10px;
+	float: left;
+	width: 275px;
+	border: 1px solid #819093;
+	background-color: #FEFFB3;
+	font-size: 90%;
+	color: #819093;
+	line-height: 110%;
+}
+p.failure {
+	background-color: #FF9999;
+}
+
+div.note-user {
+	float: left;
+	width: 295px;
+	margin: 10px 20px 0 20px;
+	border-bottom: 1px solid #D0D4D3;
+	color: #617171;
+}
+	div.note-user p  {
+		font-size: 90%;
+	}
+	div.note-user p.header  {
+		float: left;
+		width: 295px;
+	}
+	div.note-user p.header span.name {
+		float:left;
+		font-size:120%;
+	}
+	div.note-user p.header span.date {
+		float: right;
+		font-size: 90%;
+	}
+

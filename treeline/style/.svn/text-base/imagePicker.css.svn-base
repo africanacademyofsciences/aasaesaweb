@@ -1,0 +1,226 @@
+body {
+	margin:0;
+	padding:0;
+	/* background: #edf1f1; */
+	/* You cant actually set this with CSS???? as it gets overwritten by JS later*/
+	background-color: #DAE3E3; 
+	padding-bottom:10px;
+	color: #6E7D7E;
+}
+
+div#structure{
+	width: 100%;
+	margin:0;
+	padding:0;
+	float:left;
+}
+
+div#content {
+	width:100%;
+	margin:0;
+	float:left;
+	border:none;
+	padding:0;
+}
+	div#content p {
+		margin: 0;
+		padding: 2px 0;
+	}
+	
+div#controls {
+	float:left;
+	width:100%;
+	height: 30px; 
+	margin:0;
+}
+
+div#gallery {
+	float:left;
+	width:100%;
+	padding-top: 15px; 
+	min-height:400px;
+	/*height: 450px;*/
+}
+
+	div#inside_structure{
+		background-color: #f3f7f7;
+		border-bottom: 1px solid #ab0d54;
+		height: 86px; 
+		padding: 10px 0 0;
+		width: 100%;
+		margin:0;
+	}
+	
+
+#imagepicker,
+#categoryselector {
+		margin: 0;
+		padding:0;
+	}
+	form#imagepicker fieldset,
+	form#categoryselector fieldset {
+		border: none;
+		margin:0;
+		padding:0;
+	}
+	#imagepicker fieldset#upload-image {
+		width: 250px;
+	}
+	
+	#imagepicker div.field,
+	#categoryselector div.field {
+		clear: left;
+		margin: 0 0 10px 0;
+	}
+	#imagepicker div.field label,
+	#categoryselector div.field label {
+		width: 135px;
+		display: block;
+		float: left;
+		font-weight: bold;
+	}
+	#imagepicker div.field input.text,
+	#categoryselector div.field input.text {
+		width: 220px; 
+		border: 1px solid #a7a6aa;
+	}
+	
+	#imagepicker div.field select,
+	#categoryselector div.field select {
+		width: 222px; 
+		border: 1px solid #a7a6aa;
+	}	
+	#imagepicker div.field input.button,
+	#imagepicker td.field input.button,
+	#categoryselector div.field input.button,
+	#categoryselector div.field input.button {
+		border: 1px solid #ab0d54;
+		background: #ab1a5b url('/treeline/img/layout/button-submit-bg.gif') repeat-x;
+		color: #fff;
+		height: 18px;
+		width: 80px;
+	}	
+	#imagepicker td.field,
+	#categoryselector td.field {
+		padding-top:10px;
+	}
+	
+table#img-margin {
+	width: 400px;
+}
+	table#img-margin td {
+		
+	}
+		table#img-margin td.label {
+			padding-left:5px;
+		}
+		table#img-margin td.text {
+			text-align: right;
+		}
+	
+	#previous, #next {
+		margin: 10px;
+		border-width: 1px;
+		border-style: solid;
+		font-weight:bold;
+		height: 18px;
+		width: 126px;
+		padding: 0 0 3px 0;
+	}
+	
+	#previous {
+		float: left;
+		border-color: #c5cfd9;
+	}
+	#next {
+		float: right;
+		
+	}
+	#next.hi, #previous.hi {
+		border-color: #878e95;
+		background: #c9d6e7 url('/treeline/img/imagepicker/grey_button_hi.gif') repeat-x;
+		color: #000;
+	}
+	#next.lo, #previous.lo {
+		border-color: #c5cfd9;
+		background: #e2e9f1 url('/treeline/img/imagepicker/grey_button_lo.gif') repeat-x;
+		color: #b4b4b4;
+	}		
+	
+	/* individual image shots */
+	div.image {
+		float: left;
+		width: 120px;
+		height: 175px;
+		padding: 10px;
+		margin: 0px 15px 15px 15px;
+		background: #f3f4f4 url('/treeline/img/imagepicker/imagepicker_image.gif') no-repeat;
+	}
+		div.image div.frame {
+			width: 100px;
+			height: 100px;
+			border: 1px solid #878e95;
+			background-color: #f5f6f6;
+			padding: 9px;
+			text-align: center;
+			margin:0;
+		}
+		div.image div.name {
+			margin: 6px 0 9px 0;
+			height: 20px;
+			overflow:hidden;
+			font-family: Tahoma, Arial, Helvetica, sans-serif;
+			font-size: 11px;
+		}
+		
+		div.image a {
+			display: block;
+			padding-left: 18px;
+			background-repeat: no-repeat;
+			background-position: left center;
+			font: 11px Tahoma, Arial, Helvetica, sans-serif;
+			background-image: url('/treeline/img/imagepicker/arrow.gif');
+			color: #ab0d54;
+			text-decoration: none;
+		}	
+	
+		div.image a img{margin-left: -18px; border: none;}
+	
+	/* Styles for the "insert image" stage: */
+	
+	div.size {
+		clear: left; 
+		padding-top: 10px;
+		margin: 0 10px;
+	}
+	div.size img {
+		float: left; border: 1px solid #878e95;
+	}
+	div.size div.details {
+		float: left; margin-left: 10px
+	}
+	div.size div.details p {
+		margin-top: 0;
+	}
+	div.size div.details p a {
+		color: #ab0d54;
+	}	
+	
+div.img_file {
+	margin: 10px;
+	float: left;
+}
+	div.img_file img {
+		float: left;
+	}
+	div#content div.img_file p {
+		float: left;
+		width: 560px;
+		margin: 0 10px;
+	}
+	
+
+div.img_params {
+	margin: 10px;
+	float: left;
+}

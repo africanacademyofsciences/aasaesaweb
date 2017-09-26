@@ -1,0 +1,24 @@
+<?php 
+	$email = ($_POST['email']) ? $_POST['email'] : ''; 
+?>
+<form id="loginForm" class="" method="post" action="<?=$siteLink?>/member-login/">
+<fieldset class="border">
+	<input type="hidden" name="fwd" value="<?=$_SERVER['REQUEST_URI']?>" />
+	<fieldset>
+        <label for="email">Email</label>
+        <input class="text" type="text" value="<?php echo $email; ?>" id="email" name="email" />
+    </fieldset>
+    <fieldset>
+        <label for="password" class="required">Password</label>
+        <input class="text" type="password" value="" id="password" name="password" />
+    </fieldset>
+    <fieldset>
+        <input type="hidden" name="action" value="login" />
+        <input type="hidden" name="treeline" value="login" />
+        <label for="f_submit" style="visibility:hidden;" id="login-label">Login</label>
+        <input type="submit" id="f_submit" class="link-button" value="Login" />
+        <a class="register" href="/contact-details/?name=Become-a-member">register</a>
+    </fieldset>
+    <p style="padding-left:0px;"><a class="forgot" href="<?=$site->link?>member-login/?action=forgotten-password">Forgotten password?</a></p>
+</fieldset>
+</form>

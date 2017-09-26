@@ -1,0 +1,26 @@
+<?php 
+if ($page->getMode() == 'edit'){ 
+	echo '</fieldset>
+</form>
+<script type="text/javascript" src="/treeline/behaviour/helpPopup.js"></script>
+'.$page->drawTinyMCE($mceFiles).'
+<script type="text/javascript" src="/treeline/behaviour/treeline.js"></script>
+<script type="text/javascript" src="/treeline/behaviour/thickbox/thickbox.js"></script>
+';
+
+	$extraJSbottom.='
+	function editorNotes(guid) {
+		var settings="scrollbars=yes,top=100,left=200,height=500,width=346,directories=no,location=no,resizeable=no";
+		var newwindow = window.open("/treeline/ednotes/?guid="+guid, "editwin", settings);
+		if (window.focus) { newwindow.focus(); }	
+	}
+	function panelManager(guid) {
+		var settings="scrollbars=yes,top=100,left=200,height=500,width=600,directories=no,location=no,resizable=yes";
+		var panelwindow = window.open("/treeline/panelManager/?guid="+guid, "panelwin", settings);
+		if (window.focus) { panelwindow.focus(); }	
+	}
+	
+';
+
+}
+?>

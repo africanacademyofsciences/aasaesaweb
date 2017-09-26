@@ -1,0 +1,131 @@
+<?php
+
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/treeline.init.php");
+	include($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/newsletter.class.php");
+
+	$newsletter = new newsletter(addslashes($_REQUEST["id"]));
+	
+	$action = read($_REQUEST,'action','');
+	$mode = read($_REQUEST, "mode", "");
+	$guid = read($_REQUEST,'guid','');
+		
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+	
+	// PAGE specific HTML settings
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	$js = array(); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = $pagetitle = ucfirst($mode).' Newsletter';
+	$pageClass = 'newsletters';
+	
+	//print "got action($action) mode($mode) <br>\n";
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+
+<div id="primarycontent">
+  <div id="primary_inner">
+	<?php 
+	if (isset($_GET['test'])){
+		$feedback = 'success';
+		$message = ($_GET['test']+0)." message(s) were sent";
+		echo drawFeedback($feedback,$message);
+	}
+	 	
+	if(!$newsletter->id){
+		$error = 'error';
+		$message = 'Cannot find the newsletter you are trying to send.';
+		echo drawFeedback($feedback,$message);
+	} 
+	else {
+
+		if ($newsletter->status!="S") {
+		
+			$query= "SELECT m.member_id, 0 as entry_id
+			  FROM newsletter_user_preferences nup 
+			  LEFT JOIN members m ON m.member_id = nup.member_id 
+			  WHERE nup.preference_id in ( 
+				  SELECT preference_id 
+				  FROM newsletter_send_preferences nsp 
+				  WHERE newsletter_id = '".$newsletter->id."'
+				  ) 
+			  GROUP BY m.email ";
+			 $query.="UNION 
+			 	SELECT ee.member_id, ee.id AS entry_id FROM event_entry ee
+				LEFT JOIN event_entry_data eed ON ee.id=eed.entry_id
+				WHERE eed.email IS NOT NULL 
+				AND ee.registered>0 AND ee.event_guid in (
+					SELECT event_id 
+					FROM newsletter_send_preferences nsp
+					WHERE newsletter_id=".($newsletter->id+0)."
+					AND event_id IS NOT NULL
+					)
+				GROUP by eed.email";
+			//print "$query<br>";
+			$db->get_var($query);
+			$n_count=$db->num_rows;
+
+			$page_title = 'This newsletter would be sent to <b>'.($n_count+0).'</b> subscribers';
+		}
+		else $page_title = 'Follow up emails';
+        
+		$page_html = '
+        
+        <p><strong>We would recommend that you send a test email first.</strong> If you choose to send a test mailing it will be emailed immediately.</p>
+       
+        <p>To send a test mailing now, enter up to 10 email addresses in the box below, seperating them with either semi-colons ";" or carriage-returns (don\'t use live subscriber email addresses for this). </p>
+		';	
+	    
+        if ($newsletter->status!="S") { 
+			$page_html.='
+            <p>Alternatively, to send your newsletter now, click "send now".</p>
+            <p>Newsletters are mailed out regularly during the day at the rate of approximately 500 every 5 minutes.</p>
+            <p>If you do not want to send your newsletter now, you can come back and send this newsletter any time you prefer.</p>
+			';
+        } 
+		
+		$page_html .= '
+        
+        <form id="frmTestSend" method="post" action="/treeline/newsletters/sendproc.php">
+        <fieldset>
+			<input type="hidden" name="mode" value="'.$mode.'" />
+            <input type="hidden" name="id" value="'.$newsletter->id.'" />
+            <p class="instructions">Fields marked * are required.</p>
+            <label for="test_emails">Email list to test</label>
+            <textarea name="nl_test_send_emails" id="nl_test_send_emails" rows="3" cols="5">'.($_POST['nl_test_send_emails']?$_POST['nl_test_send_emails']:'').'phil.redclift@ichameleon.com</textarea>
+            <br />
+            <input type="hidden" name="validate_nl_test_send_emails_optional" value="false" />
+            <input type="hidden" name="validate_nl_test_send_emails_nicename" value="Email list for Send a Test" />
+    		';
+			
+        if ($newsletter->status!="S") {
+			$page_html.='
+                <fieldset class="buttons">
+                    <a class="button thickbox" href="'.$site->link.'newsletter/?id='.$newsletter->id.'&amp;mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=600&amp;width=700" target="_blank">Preview email as html</a>
+				</fieldset>
+				<fieldset class="buttons">
+                    <a class="button thickbox" href="'.$site->link.'newsletter/?id='.$newsletter->id.'&amp;s=plain&amp;mode=preview&amp;KeepThis=true&amp;TB_iframe=true&amp;height=600&amp;width=700" target="_blank">Preview email as text</a>
+                </fieldset>
+				';
+        }
+
+		$page_html.='
+			<fieldset class="buttons">
+            	<input type="submit" class="cancel" name="test_send" value="Send a test" />
+                '.(($user->drawGroup()=="Superuser" && $mode=="send" && $newsletter->status!="S") ?'<input type="submit" class="submit" name="send_now" value="Send now" />':'').'
+            </fieldset>
+        </form>
+		';
+		echo treelineBox($page_html, $page_title, "blue");
+    } 
+	?>
+    
+</div>
+</div>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>

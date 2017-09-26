@@ -1,0 +1,272 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+/* Standard text and link colours */
+body {
+	background-color: #E9E9E9;
+	color: #9F9F9F;
+}
+a {
+	color: #9A96C9;
+}
+a:hover {
+	color: #787596;
+}
+a:active {
+	color: #787596;
+}
+h1, h2, h3, h4, h5 {
+	color: #9595AD;
+}
+
+
+/* ******************************************* */
+/* Access menu bar along the top of every page */
+div#access-menu {
+	background-color: #E0DFE4;
+}
+	/* Access menu text colour */
+	div#access-menu ul#accessMenu {
+		color: #AAA8B3;
+	}
+		/* Access menu link colours */
+		div#access-menu ul#accessMenu li a {
+			color: #AAA8B3;
+		}
+		div#access-menu ul#accessMenu li a:hover {
+			color: #fff;
+		}
+		div#access-menu ul#accessMenu li a:active {
+			color: #fff;
+		}
+/* ******************************************* */
+
+
+/* Banner tagline colours */
+div#header_img p,h1 a {
+	color: #fff;	
+}
+	div#header_img p,h1 a:hover { color: #9B99A5; }
+	div#header_img p,h1 a:active { color: #9B99A5; }
+
+
+/* Main menu colours */
+ul#menu {
+	background-color: #E0DFE4;
+}
+ul#menu li {
+}
+	ul#menu li a {
+		color: #A09EAB;
+	}
+	ul#menu li a:hover {
+		color: #B9B6C5;
+	}
+	ul#menu li a:active {
+		color: #B9B6C5;
+	}
+ul#menu li.selected {
+	background-color: #E0DFE4;
+}
+	ul#menu li.selected a {
+		color: #4A4848;
+	}
+	ul#menu li.selected a:hover {
+		color: #B9B6C5;
+	}
+	ul#menu li.selected a:active {
+		color: #B9B6C5;
+	}
+
+
+/* News ticker */
+li.update-title {
+	color: #9A9A9A;
+}
+
+
+/* Line below the title on the home page and content pages */
+div#mainNews h2,
+h1.pagetitle {
+	border-bottom-color: #989898;
+}
+
+
+
+/* Landing panels + Normal panels*/
+div#primarycontent div.landing-panel,
+div#secondarycontent div.panel
+{
+	background-color:#E0DFE4;
+	color: #666;
+}
+	div#primarycontent div.landing-panel h3,
+	div#secondarycontent div.panel h3
+	{
+		background-color: #A9AACB;
+		color: #fff;
+	}
+
+
+/* Extra CSS for workstream panels */
+/* Fonts/sizes are inherited from normal panels */
+div#secondarycontent div.workpanel {
+	background-color: #B4B0C3;
+	color: #fff;
+}
+	div#secondarycontent div.workpanel p a {
+		color: #827D96;
+	}
+	div#secondarycontent div.workpanel p a:hover {
+		color: #8A83B1;
+	}
+	div#secondarycontent div.workpanel p a:active {
+		color: #8A83B1;
+	}
+	div#secondarycontent div.workpanel p a.level-1 {
+		background-color: #E0DFE4;
+	}
+		div#secondarycontent div.workpanel p a.level-1:hover {
+			background-color: #D3D2D7;
+		}
+	div#secondarycontent div.workpanel p a.level-2 {
+		background-color: #E0DFE4;
+	}
+		div#secondarycontent div.workpanel p a.level-2:hover {
+			background-color: #D3D2D7;
+		}
+	div#secondarycontent div.workpanel p a.level-3 {
+		background-color: #E0DFE4;
+	}
+		div#secondarycontent div.workpanel p a.level-3:hover {
+			background-color: #D3D2D7;
+		}
+	div#secondarycontent div.workpanel p a.level-4 {
+		background-color: #E0DFE4;
+	}
+		div#secondarycontent div.workpanel p a.level-4:hover {
+			background-color: #D3D2D7;
+		}
+	div#secondarycontent div.workpanel p.level-5 {
+		background-color: #E0DFE4;
+	}
+		div#secondarycontent div.workpanel p a.level-5:hover {
+			background-color: #D3D2D7;
+		}
+	div#secondarycontent div.workpanel p.level-6up {
+		background-color: #E0DFE4;
+	}
+		div#secondarycontent div.workpanel p a.level-6up:hover {
+			background-color: #D3D2D7;
+		}
+	
+	
+	
+/* Calendar */
+/* Calendar header */
+ul#calendar-header li {
+	background-color: #E0DFE4;
+}
+	ul#calendar-header li a {
+		color: #9F9CC3;
+	}
+	ul#calendar-header li a:hover {
+		color: #545456;
+	}
+	ul#calendar-header li a:active {
+		color: #545456;
+	}
+	ul#calendar-header li.header-month {
+		color: #9F9CC3;
+	}
+	
+/* Calendar body */
+table#calendar td {
+	background-color: #E0DFE4;
+}
+	table#calendar td.inactive {
+		color: #fff;
+	}
+	table#calendar td.active {
+		color: #353537;
+	}
+		table#calendar td.active a {
+			color: #9F9CC3;
+		}
+		table#calendar td.active a:hover {
+			color: #353537;
+		}
+		table#calendar td.active a:active {
+			color: #353537;
+		}
+	table#calendar td p.today {
+		background-color: #D3D2D7;
+	}
+
+
+/* And finally some nice footer stuff we can change */
+div#footer div#copyright {
+	color: #9C9BA3;
+	background-color: #E0DFE4;
+}
+	div#footer div#copyright a {
+
+		color: #9C9BA3;
+	}
+	div#footer div#copyright a:hover {
+		color: #fff;
+	}
+	div#footer div#copyright a:active {
+		color: #fff;
+	}
+
+/* We suggest you ensure the footerMenu background colour is the same as the body above. */
+div#footerMenu {
+	background-color: #E9E9E9;
+}
+	div#footerMenu p {
+		color: #949293;
+	}
+		div#footerMenu p a {
+			color: #8C88C0;
+		}
+		div#footerMenu p a:hover {
+			color: #51514F;
+		}
+		div#footerMenu p a:active {
+			color: #51514F;
+		}
+		
+		
+	
+/* Content page stuff */
+
+/* Left hand menu */
+div#sidebar ul li a {
+	background-color: #E0DFE4;
+	border-color: #E0DFE4;
+	color: #ADA9A9;
+}
+	div#sidebar ul li a:hover {
+		color: #fff;
+	}
+	div#sidebar ul li a:active {
+		color: #fff;
+	}
+div#sidebar ul li.subon a {
+	background-color: #A9AACB;
+	border-color: #A9AACB;
+	color: #fff;
+}
+
+/* Content forms */
+form.contact fieldset.border ,
+form#f-add-comment fieldset.border
+{
+        border-color: #999;
+}
+form.contact,
+form#f-add-comment {
+        background-color: #E0DFE4;
+}

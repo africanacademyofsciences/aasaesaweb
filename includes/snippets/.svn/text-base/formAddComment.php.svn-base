@@ -1,0 +1,74 @@
+<?php
+	$feedback='error';
+	$message=array();
+	$f_name=$f_comment='';	
+	
+	// Do we need to run any searchings?
+	if ($_SERVER['REQUEST_METHOD']=="POST" && $_POST['comment_flag']) {
+
+		$f_name=$_POST['name'];
+		$f_email=$_POST['email'];
+		$f_comment=$_POST['comment'];
+			
+		if (!$f_name) $message[]="You must enter your name";
+		if (!$f_email) $message[]="You must enter your email address";
+		else if (!is_email($f_email)) $message[]="Your email address is not valid";
+		if (!$f_comment) $message[]="You must enter a comment";
+		
+		if (!$message) {
+
+			if ($comment->add($f_name, $f_email, $f_comment)) {
+				$feedback="success";
+				$message[]="Thank you for adding your comments to this page. Once your comment has been checked by a website administrator it will be added to the website";
+				$send_data=array();
+				$f_name=$f_email=$f_comment='';	
+
+				if(addHistory(0, 'Publish', $page->getGUID(), "Comment ".$comment->id." saved", "pages-comments")) {
+					// Its not critical if page saves fail to register in the history table.
+					$tasks=new Tasks($site->id);
+					$pageLink='(<a href="'.$page->drawLinkByGUID($page->getGUID()).'">'.$page->getTitle().'</a>)';
+					$sendParams = array(
+						"PAGELINK"=>$pageLink
+						);
+					$tasks->notify("publish-comment", $sendParams, 'Publisher+');
+				}
+			}
+			else $message=$comment->msg;
+		}
+		
+		echo drawFeedback($feedback, $message);
+	}
+	
+?>
+
+<h4 id="comment_header"><a name="f-comment-form"></a>Comment on this page</h4>
+
+<?php if ($comment->count>0) { ?>
+    <p id="p_view_comments"><a href="<?=$page->drawLinkByGUID($page->getGUID())?>?showcomments">View comments (<?=$comment->count?>)</a></p>
+<?php } ?>
+
+<form method="POST" id="f-add-comment" class="contact">
+<fieldset class="border">
+    <input type="hidden" name="comment_flag" value="1" />
+	<fieldset>
+        <label for="f_name">Your name</label>
+        <input type="text" name="name" id="f_name" class="text" value="<?=$f_name?>" />
+    </fieldset>
+	<fieldset>
+        <label for="f_email">Your email address</label>
+        <input type="text" name="email" id="f_email" class="text" value="<?=$f_email?>" />
+    </fieldset>
+	<fieldset>
+        <label for="f_comment">Your comment</label>
+        <textarea class="text" id="f_comment" name="comment"><?=$f_comment?></textarea>
+    </fieldset>
+	<fieldset>
+        <p id="f_moderated">Comments are moderated before publication</p>
+        <input class="button" type="submit" name="action" value="Add Comment" />
+    </fieldset>
+</fieldset>
+</form>
+
+
+    
+

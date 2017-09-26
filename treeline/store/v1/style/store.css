@@ -1,0 +1,147 @@
+
+form div.fields {
+	clear: left;
+}
+
+
+form#inventory {
+	padding: 10px 0 20px;
+}
+
+
+form#products {
+	
+}
+	form#products div.fields {
+		clear: left;
+	}
+		form#products div.fields input.text {
+			width: 350px;
+		}
+		form#products div.fields select {
+			width: 356px;
+		}
+		form#products textarea#product_short_desc {
+			width:350px;
+			height:5em;
+		}
+		form#products textarea#product_long_desc {
+			width:350px;
+			height:10em;
+		}
+		form#products select#productStatus {
+			width:120px;
+		}
+		form#products select#product_variants {
+			height:5em;
+		}
+	form#products fieldset#controls button.submit {
+		margin-bottom: 20px;
+	}
+
+
+
+	table caption {
+		line-height:1.4em;
+	}
+
+	table#newVariants,
+	table#variants {
+		width:90%;
+	}
+		table#newVariants td input,
+		table#variants td input {
+			border: 1px solid #CED3E0;
+		}
+		table#newVariants td input.int,
+		table#variants td input.int {
+			text-align:right;
+		}
+		table#newVariants td select,
+		table#variants td select {
+			width:100px !important;
+		}
+
+		table#newVariants td label,
+		table#variants td label{
+			width:100px;
+		}
+		
+	form#addNumberOfNewVariants label {
+		margin-right:10px;
+		width:auto;
+	}
+	form#addNumberOfNewVariants select {
+		width:3em;
+	}
+	form#addNumberOfNewVariants button {
+		margin:7px 0 0 10px;
+	}
+	
+	form.filter {
+		padding-bottom:10px;
+	}
+
+
+
+form#postage-form {
+
+}
+	form#postage-form fieldset div.fields {
+	
+	}
+		form#postage-form fieldset div.fields label {
+			width: 200px;
+		}
+		form#postage-form fieldset div.fields label.noclear {
+			clear: none;
+			width: auto;
+			margin-left: 10px;
+			margin-right: 10px;
+		}
+		form#postage-form fieldset div.fields input.text {
+			width: 100px;
+		}
+		form#postage-form fieldset div.fields input.checkbox {
+			margin: 8px 0;
+			padding: 0;
+			clear: none;
+		}
+		form#postage-form fieldset div.fields select#new-zone {
+			width: 200px;
+		}
+
+
+	a.fauxButtons {
+		background: #CB417F url("/treeline/img/layout/button-submit-bg.gif") left top repeat-x;
+		border: 1px solid #AB0D54;
+		color: #FFF;
+		display:block;
+		float:left;
+		font-size:100%;
+		margin-left:10px;
+		padding:2px 8px 3px 8px;
+		text-align:center;
+		text-decoration:none;
+		width:auto;
+	}
+	a.fauxButtons:link,
+	a.fauxButtons:visited,
+	a.fauxButtons:hover,
+	a.fauxButtons:active {
+		color:#fff;
+		text-decoration:none;
+	}
+
+	fieldset#controls button,
+	fieldset#controls input {
+		margin-right:100px;
+	}
+	
+table.treeline {
+}	
+	table.treeline th.col_total,
+	table.treeline td.col_total {
+		text-align: right;
+		padding-right: 0;
+	}

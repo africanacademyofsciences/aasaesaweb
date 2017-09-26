@@ -1,0 +1,113 @@
+@charset "utf-8";
+/* LOW GRAPHICS CSS */
+
+
+/* ALL PAGES */
+
+form, fieldset{
+	background-image: none !important;
+}
+
+/* BRANDING */
+div#header_img {
+	background: none !important;
+}
+
+div#branding span#logo{ 
+	color: #000; 
+	font-size: 260%;
+	text-indent: 0;
+}
+	div#branding span#logo a{
+		background: #FFF; 
+		color: #000;
+	}
+	div#branding span#logo a.logo {
+		background: #FFF; 
+		color: #000;
+	}
+div#landing-section {
+	background-image:none;
+}
+div.panel a {
+	background-image:none  !important;
+}
+	
+/* MEDIA LINKS */
+
+ul.multimedia li{
+	background: none !important;
+	list-style: disc;
+	margin-left: 10px;
+	padding-left: 0;
+}	
+
+ul.multimedia a{
+	background: none;
+}	
+	
+/* HOME PAGE */
+
+body.home div#home_banner{
+	height: 181px;
+}
+
+/* BUTTONS */
+body.home div#button1{
+	background: #AB1C25;
+	width: 198px;
+}
+body.home div#button2{
+	background: #FFF;
+	border: 1px solid #AB1C25;
+	width: 196px;
+}
+
+/* STORY PANEL */
+body.home div#story{
+	background: #F5EEE6;
+}
+
+body.home div#overlayed{
+	background: none;
+}
+
+/* WHERE WE WORK MAP */
+body.home div#wherewework div#map{
+	background: none;
+}
+
+/* LANDING PAGES */
+body.landingpage div#button1{
+	background: #B71E28;
+	width: 176px;
+}
+
+body.style2 div#banner{
+	background: none;
+	color: #111;
+}
+
+body.style2 div#banner p{
+	padding: 0;
+}
+
+/* RESOURCES */
+body.resources ul#serp li{
+	background: none; 
+	padding-left: 0px;
+	width: 711px;
+}
+	body.resources ul#serp li span.title {
+		width: 475px;
+	}
+
+/* PAGES */
+div#storypanel{
+	background: #F5EEE6;
+}
+
+div#overlayed{
+	display: none;
+}
+

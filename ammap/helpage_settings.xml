@@ -1,0 +1,50 @@
+<settings>
+  <projection>xy</projection>
+  <background>
+    <color>#ffffff</color>
+	<border_color>#ffffff</border_color>
+  </background>
+
+  <zoom>
+    <outline_color>#ffffff</outline_color>
+	<color_hover>#c9b89b</color_hover>
+	<color>938671</color>
+    <zoom_on_click>1</zoom_on_click>
+	<max>800%</max>
+	
+  </zoom>
+
+  <small_map>
+	<enabled>false</enabled>
+  </small_map>
+
+  <navigation_path>
+    <enabled>false</enabled>
+  </navigation_path>
+
+  <area>
+	<balloon_text>
+    	<![CDATA[{description}]]>
+    </balloon_text>
+	<border_color>#ffffff</border_color>
+	<active_only_if_value_set>false</active_only_if_value_set>
+    <color_solid>#ffffff</color_solid>
+    <color_light>#938671</color_light>
+	<color_unlisted>#c9b89b</color_unlisted>
+    <color_hover>#F25821</color_hover>
+    <disable_when_clicked>true</disable_when_clicked>
+  </area>
+  <text_box>                                                  <!-- text box is displayed when user clicks on an object and the object contains description. You can disable text box for individual objects in data file -->
+    <enabled>false</enabled> 
+	</text_box>
+  <balloon>
+    <color>#FFFFFF</color>
+    <alpha>85</alpha>
+    <text_color>#000000</text_color>
+    <border_color>#CC0000</border_color>
+    <border_alpha>90</border_alpha>
+    <border_width>2</border_width>
+    <corner_radius>7</corner_radius>
+  </balloon>
+
+</settings>

@@ -1,0 +1,111 @@
+<?php
+
+	/*
+	WE WILL FIND OUT SOON ENOUGH WHERE THESE ARE USED
+	function getPageTemplatesList(){
+		global $db;
+		$query = "SELECT * FROM pages_templates WHERE user_selectable = 1 AND template_id > 1";
+		$results = $db->get_results($query);
+		return $results;
+	}
+	function drawTemplatesList($selected = NULL, $exclude=array()){
+		//
+		$html = '';
+		if($results = getPageTemplatesList()){
+			foreach($results as $result){
+				//print "check page (".$result->template_title.")<br>";
+				//print_r($exclude);
+				if (!in_array($result->template_title, $exclude)) {
+					unset($preSelected);
+					if($result->template_id == $selected){
+						$preSelected = ' selected="selected"';
+					}
+		
+					$html .= '<option value="'.$result->template_id.'"'.$preSelected.'>'.$result->template_title.'</option>'."\n";
+				}
+			}
+			
+			return $html;
+		}else{
+			return false;
+		}
+	}
+	*/
+	
+	
+	
+
+
+
+	/*
+	THIS HAS BEEN MOVED TO THE PAGE CLASS 
+	function getPageStyleList($template = null){
+		//
+		global $db;
+		
+		if (!is_null($template)) {
+			$template = " AND template = $template";
+		}
+		
+		$query = "SELECT * FROM pages_style WHERE user_selectable=1".$template;
+		$results = $db->get_results($query);
+		
+		return $results;
+	}
+	*/
+	
+/*
+MOVE TO PAGE CLASS
+	function drawStyleHeadLinks($selected = NULL){
+		global $page;
+		$results = $page->getPageStyleList();
+		
+		$html = '';
+		
+		if($results){
+			
+			foreach($results as $result){
+				unset($preSelected);
+				if($result->style_css != $selected && $result->style_id != $selected){
+					$preSelected = 'alternate ';
+				}
+				$html .= '<link href="/style/'.$result->style_css.'.css" rel="'.$preSelected.'stylesheet" type="text/css" title="'.$result->style_title.'" media="screen, projection" id="CSS'.$result->style_id.'" />'."\n";
+			}
+		}
+		
+		return $html;
+	}
+
+*/	
+
+	/*
+	MOVED TO THE TREELINE CLASS
+	function drawStyleSwitcherMenu($selected = NULL, $template = null, $disabled=false){
+		//
+		
+		if ($disabled) return '';
+		$results = getPageStyleList($template);
+	
+		
+		$html = "\n";
+		
+		if($results){
+			$html .= '<fieldset id="styleSwitcher">'."\n";
+			$html .= '<label for="style">Choose layout:</label> '."\n";
+			$html .= '<select name="style" id="style">'."\n";
+			foreach($results as $result){
+				unset($preSelected);
+				if($result->style_id == $selected){
+					$preSelected = ' selected="selected"';
+				}
+				$html .= '<option value="'.$result->style_id.'"'.$preSelected.'>'.$result->style_title.'</option>'."\n";
+			}
+			$html .= '</select>'."\n";
+			$html .= '</fieldset>'."\n";
+		}
+		
+		return $html;
+	}
+	*/
+
+?>

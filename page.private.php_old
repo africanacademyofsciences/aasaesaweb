@@ -1,0 +1,138 @@
+<?
+
+	// Content
+	$content = new HTMLPlaceholder();
+	$content->load($page->getGUID(), 'content');
+	
+	// Tags
+	$tags = new Tags();
+	$tags->setMode($mode);
+	$content->setMode($mode);
+	
+	// Header image
+	$header_img = new HTMLPlaceholder();
+	$header_img->load($siteID, 'header_img');
+	if (!$header_img->draw()) {
+		$header_img->load($siteData->primary_msv, 'header_img');
+		if (!$header_img->draw()) {
+			$header_img->load(1, 'header_img');
+		}
+	}
+	$header_img->setMode("view");
+
+	// footer text
+	$footer = new HTMLPlaceholder();
+	$footer->load($site->id, 'footer');
+	$footer->setMode("view");	// You can only edit the footer on the homepage.
+	
+	// Panels
+	$panels = new PanelsPlaceholder();
+	$panels->load($page->getGUID(), 'panels');
+	$panels->setMode($mode);
+	
+	$referer = urldecode(read($_REQUEST,'referer','/treeline/'));
+	$mode = read($_REQUEST,'mode','');
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		
+		if (strpos($referer,'?') > 0) {
+	// If we've already got a querystring in the referring URL, we need to append the message onto it
+			$referer .= '&';
+		}
+		else {
+			// Otherwise, create a new querystring
+			$referer .= '?';
+		}
+	
+		if (read($_POST,'treeline','') == 'Save changes') {
+			$content->save();
+			$page->save();
+			$panels->save();
+			
+						// intelligent link panels
+			$tags->updateIntelligentLinkPanelDetails($page->getGUID(), $_POST['accuracy'], $_POST['maxlinks'], $_POST['show_related_content']);
+			
+			// Content is saved so redirect the user
+			$feedback .= createFeedbackURL('success',"Changes saved to page '<strong>".$page->getTitle()."</strong>' in section <strong>".$page->drawTitleByGUID($page->getSectionByPageGUID($page->getGUID()))."</strong>");
+			
+			$referer .= $feedback;
+			$referer .= '&action=edit';
+			
+			$publish_redirect = '/treeline/pages/?action=saved&guid='.$page->getGUID();
+			$publish_redirect .= '&'.$feedback;
+			
+			include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.class.php");
+			if($user->drawGroup() == 'Superuser' || $user->drawGroup() == 'Publisher'){ // can this user publish pages?
+				redirect($publish_redirect); // show them the publish option
+			} else{
+				redirect($referer); // otherwise take the user back to the edit pages page
+			}
+
+		}
+		else if (read($_POST,'treeline','') == 'Discard changes') {			
+			$referer .= 'action='.$mode.'&'.createFeedbackURL('error','Your changes were not saved');
+			redirect ($referer);
+		}
+	}
+
+	// Page specific options
+	
+	$pageClass = 'page'; // used for CSS usually
+	
+	$css = array(); // all attached stylesheets
+	if($page->style != NULL){
+		$css[] = $page->style;
+	}
+	$extraCSS = ''; // extra page specific CSS
+	
+	$js = array(); // all atatched JS behaviours
+	if($mode == 'edit'){
+		$js[] = 'styleSwitcher';
+		$js[] = 'showHideDetails';
+		
+	}
+	$extraJS = ''; // etxra page specific  JS behaviours
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/header.inc.php');	
+	
+?>
+<div id="midholder">
+		<h1><?=$pageTitle?></h1>
+		<div id="sidebar">
+        	<!--SUBNAV -->
+            <?php if($mode != 'edit') { // show placeholder tags in edit mode: This needs moving to the class ?>
+			<?=$menu->drawSecondaryByParent($page->getPrimary())?>
+            <?php } ?>
+        </div>
+		<div id="primarycontent">
+            <?php 
+			if(!$memberLogin->getId() && ($mode == '' || $mode == 'view')) { 
+			?>
+            <p>Only logged-in members can view this information.</p>
+            <?php 
+			} 
+			else { 
+				echo $content->draw(); 
+			} 
+			?>
+            <?php if($mode == 'edit') { // show placeholder tags in edit mode: This needs moving to the class ?>
+            <div id="tagslist">
+                <p>Tags:</p>
+                <ul id="tags">
+                 <li><a href="#" title="unclickable">tag placeholder</a></li>
+                 <li><a href="#" title="unclickable">tag placeholder</a></li>
+                 <li><a href="#" title="unclickable">tag placeholder</a></li>
+                 <li class="last"><a href="#" title="unclickable">tag placeholder</a></li>
+                </ul>
+            </div>
+            <?php }else{ ?>
+			<?=$tags->drawTags($page->getGUID(),'linklist')?>
+            <?php } ?>
+		</div>
+		<div id="secondarycontent">
+			<!--PANELS-->
+			<?=$panels->draw()?>
+			<!--INTELLIGENT LINK PANEL -->
+			<?=$tags->drawRelatedContentLinks($page->getGUID())?>
+		</div>
+<?php include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/footer.inc.php'); ?>

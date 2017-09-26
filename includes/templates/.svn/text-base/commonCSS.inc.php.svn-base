@@ -1,0 +1,137 @@
+<style type="text/css" media="all">
+<?php
+if (!$palateNumber) $palateNumber=$site->config['palate'];
+if (!$palateNumber || $palateNumber>99) $palateNumber=1;
+if ($_SESSION['palate']>0) $palateNumber=$_SESSION['palate'];
+
+if (!$fontNumber || $fontNumber>2) $fontNumber=1;
+
+// Temp disable the crusher to allow development
+if (0) {
+	echo '@import url("/treeline/includes/cssCrusher.php?type=css&params[]=';
+	echo 'reset,yui_fonts,global,panel,config,';
+	if(is_array($css)){
+		echo join(',',$css); /* turn $css array into CSV */
+	}
+	echo '");'."\n";
+}
+else {
+	echo '@import url("/style/reset.css");
+@import url("/style/yui_fonts.css"); 
+@import url("/style/global.css");
+@import url("/style/panel.css");
+@import url("/style/config.css");
+@import url("/style/scheme/font0'.($fontNumber).'.css");
+@import url("/style/scheme/palate01.css");
+	';
+	if ($USEFLIR) echo '@import url("/style/flir.css");'."\n";
+	
+	if (file_exists($_SERVER['DOCUMENT_ROOT']."/style/microsite/scheme".$site->id.".css") && !$_SESSION['palate']) echo '@import url("/style/microsite/scheme'.$site->id.'.css");';
+	else if ($palateNumber>1) echo '@import url("/style/scheme/palate'.(($palateNumber<10?"0":"").$palateNumber).'.css");';		
+	
+	if ($_GET['palate']>0) echo '@import url("/style/scheme/palate'.(($_GET['palate']<10?"0":"").$_GET['palate']).'.css");';
+
+	foreach ($css as $file) {
+		echo '@import url("/style/'.$file.'.css");'."\n";
+	}
+}
+
+		
+if($extraCSS){
+	echo $extraCSS."\n";
+}
+
+// SET UP THE FONT SIZE FOR THE PAGE
+if ($_COOKIE['font_size']) {
+
+	echo "body{font-size:{$_COOKIE['font_size']}}\n";
+
+	if($_COOKIE['font_size'] ==  'small') {
+
+		echo ' 
+div#access-menu ul#accessMenu li a.small_text {
+	color: #ccc;
+}
+';
+
+	}
+
+	if ($_COOKIE['font_size'] ==  'medium'){
+		echo 'ul#menu li{font-size:108%}
+			ul#menu li.bottomRow{font-size:80%}
+form#form-search-form fieldset input.text {
+	width: 120px;
+}
+div#access-menu {
+	height: 35px;
+}
+div#mainNews h2 {
+	height: auto;
+}
+div#access-menu ul#accessMenu li a.medium_text {
+	color: #ccc;
+}
+';
+	}
+		
+	if($_COOKIE['font_size'] ==  'large') {
+		echo '
+ul#menu li {
+	font-size:96%
+}
+ul#menu li.bottomRow {
+	font-size:80%
+}
+form#form-search-form fieldset input.text {
+	width: 110px;
+}
+div#access-menu {
+	height: 40px;
+}
+div#mainNews h2 {
+	height: auto;
+}
+div#access-menu ul#accessMenu li a.large_text {
+	color: #ccc;
+}
+';
+
+	}
+	
+}
+		
+// LOW GRAPHICS EXTRA STYLES
+/*if ($_COOKIE['graphics_mode'] == 'low'){
+	echo '
+	*{background-image: none !important;}
+	';
+}*/
+		
+?>
+</style>
+
+<style type="text/css" media="all">
+body {  
+	direction: <?= $siteData->ltr ?>; 
+}
+</style>
+
+
+<?php 
+	//include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/functions/pages.php'); 
+
+	/* Style Switcher (alternate stylesheets) */
+	if($mode == 'edit'){ 
+		echo '<link rel="stylesheet" type="text/css" href="/treeline/style/thickbox.css" media="all" />'."\n";
+		$currentStyle = ($_POST['style']) ? $_POST['style'] : '';
+		echo $page->drawStyleHeadLinks($currentStyle); 
+	} 
+?>
+
+<?php //Internet Explorer Specific CSS ?>
+<!--[if IE 7]><link rel="stylesheet" type="text/css" href="/style/ie7.css" media="all"><![endif]-->
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="/style/ie6.css" media="all"><![endif]-->
+<?php /* Edit mode IE fixes*/	if($mode == 'edit'){  ?>
+<!--[if IE 7]><link rel="stylesheet" type="text/css" href="/style/ie7edit.css" media="all"><![endif]-->
+<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="/style/ie6edit.css" media="all"><![endif]-->
+<?php } ?>

@@ -1,0 +1,750 @@
+<?php
+
+class Form {
+
+	public $id;
+	public $name, $title;
+	public $description;
+	public $msv;
+	public $valid;
+	public $successmsg, $user_email; 
+	public $enctype;
+	
+	public $totalresults, $perpage;
+
+	public $errormsg = array();
+	public $field = array();
+	
+	public function Form($id=0, $msv=0) {
+		global $site;
+
+		$this->msv=$msv?$msv:$site->id;
+		
+		$this->perpage = 4;
+		$this->field = new Field();
+		
+		if ($id) $this->loadByID($id);
+		return true;
+	
+	}
+
+
+	// ***********************************************************
+	// DATA MANAGEMENT FUNCTIONS
+	public function create($data) {
+		global $db, $site, $user;
+		// Make sure we have a unique and valid title for this new form
+		if (!$data['title']) {
+			$this->errormsg[]="You must specify a unique form title";
+			return false;
+		}
+		
+		$name = strtoupper(@generateName($data['title'], "forms"));
+		//print "created name($name) from(".$data['title'].")<br>\n";
+		if ($id = $this->loadByName($name, $site->id)) {
+			$this->errormsg[]="A form named $name already exists";
+			return 0;
+		}
+		
+		$query = "INSERT INTO forms (msv, name, title, description, date_created, user_created, msg, user_email)
+			VALUES
+			(".$site->id.", '$name', '".$db->escape($data['title'])."', '".$db->escape($data['description'])."', 
+			NOW(), ".($user->id+0).", '".$db->escape($data['success-msg'])."', ".($data['user_email']+0).")
+			";
+		//print "$query<br>\n";
+		if ($db->query($query)) {
+			return $db->insert_id;
+		}
+		return 0;
+	}
+	// ***********************************************************
+	public function update($data) {
+		global $db;
+		if (!$this->id) return false;
+		$query = "UPDATE forms SET 
+			description='".$db->escape($data['description'])."',
+			msg='".$db->escape($data['success-msg'])."',
+			user_email = ".($data['user_email']+0)."
+			WHERE id=".$this->id;
+		//print "$query<br>\n";
+		$db->query($query);
+		return true;
+	}
+	// ***********************************************************
+	public function duplicate($old_form_id, $data) {
+		global $db;
+		//print "copy blocks from ($old_form_id) to (".$new_form_id.")<br>\n";
+		
+		$new_form_id = $this->create($data);
+		if (!$new_form_id) {
+			$this->errormsg[]="Failed to create a new form";
+			return false;
+		}
+		
+		$block_query = "SELECT id, title, sort_order, `status` 
+			FROM forms_blocks 
+				WHERE form_id=$old_form_id
+				AND `status`<>'X' AND title IS NOT NULL
+				AND title<>'' ";
+		//print "$block_query<br>\n";
+		if ($blocks = $db->get_results($block_query)) {
+			foreach ($blocks as $block) {
+				$query = "INSERT INTO forms_blocks (form_id, title, sort_order, status)
+					VALUES 
+					($new_form_id, '".$db->escape($block->title)."', ".$block->sort_order.", '".$block->status."') ";
+				//print "$query<br>\n";
+				if ($db->query($query)) {
+					// Copy all fields for this block
+					$new_block_id = $db->insert_id;
+					if ($new_block_id>0) {
+						$field_query = "SELECT id, label, type, `status`, sort_order, name, required
+							FROM forms_fields 
+							WHERE block_id=".$block->id;
+						//print "$field_query<br>\n";
+						if ($fields = $db->get_results($field_query)) {
+							foreach ($fields as $field) {
+								$query = "INSERT INTO forms_fields (block_id, label, type, 
+									`status`, sort_order, 
+									name, required)
+									VALUES 
+									($new_block_id, '".$db->escape($field->label)."', '".$field->type."', 
+									'".$field->status."', ".$field->sort_order.", 
+									'".$field->name."', ".$field->required.")
+									";
+								//print "$query<br>\n";
+								if ($db->query($query)) {
+									$new_field_id = $db->insert_id;
+									if ($field->type=="radio" || $field->type=="select") {
+										//print "collect options for this field too<br>\n";
+										$option_query = "SELECT value, title FROM sites_options WHERE name='field-".$field->id."'";
+										//print "$option_query<Br>\n";
+										if ($options = $db->get_results($option_query)) {
+											foreach ($options as $option) {
+												$query = "INSERT INTO sites_options (value, name, title) 
+													VALUES (".$option->value.", 'field-".$new_field_id."', '".$db->escape($option->title)."') ";
+												//print "$query<br>\n";
+												if (!$db->query($query)) return false;
+											}
+										}
+									}
+								}
+								else {
+									//print "Failed to create field";
+									return false;
+								}
+							}
+						}
+					}
+					else return false;	// Failed to create new block					
+				}
+				else {
+					//print "Failed to create new block ??";
+					return false;	// Failed to add block
+				}
+			}
+			return $new_form_id;
+		}
+		// Nothing to copy
+		else {
+			//$this->errormsg[]="This form has no fields to copy but has been created ok";
+			return $new_form_id; 
+		}
+		return false;
+	}
+	// ***********************************************************
+	public function delete() {
+		global $db;
+		if (!$this->id) return false;
+		$query = "UPDATE forms SET `status`='X' WHERE id=".$this->id;
+		return $db->query($query);
+	}
+	// ***********************************************************
+
+
+
+	// ***********************************************************
+	// FORM LOADING FUNCTIONS 
+	public function loadByName($name, $msv=0) {
+		global $db, $site;
+		$msv = $msv?$msv:$this->msv;
+		
+		$query = "SELECT id FROM forms WHERE name='$name' AND msv=".$msv;
+		//print "$query<br>\n";
+		if ($id=$db->get_var($query)) {
+			$this->loadByID($id);
+			return $id;
+		}
+		return false;
+	}
+	public function loadByID($id) {
+		global $db, $site;
+		
+		if (!$id) return false;
+		
+		$query = "SELECT * FROM forms WHERE id=$id AND msv=".$this->msv." LIMIT 1";
+		//print "$query<br>\n";
+		if ($row = $db->get_row($query)) {
+			$this->id = $row->id;
+			$this->name = $row->name;
+			$this->title = $row->title;
+			$this->description = $row->description;
+			$this->msv = $row->msv;
+			$this->valid = $row->valid;
+			$this->successmsg = $row->msg;
+			$this->user_email = $row->user_email;
+		}
+	}
+	// ***********************************************************
+
+
+	// ***********************************************************
+	// DATA PROCESSING FUNCTIONS
+	public function processData($data) {
+		global $db, $page, $captcha;
+		$insert = array();
+		reset($this->errormsg);
+		
+		$data_id = $data['data_id']+0;
+		if (!$data['fid']) $this->errormsg[]="No form ID was found";
+		else if ($results = $this->getFieldList($data_id)) {
+			
+			foreach ($results as $result) {
+				//print "Process fields (".print_r($result, true).")<br>\n";
+				$value = $data[$result->name];
+				//print $result->name." = $value <br>\n";
+				if ($result->type=="captcha") {
+					if (!$captcha->valid) $this->errormsg[]="You must enter the confirmation text correctly.";
+				}
+				else if ($result->required==1 && !$value && $result->type!="paragraph") {
+					if ($result->type=="checkbox") $this->errormsg[]="You much tick the box entitled : ".$result->label;
+					else $this->errormsg[]="You must enter a value for : ".$result->label;
+				}
+				// Looks like the data is valid
+				else if ($result->type!="paragraph" && $result->type!="captcha") {
+					
+					if ($result->type=="radio") $ins_value=$value[0];
+					else if ($result->type=="checkbox") $ins_value = ($value+0);
+					else if ($result->type=="file") {
+						$value = $_FILES[$result->name];
+						if ($value['name']) {
+							switch($value['type']) {
+								case 'application/pdf':
+								case 'application/x-pdf':
+								case "application/acrobat":
+									$extension = 'pdf';
+									break;
+								case 'application/msword':
+								case 'application/vnd.ms-word':
+									$extension = 'doc';
+									break;
+								case 'application/excel':
+								case 'application/vnd.ms-excel':
+								case 'application/x-excel':
+								case 'application/x-msexcel':
+									$extension = 'xls';
+									break;
+								default :
+									$this->errormsg[]=$result->label." filetype[".$value['type']."] is not supported you must only upload a Word or PDF document";
+									break;
+							}
+							if ($extension) {
+								$destname = "F".$this->id.date("dm")."_".$db->escape($value['name']);
+								$destfile = $_SERVER['DOCUMENT_ROOT']."/silo/files/forms/".$destname;
+								if (move_uploaded_file($value['tmp_name'], $destfile)) {
+									$ins_value = $destname;
+								}
+								else $this->errormsg[]="Failed to copy file from: ".$result->label;
+							}
+						}						
+					}
+					else $ins_value = $db->escape(str_replace('"', "'", $value));
+					
+					$insert[]="REPLACE INTO forms_values (data_id, field_id, value)
+						VALUES
+						(@@DATA_ID@@, ".$result->id.", '".$ins_value."')
+						";
+					if ($result->name=="EMAIL" && $data['EMAIL'] && !is_email($data['EMAIL'])) $this->errormsg[]="Your email address is not valid";
+
+					if ($result->name=="SIGNUP" && $value==1) {
+						if ($data['EMAIL']) {
+							if (is_email($data['EMAIL'])) {
+								// Add to newsletter ??? how
+								$this->signup ($data);
+							}
+						}
+						else if (isset($data['EMAIL'])) $this->errormsg[]="You have opted to recieve news and updates from the site but have not entered an email address";
+					}
+				}
+			}
+			// If no problems with the data and we have some queries to run ....
+			if (count($insert) && !count($this->errormsg)) {
+				//print "need to run some inserts<br>\n";
+				if (!$data_id) {
+					$query = "INSERT INTO forms_data (form_id, member_id, guid)
+					VALUES
+					(".($data['fid']+0).", ".($data['member_id']+0).", '".$page->getGUID()."')
+					";
+					//print "$query<br>\n";
+					if ($db->query($query)) $data_id = $db->insert_id;
+				}
+				if (!data_id) $this->errormsg[]="Failed to get data ID to insert form data";
+				else {
+					foreach ($insert as $tmp) {
+						$tmp = str_replace("@@DATA_ID@@", $data_id, $tmp);
+						//print $tmp."<br>\n";
+						if (!$db->query($tmp)) $this->errormsg[]="Failed query($query)";
+					}
+				}
+			}
+		}
+		return $data_id;
+	}
+
+	
+	
+	public function sendData($data_id) {
+		global $db, $site;
+		//print "sD($data_id)<br>\n";
+		if ($this->user_email) {
+			//print "send $data_id to user(".$this->user_email.")<Br>\n";
+	
+			$data=array();
+			$query = "SELECT email FROM users WHERE id=".$this->user_email;
+			//print "$query<br>\n";
+			$data_email = $db->get_var($query);
+			
+			if ($data_email && is_email($data_email)) {
+				// Get the field listing 
+				$query = "SELECT distinct ff.`label`, fv.`value`, ff.`type`
+					FROM 
+					forms_data fd
+					LEFT JOIN forms_values fv ON fd.id=fv.data_id
+					LEFT JOIN forms_fields ff ON fv.field_id=ff.id
+					LEFT JOIN forms_blocks fb ON fb.id = ff.block_id
+					WHERE fv.id is not null 
+					AND fd.form_id=".$this->id."
+					AND fv.data_id=".$data_id."
+					ORDER BY fb.sort_order, ff.sort_order ";
+				//print "$query<br>\n";
+				if ($results = $db->get_results($query)) {
+					foreach ($results as $result) {
+						$tmp = $result->value;
+						if ($result->type=="file") $tmp = '<a href="'.$site->root.'/silo/files/forms/'.$result->value.'">'.$result->value.'</a>';
+						else if ($result->type=="checkbox") $tmp=$tmp==1?"Y":"N";
+						$data['FORM-DATA'].='<p>'.$result->label.": ".$tmp."</p>\n";
+					}
+				}
+				
+				//print "send($data_email, FORM-DATA, ".print_r($data, true).")<br>\n";
+				
+				//include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletter/includes/newsletter.class.php");
+				include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+				include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+					
+				$newsletter= new Newsletter();
+				$newsletter->sendText($data_email, "FORM-DATA", $data);
+				//print "send($data_email, FORM-DATA, data)<br>\n";
+				//$newsletter->sendText("phil.redclift@ichameleon.com", "FORM-DATA", $data);
+			}
+			//else print "failed to get admin email address for user (".$this->user_email.")<br>\n";			
+		}		
+	}
+	// ***********************************************************
+
+
+
+	// ***********************************************************
+	// FORM BUILDING FUNCTIONS
+	public function addBlock($data) {
+		global $db, $site;
+		if (!$this->id) return false;
+		$query = "SELECT MAX(sort_order)
+			FROM forms f
+			LEFT JOIN forms_blocks fb ON f.id=fb.form_id
+			WHERE f.msv=".$site->id;
+		$pos = $db->get_var($query)+1;
+		//print "$query<br>\n";
+		$query = "INSERT INTO forms_blocks (form_id, title, sort_order)
+			VALUES 
+			(".$this->id.", '".$db->escape($data['title'])."', ".($pos+0).")";
+		//print "$query<br>\n";
+		return $db->query($query);
+	}
+	// ***********************************************************
+	public function updateBlock($block_id, $data) {
+		global $db, $site;
+		if (!$block_id) return false;
+		$query = "UPDATE forms_blocks SET title='".$db->escape($data['title'])."' WHERE id=".$block_id;
+		$success = $db->query($query);
+		return !$db->last_error;
+	}
+	// ***********************************************************
+	public function deleteBlock($block_id) {
+		global $db;
+		if (!$block_id) return false;
+		$query = "SELECT id FROM forms_fields WHERE block_id=$block_id";
+		if ($results =$db->get_results($query)) {
+			foreach($results as $result) {
+				$this->deleteField($result->id);
+			}
+		}
+		$query = "UPDATE forms_blocks SET `status`='X' WHERE id = $block_id";
+		return $db->query($query);
+	}
+	// ***********************************************************
+	public function addField($block_id, $data) {
+		global $db, $site;
+		if (!$block_id) return false;
+		$query = "SELECT MAX(ff.sort_order)
+			FROM forms_blocks fb
+			LEFT JOIN forms_fields ff ON fb.id=ff.block_id
+			WHERE fb.id=".$block_id;
+		$pos = $db->get_var($query)+1;
+		$fieldName = strtoupper(_generateName($data['name']));
+		//print "Got fieldname($fieldName) from gN(".$data['name'].")<br>\n";
+		//print "$query<br>\n";
+		$query = "INSERT INTO forms_fields (block_id, label, name, type, required, sort_order, `status`)
+			VALUES 
+			(".$block_id.", '".$db->escape($data['label'])."', 
+			 '$fieldName', '".$data['type']."', 
+			 ".($data['required']+0).", ".($pos+0).", '".($data['hidden']?'H':'A')."')";
+		//print "$query<br>\n";
+		return $db->query($query);
+	}
+	// ***********************************************************
+	public function updateField($field_id, $data) {
+		global $db, $site;
+		if (!$field_id) return false;
+		//print_r($data);
+		$query = "UPDATE forms_fields 
+			SET label='".$db->escape($data['label'])."', 
+			type='".$data['type']."', required=".($data['required']+0).",
+			`status`='".($data['hidden']?'H':'A')."'
+			WHERE id=$field_id";
+		//print "$query<br>\n";
+		if (!$db->query($query)) {
+			if ($db->last_error) return false;
+		}
+		return true;
+	}
+	// ***********************************************************
+	public function deleteField($field_id) {
+		global $db;
+		$query = "UPDATE forms_fields SET `status`='X' WHERE id=$field_id";
+		return $db->query($query);
+	}	
+	// ***********************************************************
+
+
+
+
+	// ***********************************************************
+	// FORM LISTING FUNCTIONS
+	public function getFormsList($search, $form_id=0) {
+		global $db, $site;
+		//print "gFL($search)<br>\n";
+		
+		if ($search) $where.="AND title LIKE '%$search%' ";
+		if ($form_id>0) $where.="AND id=$form_id ";
+		$order = "ORDER BY f.title ASC ";
+		$query = "SELECT f.id, f.title, f.description, (SELECT count(*) FROM forms_blocks fb WHERE fb.form_id=f.id and fb.`status`='A') AS block_count
+			FROM forms f
+			WHERE f.msv=".$site->msv." AND f.`status`='A' ";
+		//print "$query<br>\n";
+		$query.= $where;
+		//print "Get form total - $query<br>\n";
+		
+		$db->query($query);
+		$this->totalresults = $db->num_rows;
+		//$this->setTotalPages($db->num_rows);	
+		$db->flush();
+
+		$limits = "LIMIT ".getQueryLimits($this->perpage, $this->thispage);
+		$query.= $order.$limits;
+		//print "Actually get data $query<br>\n";
+		return $db->get_results($query);
+	
+	}
+	
+	public function drawFormsList($page=1, $search, $form_id=0) {
+	
+		global $help;
+		$html = '';
+		$no_link = '<span class="no-action"></span>';
+		$this->thispage = $page;
+		
+		if ($results = $this->getFormsList($search, $form_id)) {
+		
+			foreach ($results as $result) {
+				$deletelink = $editlink = $editformlink = $previewlink = $duplicatelink = $datalink = $no_link;
+	
+				$previewlink = '<a '.$help->drawInfoPopup("Preview this form").' class="preview" href="/treeline/forms/?fid='.$result->id.'&amp;action=preview">Preview</a>';
+				$deletelink = '<a '.$help->drawInfoPopup("Delete this form").' class="delete" href="/treeline/forms/?fid='.$result->id.'&amp;action=delete&amp;page='.$page.'">Delete</a>';
+				$editlink = '<a '.$help->drawInfoPopup("Edit form details").' class="edit" href="/treeline/forms/?fid='.$result->id.'&amp;action=edit">Edit</a>';
+				$editformlink = '<a '.$help->drawInfoPopup("Edit the form").' class="edit-form" href="/treeline/forms/?fid='.$result->id.'&amp;action=editform">Edit form</a>';
+				$duplicatelink = '<a '.$help->drawInfoPopup("Duplicate this form").' class="reuse" href="/treeline/forms/?fid='.$result->id.'&amp;action=duplicate">Duplicate</a>';
+				$datalink = '<a '.$help->drawInfoPopup("Download data").' class="event-links" href="/treeline/forms/?fid='.$result->id.'&amp;action=download">Download</a>';
+
+				$html.='<tr>
+	<td>'.$result->title.'</td>
+	<td>'.$result->block_count.'</td>
+	<td nowrap class="action">
+	'.$previewlink.$editlink.$editformlink.$duplicatelink.$deletelink.$datalink.'
+	</td>
+<tr>
+';
+
+			}
+			if ($html) {
+				$caption=$pagination='';
+				if (!$form_id) {
+					$caption = '<caption>'.getShowingXofX($this->perpage, $this->thispage, sizeof($results), $this->totalresults).'</caption>';
+					$pagination = drawPagination($this->totalresults, $this->perpage, $this->thispage, "?keywords=".$search);
+				}
+				$html = '<table class="tl_list">
+'.$caption.'
+<tr>
+	<th scope="col">Form title</th>
+	<th scope="col">Blocks</th>
+	<td scope="col">Manage form</th>
+</tr>
+</thead>
+<tbody>
+'.$html.'
+</tbody>
+</table>
+'.$pagination.'
+';
+			}
+			return $html;
+			
+		}
+		return;
+			
+	}
+	// Function to pull a list of valid fields with all field data
+	public function getFieldList($data_id) {	
+		global $db;
+		//print "gFL($data_id)<br>\n";
+		$query = "SELECT fb.title, ff.*".($data_id?",fv.value":"")." FROM 
+			forms_blocks fb 
+			LEFT JOIN forms_fields ff ON fb.id=ff.block_id ";
+		if ($data_id) $query.="LEFT JOIN forms_values fv ON ff.id=fv.field_id ";
+		$query.="WHERE fb.form_id=".$this->id." AND ff.`status`='A' ";
+		if ($data_id) $query.="AND fv.data_id=$data_id ";
+		$query.="ORDER BY fb.sort_order, ff.sort_order";
+		//print "$query<br>\n";
+
+		return $db->get_results($query);
+	}
+	
+	// ***********************************************************
+
+
+
+	// Add this person to some newsletter group???
+	// its a bit of a fix but set up the post fields so the newsletter class can understand them
+	private function signup($data) {
+		global $db, $site;
+		
+		// See if we have any groups to subscribe to?
+		// if so just subscribe to the first group found.
+		$query = "SELECT preference_id FROM newsletter_preferences 
+			WHERE site_id=".$site->id."
+			AND deleted=0 
+			LIMIT 1 ";
+		//print "$query<br>\n";
+		$group = $db->get_var($query);
+		//print "subscribe to group($group)<br>\n";
+		if ($group>0) {
+		
+			include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/newsletter.class.php");
+			include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/includes/subscriber.class.php");
+		
+			$_POST['email']=$_POST['EMAIL'];
+			$_POST['preference']=$group;
+			$_POST['allpref']=$group.",";
+			
+			if ($_POST['NAME']) $_POST['name']=$_POST['NAME'];
+			else if ($_POST['FULLNAME']) $_POST['name']=$_POST['FULLNAME'];
+			else if ($_POST['FULL_NAME']) $_POST['name']=$_POST['FULL_NAME'];
+			else {
+				if ($_POST['FIRSTNAME']) $_POST['name']=$_POST['FIRSTNAME']." ";
+				if ($_POST['SURNAME']) $_POST['name'].=$_POST['SURNAME']." ";
+			}
+			Newsletter::subscribe(true);
+		}
+	}
+
+	
+}
+
+class Field {
+
+	public $id;
+	public $block, $label, $name, $type, $required, $status;
+	public $enctype;
+	
+	public function loadByID($field_id) {
+		global $db;
+		if (!$field_id) return false;
+		$query = "SELECT * FROM forms_fields WHERE id=".$field_id;
+		//print "$query<br>\n";
+		if ($row=$db->get_row($query)) {
+			//print "loading field data<br>\n";
+			$this->block=$row->block_id;
+			$this->label=$row->label;
+			$this->name=$row->name;
+			$this->type=$row->type;
+			$this->status=$row->status;
+			$this->required=$row->required;
+			return true;
+		}
+		return false;
+	}
+
+	
+	public function drawField($data) {
+		//print "dF(".$data->type.")<br>\n";
+		switch ($data->type) {
+			case 'text': $html.=$this->drawTextInput($data); break;
+			case 'textarea': $html.=$this->drawTextArea($data); break;
+			case 'checkbox': $html.=$this->drawCheckbox($data); break;
+			case 'select': $html.=$this->drawSelect($data); break;
+			case 'radio': $html.=$this->drawRadio($data); break;
+			case 'paragraph': $html.=$this->drawParagraph($data); break;
+			case 'captcha': $html.=$this->drawCaptcha($data); break;
+			case 'file': 
+				$this->enctype="form-data";
+				$html.=$this->drawFile($data); 
+				break;
+			default : 
+				print "FORMS: Can't draw a ".$data->type."<br>\n";
+				break;
+		}
+		if ($html) $html = '<fieldset class="field">'.$html.'</fieldset>';
+		return $html;	
+	}
+	
+	public function drawTextInput($data) {
+		$html = '
+		<label for="f_'.$data->name.'">'.$this->parseLinks($data->label).'</label>
+		<input type="text" class="text" id="f_'.$data->name.'" name="'.$data->name.'" value="'.($_POST[$data->name]?$_POST[$data->name]:$data->value).'" />
+		';
+		return $html;
+	}
+	public function drawTextArea($data) {
+		$html = '
+		<label for="f_'.$data->name.'">'.$this->parseLinks($data->label).'</label>
+		<textarea name="'.$data->name.'" class="text" id="f_'.$data->name.'">'.($_POST[$data->name]?$_POST[$data->name]:$data->value).'</textarea>
+		';
+		return $html;
+	}
+	public function drawCheckbox($data) {
+		if (isset($_POST[$data->name])) $cur_value=$_POST[$data->name];
+		else $cur_value=$data->value;
+		$html = '
+		<input class="checkbox" type="checkbox" id="f_'.$data->name.'" value="1" name="'.$data->name.'" '.($cur_value==1?'checked="checked"':"").' />
+		<label for="f_'.$data->name.'" class="checkbox">'.$this->parseLinks($data->label).'</label>
+		';
+		return $html;
+	}
+	public function drawSelect($data) {
+		global $db;
+		//print_r($data);
+		$query = "SELECT value, title FROM sites_options WHERE name='field-".$data->id."' ORDER BY title";
+		if ($results = $db->get_results($query)) {
+			foreach ($results as $result) {
+				$tmp_value = $result->value>0?$result->value:$result->title;
+				$html.='<option value="'.$tmp_value.'"'.((isset($_POST[$data->name])?$_POST[$data->name]:$data->value)==$tmp_value?' selected="selected"':'').'>'.$result->title.'</option>';
+			}
+		}
+		if ($html) $html = '
+			<label for="f_'.$data->name.'">'.$this->parseLinks($data->label).'</label>
+			<select name="'.$data->name.'" id="f_'.$data->name.'">
+				<option value="">Select</option>
+				'.$html.'
+			</select>
+			';
+		return $html;
+	}
+	public function drawRadio($data) {
+		global $db;
+		if (isset($_POST[$data->name])) $cur_value=$_POST[$data->name];
+		else $cur_value[0]=$data->value;
+		//print_r($data);
+		$query = "SELECT value, title FROM sites_options WHERE name='field-".$data->id."' ORDER BY title";
+		if ($results = $db->get_results($query)) {
+			foreach ($results as $result) {
+				$tmp_value = $result->value>0?$result->value:$result->title;
+				$tmp_id = generateName($result->title);
+				//print "got cur_value(".print_r($cur_value, true).") tmp($tmp_value)<br>\n";
+				$html.='
+				<input class="checkbox" id="f_'.$tmp_id.'" type="radio" name="'.$data->name.'[]" value="'.$tmp_value.'"'.($cur_value[0]==$tmp_value?' checked="checked"':'').'>
+				<label class="checkbox" for="f_'.$tmp_id.'">'.$this->parseLinks($result->title).'</label>
+				';
+			}
+		}
+		if ($html) $html = '<fieldset class="radio">
+			<legend>'.$data->label.'</legend>
+			'.$html.'
+			</fieldset>
+			';
+		return $html;
+	}
+	public function drawFile($data) {
+		$html = '
+		<label for="f_'.$data->name.'">'.$this->parseLinks($data->label).'</label>
+		<input type="file" class="text" id="f_'.$data->name.'" name="'.$data->name.'" />
+		';
+		return $html;
+	}
+	public function drawCaptcha($data) {
+		global $captcha;
+		if (is_object($captcha)) {
+			$html = '<label for="f_'.$data->name.'">'.$this->parseLinks($data->label).'</label>'.$captcha->drawForm();
+		}
+		return $html;
+	}
+	public function drawParagraph($data) {
+		$html = '<p>'.$this->parseLinks($data->label).'</p>';
+		return $html;
+	}
+	
+	
+	// Replace any link placeholders in the label text
+	public function parseLink($href, $title) {
+		$window="self";
+		if ($offset = strpos($title, ";")) {
+			$window= (substr($title, $offset+1)=="new")?"blank":$window;
+			$title = substr($title, 0, $offset);
+		}
+		//print "parseLink($href, $title, $window)<br>\n";
+		if ($href && $title && $window) return '<a href="'.$href.'" target="_'.$window.'">'.$title.'</a>';
+		return '';
+	}
+	public function parseLinks($text) {
+		$new_txt=$text;
+		while (preg_match("/\[(.*?)=(.*?)\]/", $new_txt, $reg) ) {
+			$new_txt = str_replace("[".$reg[1]."=".$reg[2]."]", $this->parseLink($reg[1], $reg[2]), $new_txt);
+		}
+		return $new_txt;
+	}
+
+
+	// Check if $name has already been used as an ID in this form
+	public function checkName($form_id, $name) {
+		global $db;
+		$tmp_name=_generateName($name);
+		$query = "SELECT ff.id FROM forms f
+			LEFT JOIN forms_blocks fb ON f.id=fb.form_id
+			LEFT JOIN forms_fields ff ON fb.id=ff.block_id
+			WHERE ff.name='$tmp_name' AND f.id=".$form_id;
+		//print "$query<br>\n";
+		if ($db->get_var($query)) return false;
+		//print "checkName OK<br>\n";
+		return true;
+	}
+}
+
+?>

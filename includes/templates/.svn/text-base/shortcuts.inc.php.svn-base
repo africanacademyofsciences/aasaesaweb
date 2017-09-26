@@ -1,0 +1,6 @@
+<ul id="shortcuts" class="hide">
+	<li><a href="#primarycontent" accesskey="2"><?= $pagelabel['skiptocontent']?></a></li>
+	<li><a href="#menu"><?= $pagelabel['skiptomenu']?></a></li>
+	<li><a href="<?= ($siteID==1 ? '' : '/'.$site->properties['site_name']) ?>/accessibility-statement/" accesskey="0"><?= $pagelabel['accessibilityinfo']?></a></li>
+    <li><a href="<?= ($siteID==1 ? '' : '/'.$site->properties['site_name']) ?>/sitemap/"><?= $pagelabel['sitemap']?></a></li>
+</ul>

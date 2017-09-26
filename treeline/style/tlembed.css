@@ -1,0 +1,137 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body {
+	margin:0;
+	padding:0;
+	background-color: #EDF1F1; 
+}
+
+p {
+	margin: 0;
+	padding: 0 0 15px;
+}
+
+/*********************** ERROR PANE *****************************/
+#error_list {
+	background: #AB0D54 url('/treeline/img/icons/icon_error.gif') 2px 2px no-repeat;
+	text-align: left;
+	padding: 2px;
+	padding-left: 25px;
+	color: #fff;
+	margin-bottom: 15px;
+}
+/*********************** WARNING PANE *****************************/
+#warning_list {
+	background-color: #C2E7A3;
+	text-align: left;
+	padding: 2px 5px;
+	color: #fff;
+	margin-bottom: 15px;
+}
+
+
+/*********************** CONTENT *****************************/
+div#contentpane {
+	float: left;
+	clear: both;
+	padding: 10px 10px 0;
+}
+
+	div#contentpane h2 {
+		color: #AB0D54;
+		font-size: 150%;
+		font-weight: bold;
+		margin: 0;
+		padding: 0 0 15px;
+	}
+
+div#contentpane form{
+	margin: 0;
+	padding: 0;
+}
+	div#contentpane form fieldset {
+		padding: 0 0 15px;
+		border: 0;
+		margin: 0;
+		width: 605px;
+		float: left;
+		clear: left;
+	}
+		div#contentpane form fieldset div.newwindow {
+			float: left;
+			width: 200px;
+		}
+		div#contentpane form fieldset fieldset.radiobox {
+			width: auto;
+			padding-bottom: 10px;
+		}
+		div#contentpane form fieldset label {
+			float: left;
+			width: 120px;
+		}
+			div#contentpane form fieldset label.wide {
+				width: auto;
+			}
+		div#contentpane form fieldset input.text {
+			float: left;
+			width: 160px;
+			padding: 0 2px;
+			border-width: 1px;
+		}
+		div#contentpane form fieldset input.file {
+			float: left;
+			padding: 0 2px;
+			border-width: 1px;
+		}
+		div#contentpane form fieldset input.checkbox {
+			float: left;
+			margin: 0 5px 0 0;
+		}
+		div#contentpane form fieldset select {
+			float: left;
+			width: 160px;
+		}
+
+
+div#contentpane form fieldset#linkwindow {
+}
+	div#contentpane form #linkwindow span {
+		float: left;
+	}
+
+#contentpane form hr {
+	border: 1px dotted #ccc;
+}
+
+
+
+/********************** BUTTONS **********************/
+.btn {
+	background: url('/treeline/img/linkpicker/bk-btn.gif') repeat-x;
+	height: 18px;
+	font-size: 95%;
+	text-align: center;
+	border: 1px solid #999;
+	padding: 0 20px;
+	font-weight: bold;
+	color: #000;
+	margin-right: 5px;
+}
+.red_btn, #next_btn, #intsection_btn, #intsection_btn_1 {
+	height: 18px;
+	color: #fff;
+	background: url('/treeline/img/linkpicker/bk-btn-on.gif') repeat-x;
+	border-color: #AB0D54;
+}
+
+
+
+/*********************** FOOTER *****************************/
+#footerlinks {
+	float: none;
+	clear: left;
+	padding: 15px 0;
+}
+

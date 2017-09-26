@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @author chrisntr
+ * @copyright 2007
+ */
+
+if ($_POST){
+	header("Content-Type: text/xml");
+
+	echo "<?xml version='1.0'?>
+	<RESPONSE>
+		<Description>
+			Dan Is A Twat
+		</Description>
+	</RESPONSE>";
+
+	mail('chris.hardy@ichameleon.com', 'posted stuff', print_r($_POST, 1));
+} else {
+	header("Content-Type: text/xml");
+	
+	echo "<?xml version='1.0'?>
+	<RESPONSE>
+		<Description>
+			Didn't actually post anything...
+		</Description>
+	</RESPONSE>";
+}
+//print_r($_POST);
+
+?>

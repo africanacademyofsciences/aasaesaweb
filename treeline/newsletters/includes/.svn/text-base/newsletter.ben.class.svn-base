@@ -1,0 +1,1427 @@
+<?php
+
+	/*
+	
+	  Newsletter Class
+	  
+	  last edited: 03/08/2007 
+	  last edited by: by Phil T phil.thompson@ichameleon.com
+	  changes made: Modified drawPreferences HTML
+	  
+	  
+	  Table of contents
+	  
+	  includes: html2text class
+	  # newsletter config
+	  # isValid
+	  # reuse
+	  # createNew
+	  # subscribe
+	  # unsubscribe
+	  # update
+	  # validate
+	  # validateSubject
+	  # validateHTMLText
+	  # Email design
+	  	- getCSS
+		- getHTMLHeader
+		- GEtHTMLHEader
+		- convertImages
+		- convertLinks
+		- getBodyText
+		-setUnsubscribe
+		- getBodyTExt
+		- getHTMLEmail
+		- getPlainEmail
+	  # Preferences
+	  
+	
+	*/
+
+
+require_once('html2text.class.php');
+//require_once($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/ezSQL.class.php');
+
+
+class newsletter{
+
+	var $id;
+	var $subject;
+	public $layout, $colour;
+	var $html_text, $html_text2, $html_text3, $html_text4, $html_text5, $html_text6;
+	var $plain_text, $plain_text2, $plain_text3, $plain_text4, $plain_text5, $plain_text6;
+	var $digestHTML;
+	var $status;
+	
+	var $send_date;
+	var $done;
+	var $errorMsg;
+	var $sitename;
+	var $sitelang;
+	var $siteencoding; 
+	var $siteltr;
+	
+	public $outbox_id;
+	
+	public $event_id;
+	
+	private $msg = array();
+	public $errmsg = array();
+	public $labels=array();
+	
+	private $mode; 
+	
+	public function newsletter($id = null, $html_text= null){
+
+		$this->id = null;
+		$this->layout = 0;
+		$this->colour = 0;
+		$this->subject = null;
+		$this->html_text = $this->html_text2 = $this->html_text3 = null;
+		$this->plain_text = null;
+		$this->plain_text2 = null;
+		$this->plain_text3 = null;
+		$this->send_date = null;
+		$this->done = null;
+		$this->msv = null;
+		$this->sitename = null;
+		$this->sitelang = null;
+		$this->status='N';
+		$this->outbox_id = 0;
+		
+		if ($id) $this->loadByID($id);
+	}
+	
+	public function loadByID($id) {
+	
+		if($id){
+
+			global $db;
+
+			// Pull newsletter data out
+			$query = "SELECT n.subject, 
+				n.layout, n.colour,
+				n.text, n.text2, n.text3, n.text4, n.text5, n.text6,
+				n.send_date, n.done, n.msv, n.status, 
+				sv.language, sv.msv, 
+				s.name as title, 
+				l.encoding, l.text_dir
+				FROM newsletter n
+				LEFT JOIN sites_versions sv on n.msv = sv.msv
+				LEFT JOIN sites s on sv.microsite=s.microsite
+				LEFT JOIN languages l ON sv.language=l.abbr
+				WHERE n.id = " . $id;
+			//print "$query<br>";
+			if($db->query($query)){
+
+				$n = $db->get_row(null);
+
+				$this->id = $id;
+				
+				$this->layout = $n->layout;
+				$this->colour = $n->colour;
+				$this->subject = stripslashes($n->subject);
+				$this->setSubject();
+
+				$this->html_text = stripslashes($n->text);
+				$this->html_text2 = stripslashes($n->text2);
+				$this->html_text3 = stripslashes($n->text3);
+				$this->html_text4 = stripslashes($n->text4);
+				$this->html_text5 = stripslashes($n->text5);
+				$this->html_text6 = stripslashes($n->text6);
+
+				$h2t =& new html2text($this->html_text);  $this->plain_text = $h2t->get_text();
+				$h2t =& new html2text($this->html_text2); $this->plain_text2 = $h2t->get_text();
+				$h2t =& new html2text($this->html_text3); $this->plain_text3 = $h2t->get_text();
+				$h2t =& new html2text($this->html_text4); $this->plain_text4 = $h2t->get_text();
+				$h2t =& new html2text($this->html_text5); $this->plain_text5 = $h2t->get_text();
+				$h2t =& new html2text($this->html_text6); $this->plain_text6 = $h2t->get_text();
+				$this->status=$n->status;
+
+				$this->send_date = $n->send_date;
+				$this->done = $n->done;
+				$this->msv = $n->msv;
+
+				$this->sitename = $n->title;
+				$this->sitelang = $n->language;
+				$this->siteencoding = $n->encoding;
+				$this->siteltr = $n->text_dir;
+				
+			}
+		}
+		
+		/*
+		if ($html_text) { //This means it's a digest.
+			
+			global $site;
+				
+			$this->html_text = stripslashes($html_text);
+			$this->msv = $site->id;
+			$h2t =& new html2text($this->html_text);
+			$this->plain_text = $h2t->get_text();
+			
+		}
+		*/
+	}
+
+	public function setMode($mode) {
+		$this->mode=$mode;
+	}
+
+	public function isValid(){
+		if($this->id) return true;
+		return(false);
+	}
+
+
+	public function reuse($id){
+
+		global $db;
+
+		// Pull newsletter data out
+
+		$query = "SELECT subject, layout, colour,
+			text, text2, text3, text4, text5, text6,
+			send_date, done, msv
+			FROM newsletter
+			WHERE id = " . $id;
+
+		if($db->query($query)){
+
+			$n = $db->get_row(null);
+
+			$this->id = null; // Creating a new newsletter based on an old one
+			
+			$this->layout = $n->layout;
+			$this->colour = $n->colour;
+			$this->subject = stripslashes($n->subject);
+
+			$this->html_text = stripslashes($n->text);
+			$this->html_text2 = stripslashes($n->text2);
+			$this->html_text3 = stripslashes($n->text3);
+			$this->html_text4 = stripslashes($n->text4);
+			$this->html_text5 = stripslashes($n->text5);
+			$this->html_text6 = stripslashes($n->text6);
+				
+			$h2t =& new html2text($this->html_text);  $this->plain_text = $h2t->get_text();
+			$h2t =& new html2text($this->html_text2); $this->plain_text2 = $h2t->get_text();
+			$h2t =& new html2text($this->html_text3); $this->plain_text3 = $h2t->get_text();
+			$h2t =& new html2text($this->html_text4); $this->plain_text4 = $h2t->get_text();
+			$h2t =& new html2text($this->html_text5); $this->plain_text5 = $h2t->get_text();
+			$h2t =& new html2text($this->html_text6); $this->plain_text6 = $h2t->get_text();
+			/*
+			$this->html_text = stripslashes($n->text);
+			$h2t =& new html2text($this->html_text);
+			$this->plain_text = $h2t->get_text();
+			*/
+			$this->send_date = $n->send_date;
+			$this->done = $n->done;
+			$this->msv = $n->msv;
+		}
+	}
+
+
+	public function createNew(){
+
+		global $_SESSION, $db, $site;
+
+		$preference = $_POST['preference'];
+		$query = "INSERT INTO newsletter 
+			(subject, layout, colour, text, text2, text3, text4, text5, text6, msv, added_date) 
+			VALUES ('" . $db->escape($this->subject) . "',
+				".($this->layout+0).",
+				".($this->colour+0).", 
+				'" . $db->escape($this->html_text) . "', 
+				'" . $db->escape($this->html_text2) . "', 
+				'" . $db->escape($this->html_text3) . "', 
+				'" . $db->escape($this->html_text4) . "', 
+				'" . $db->escape($this->html_text5) . "', 
+				'" . $db->escape($this->html_text6) . "', 
+				".$site->id.", NOW() )";
+		//echo $query; exit;
+		$db->query($query);
+
+		$this->id = $db->insert_id;
+		
+		while (list ($key,$val) = @each ($preference)) { 
+			$query = "INSERT INTO newsletter_send_preferences (newsletter_id, preference_id) VALUES (".$this->id.",".$val.")";	
+			
+			if ($db->query($query)){ // update their status to opted in
+				$message .= "<br />Newsletter preference group added";
+			}
+			else {
+				$error++;
+				$message .= "<br />Didn't add newsletter preference group";
+			}
+		}
+
+		// Add event subscriber preferences.
+		$event_id = $_POST['guid'];
+		if ($event_id) {
+			$query = "INSERT INTO newsletter_send_preferences (newsletter_id, event_id) VALUES (".$this->id.", '".$event_id."')";
+			$db->query($query);
+		}
+		
+		return $this->id;
+
+	}
+
+	public function subscribe($subscribe=true) {
+		global $db, $site, $labels, $site;
+		
+		$error = 0; // error counter. increment for every error
+		
+		$subscriber = new Subscriber();
+		$sub = array();
+		
+		$sub['title'] = $db->escape($_POST['reg_title']);
+		if ($sub['title']==1 || !$sub['title']) $sub['title']=$db->escape($_POST['reg_other']);
+		$sub['first'] = $db->escape($_POST['reg_first']);
+		$sub['surname'] = $db->escape($_POST['reg_last']);
+		$sub['email'] = $db->escape($_POST['email']);
+		$sub['from'] = $db->escape($_POST['reg_from']);
+		$sub['mobile'] = $db->escape($_POST['reg_mob']);
+
+		if ($sub['from']=="Work") {
+			$sub['hearabout'] = $db->escape($_POST['workabout']);
+			$sub['job'] = $db->escape($_POST['reg_job']);
+			$sub['company'] = $db->escape($_POST['reg_company']);
+			$sub['company_type'] = $db->escape($_POST['reg_bustype']);
+			$sub['switchboard'] = $db->escape($_POST['reg_switch']);
+		}
+		else {
+			$sub['phone'] = $db->escape($_POST['telephone']);
+			$sub['hearabout'] = $db->escape($_POST['homeabout']);
+		}
+
+		$sub['house'] = $db->escape($_POST['houseno']);
+		$sub['street'] = $db->escape($_POST['street']);
+		$sub['address_2'] = $db->escape($_POST['address_2']);
+		$sub['locality'] = $db->escape($_POST['locality']);
+		$sub['towncity'] = $db->escape($_POST['towncity']);
+		$sub['county'] = $db->escape($_POST['county']);
+		$sub['postcode'] = $db->escape($_POST['postcode']);
+		$sub['country'] = $db->escape($_POST['country']);
+		$sub['con_email'] = $db->escape($_POST['con_email']);
+		$sub['con_post'] = $db->escape($_POST['con_post']);
+		$sub['con_phone'] = $db->escape($_POST['con_phone']);
+		$sub['con_sms'] = $db->escape($_POST['con_sms']);
+		//print_r($sub);
+				
+		$allpref=explode(",", $_POST['allpref']);
+		$preference = $_POST['preference'];
+		//print_r($preference);
+		$mailallpref=explode(",", $_POST['mailallpref']);
+		$mailpreference = $_POST['mail_group'];
+		//print_r($mail_preference);
+		
+		
+		if (!$sub['email']) $this->errmsg[] = $labels['NOEMAIL']['txt'];
+		if (!$subscriber->validateEmail($sub['email'])) $this->errmsg[] = $labels['INVEMAIL']['txt'];
+		if (!$sub['title']) $this->errmsg[] = "You must enter your title";
+		if (!$sub['first']) $this->errmsg[] = "You must enter your first name";
+		if (!$sub['surname']) $this->errmsg[] = "You must enter your surname";
+		
+		if (count($this->errmsg)) return false;
+		
+		$subscriber->set("email", $email);
+		$subscriber->setData($sub);
+		
+		// Should really check if this email address is already
+		// subscribed and opt_in etc as this will fail if they are in the table already.
+		$query = "SELECT member_id FROM members WHERE email = '".$sub['email']."'";
+		//$message="<br>$query";
+		$member_id = $db->get_var($query);
+		if (!$member_id) {
+			$member_id=$subscriber->createNew();
+			if (!$member_id) $this->errmsg = $subscriber->errmsg;
+		}
+		else {
+			$subscriber->id=$member_id;
+
+			// This member already has a member record but are they a member of this site?
+			$query = "SELECT member_id FROM member_access where member_id=".$member_id." and msv=".$site->id;
+			//print "$query<Br>\n";
+			if (!$db->get_var($query)) {
+				// Add member to this site.
+				$member = new Member($member_id);
+				$member->addToSite($member_id, $site->id, $sub);
+				$this->errmsg[] = "This email address is already registered to a site in this group";
+			}
+			else { 
+				$this->errmsg[] = "This email address is already registered";
+			}
+			if ($sub['con_email']) $this->errmsg[] ="Your email preferences have been updated but your personal data has not been modified";
+		}
+		
+		$query = "INSERT INTO member_changes (member_id, msv) VALUES (".($member_id+0).", ".($site->id+0).")";
+		if (!$db->query($query)) {
+			//print "$query<br>\n";
+		}
+		
+		//print "Got member ($member_id)<br>";
+		if ($member_id) {
+
+			// Check if they want to be contacted by email.
+			if ($sub['con_email']) {
+				if ($_POST['allpref']) {
+	
+					// Remove all currently set up preferences
+					$query = "DELETE from newsletter_user_preferences WHERE member_id = ".$member_id." AND preference_id in (".substr($_POST['allpref'],0,-1).")";
+					//print "$query<br>\n";
+					$db->query($query);
+					
+					//Now add preferences to subscriber
+					if ($_POST['all'] == 1) { //Subscriber gets all newsletters
+						unset($preference);
+						$query = "SELECT preference_id FROM newsletter_preferences n WHERE deleted != 1 AND site_id = ".$site->id;
+						//print "$query<br>";
+						if ($results = $db->get_results($query)) {
+							foreach($results as $result) {
+								$preference[]=$result->preference_id;
+							}
+						}
+					}
+			
+					//print_r($preference);
+					if (is_array($preference)) {
+						foreach($preference as $pref_id) {
+							if ($pref_id>0) {
+								$query = "INSERT INTO newsletter_user_preferences (member_id, preference_id) VALUES (".$member_id.",".$pref_id.")";
+								$db->query($query);
+							}
+						}
+					}
+				}
+				else {
+					$this->errmsg[] = "This site has no newsletters to subscribe to";
+				}
+			}
+		}
+		else { 
+			$this->errmsg[] = "Failed to add or find member id<br />"; 
+		}
+		
+		return !count($this->errmsg);
+	}
+	
+	public function unsubscribe($email, $member_id=0) {
+		global $db, $site, $labels;
+		//print "us($email, $member_id)<br>";
+		if ($member_id==0 || !$member_id) {
+			$query="select member_id, concat(firstname, ' ', surname) as name from members where email='$email'";
+			//print "$query<br>";
+			if ($row=$db->get_row($query)) {
+				$member_id=$row->member_id;
+				$_POST['name']=$row->name;
+			}
+		}
+		if ($member_id>0) {		
+			$query="select * from newsletter_user_preferences nup
+				left join newsletter_preferences np on nup.preference_id=np.preference_id 
+				where member_id=".$member_id."
+				and np.site_id=".$site->id;
+			//print "$query<br>";
+			if ($results=$db->get_results($query)) {
+				foreach($results as $result) {
+					$query="delete from newsletter_user_preferences where member_id=".$member_id." and preference_id=".$result->preference_id;
+					//print "$query<br>";
+					$db->query($query);
+				}
+			}
+			return true;
+		}
+		//print "fail, set err to (".$labels['NOTREG']['txt'].")<br>\n";
+		$this->errormsg[] = $labels['NOTREG']['txt'];
+		return false;
+	}
+	
+	public function update(){
+
+		global $db;
+		
+		$query = 
+			"UPDATE newsletter 
+			SET subject = '" . $db->escape($this->subject) . "', 
+			text = '" . $db->escape($this->html_text) . "',
+			text2 = '" . $db->escape($this->html_text2) . "',
+			text3 = '" . $db->escape($this->html_text3) . "',
+			text4 = '" . $db->escape($this->html_text4) . "',
+			text5 = '" . $db->escape($this->html_text5) . "',
+			text6 = '" . $db->escape($this->html_text6) . "',
+			layout = ".($this->layout+0).",
+			colour = ".($this->colour+0)."
+			WHERE id = " . $this->id;
+		$db->query($query);
+
+		// Remove all preferences first.
+		$query = "DELETE FROM newsletter_send_preferences WHERE newsletter_id = ".$this->id;
+		$db->query($query);
+
+		// Add news preferences
+		$preference = $_POST['preference'];
+		if ($preference){
+			
+			while (list ($key,$val) = @each ($preference)) { 
+				$query = "INSERT INTO newsletter_send_preferences (newsletter_id, preference_id) VALUES (".$this->id.",".$val.")";
+				if ($db->query($query)){ // update their status to opted in
+					$message .= "<br />Added newsletter preference.";
+				}
+				else {
+					$message .= "<br />Error adding preference.";
+				}										
+			}
+		}
+		
+		// Add event subscriber preferences.
+		$event_id = $_POST['guid'];
+		if ($event_id) {
+			$query = "INSERT INTO newsletter_send_preferences (newsletter_id, event_id) VALUES (".$this->id.", '".$event_id."')";
+			$db->query($query);
+		}
+		
+	}
+
+	public function validate()
+	{
+		$this->msg[] = $this->validateSubject();
+		$this->msg[] = $this->validateHTMLText();
+		return !strlen($this->errMsg);		
+	}
+	public function validateSubject()
+	{
+		// Test subject for stuff...
+		$error='';
+		if (strlen($this->subject) < 4){
+		 $error .= "Subject too short\n";
+		 }
+		return $error;
+	}
+	public function validateHTMLText()
+	{
+		$error = '';
+		if (strlen($this->html_text)<4){
+			$error .= "Email text too short\n";
+		}
+		return $error;
+	}
+	
+	
+	public function validateEmail($email)
+	{
+		$regExpEmail = "/^([^\@ \.]+\.)*[^\@ \.]+\@([^\@ \.]+\.)+[^\@ \.]+$/";
+		if (preg_match($regExpEmail, $email) < 1) return false;
+		return true;
+	}
+	
+
+	
+	
+	
+public function getHTMLheader() {
+	global $site;
+	//print_r($site);
+
+	$langDayFormat="d";
+	if ($this->sitelang=="en") $langDayFormat="jS";
+
+	//$this->msg[]="Get cur date in correct lang...\n";
+	$timeNow=time();
+	$dateNow=date($langDayFormat, $timeNow)." ";
+	//$this->msg[]="Now ($dateNow)\n";
+	$monthNow=strtoupper(date("M", $timeNow));
+	//$this->msg[]="Month now for label lookup - ($monthNow)\n";
+	$dateNow.=$this->labels[$monthNow]['txt']." ";
+	//$this->msg[]="Now ($dateNow)\n";
+	$dateNow.=date("Y", $timeNow);
+	//$this->msg[]="Now ($dateNow)\n ____________________ \n";
+	
+	
+	$html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.$this->sitelang.'" lang="'.$this->sitelang.'" dir="'.$this->siteltr.'">
+<head>
+<meta http-equiv="Content-Type" content="text/plain; charset='.$this->siteencoding.'" />
+<title>'.$site->name.' newsletter</title>
+</head>
+<style type="text/css">
+body {
+	font-family: arial,helvetica,clean,sans-serif;
+	font-size: 77%;
+	color: #666;
+	background: #fff url(\''.$site->root.'img/email/body-bg.png\') repeat-x top left;
+	margin:0
+}
+p {
+	padding:0 0 10px 0;
+	margin:0;
+}
+a {
+	text-decoration: none;
+	font-weight: normal;
+	color:#3366CC;
+}
+h1, h2, h3, h4 {
+	font-family: Tahoma,Arial,Verdana;
+	margin:0;
+	padding:0;
+	font-weight:normal;
+}
+h1 {
+	color: #fff;
+	font-size:180%;
+}
+h3 {
+	color: #fff;
+	font-size:180%;
+}
+h4 {
+	font-size:160%;
+}
+ul {
+	margin:0px 0 20px; 0;
+	padding:0;
+}
+li {
+	margin-left: 20px;
+}
+
+
+div#holder {
+	clear: both;
+	float: left;
+}
+div.section-title {
+	background: url(\''.$site->root.'img/email/title-mid.png\')	repeat-y top left;
+	float: left;
+}
+	div.section-title h1 {
+		background: url(\''.$site->root.'img/email/title-top.png\')	no-repeat top left;
+		padding: 20px 0 0 40px;
+		color: #fff;
+	}
+	div.section-title div.section-title-bottom {
+		background: url(\''.$site->root.'img/email/title-bottom.png\')	no-repeat top left;
+		height: 18px;
+	}
+	
+div.section-title-2 {
+	background: url(\''.$site->root.'img/email/title-mid-orange.png\') repeat-y top left;
+}
+	div.section-title-2 h1 {
+		background: url(\''.$site->root.'img/email/title-top-orange.png\') no-repeat top left;
+	}
+	div.section-title-2 div.section-title-bottom {
+		background: url(\''.$site->root.'img/email/title-bottom-orange.png\') no-repeat top left;
+	}
+div.section-title-3 {
+	background: url(\''.$site->root.'img/email/title-mid-blue.png\') repeat-y top left;
+}
+	div.section-title-3 h1 {
+		background: url(\''.$site->root.'img/email/title-top-blue.png\') no-repeat top left;
+	}
+	div.section-title-3 div.section-title-bottom {
+		background: url(\''.$site->root.'img/email/title-bottom-blue.png\') no-repeat top left;
+	}
+div.section-title-4 {
+	background: url(\''.$site->root.'img/email/title-mid-purple.png\') repeat-y top left;
+}
+	div.section-title-4 h1 {
+		background: url(\''.$site->root.'img/email/title-top-purple.png\') no-repeat top left;
+	}
+	div.section-title-4 div.section-title-bottom {
+		background: url(\''.$site->root.'img/email/title-bottom-purple.png\') no-repeat top left;
+	}
+
+
+
+
+div.section {
+	float: left;
+	border: 1px solid #51B948;
+}
+	div.section h3 {
+		background-color: #51B948;
+		padding: 5px 20px;
+	}
+	div.section p,
+	div.section table,
+	div.section ol {
+		margin: 20px;
+	}
+
+
+div.section-2,
+div.section-box-2 {
+	border-color: #EB940E;
+}
+	div.section-2 h3,
+	div.section-box-2 h3 {
+		background-color: #EB940E;
+	}
+div.section-3,
+div.section-box-3 {
+	border-color: #008CFC;
+}
+	div.section-3 h3,
+	div.section-box-3 h3 {
+		background-color: #008CFC;
+	}
+div.section-4,
+div.section-box-4 {
+	border-color: #753386;
+}
+	div.section-4 h3,
+	div.section-box-4 h3 {
+		background-color: #753386;
+	}
+
+
+div.section-top-1 {
+	background-color: #E0ECE0;
+}
+div.section-top-2 {
+	background-color: #FAE4C3;
+}
+div.section-top-3 {
+	background-color: #D8E6F2;
+}
+div.section-top-4 {
+	background-color: #E0D1E4;
+}
+
+div.section-links {
+	float: left;
+	border: 1px solid #BCBCBC;
+	background-color: #E6E6E6;
+	padding: 20px;
+}
+	div.section-links h3 {
+		color: #606060;
+		padding-bottom: 20px;
+	}
+	div.section-links a {
+		color: #50B948;
+		padding: 0 0 0 40px;
+		text-decoration: underline;
+		height: 20px;
+		background-repeat: no-repeat;
+		display: block;
+	}
+	div.section-links-1 a {
+		background-image: url(\''.$site->root.'img/email/heart-green.png\');
+	}
+	div.section-links-2 a {
+		background-image: url(\''.$site->root.'img/email/heart-orange.png\');
+	}
+	div.section-links-3 a {
+		background-image: url(\''.$site->root.'img/email/heart-blue.png\');
+	}
+	div.section-links-4 a {
+		background-image: url(\''.$site->root.'img/email/heart-purple.png\');
+	}
+
+div.footer {
+	float: left;
+	clear: left;
+}
+
+</style>
+<body>
+
+<div id="holder" style = "background: url(\''.$site->root.'img/email/top-bg.png\') no-repeat top left; width: 746px;">
+';
+
+
+	// Generate an info bar containing the current date 
+	// If its not an internal email show a link to open it in a browser
+	if ($this->status=="S") $this->mode = "VGA";	// Simulate online mode (hide the infobar)
+	$infoBarRow = '
+<div style="height:31px;margin:left:76px;">
+	<p style = "margin-left:150px;margin-top:4px;color:#B7D0E8;">
+	'.(($this->mode=="VGA")?"&nbsp;":'If you cannot view this email, please visit <a href="'.$site->root.'newsletter?id='.$this->id.'" style="color:#fff;">'.$site->root.'newsletter?id='.$this->id.'</a>').'
+	</p>
+</div>
+<img src="'.$site->root.'img/email/ben-bg.png" />
+';
+	$html.=$infoBarRow;
+
+
+	// Show the newsletter title
+	if ($this->html_text3 && $this->status!="S") {
+		if ($this->html_text3!="DIGEST") {
+			$html.='
+<div id="section-title" class="section-title section-title-'.$this->colour.'" style="margin: 10px 0 0 56px;width:690px;padding:0;">
+	<h1>'.$this->getBodyText(3).'</h1>
+	<div class="section-title-bottom"></div>
+</div>';
+		}
+	}
+
+	// Microsite specific logo here (only for site emails switched off for newsletters)
+	if ($this->status=="S") {
+		$tmp_logo=new Image(); 
+		$tmp_logo_guid=$site->properties['email_logo'];
+		if ($tmp_logo_guid>'') {
+			$tmp_logo->loadImageByGUID($tmp_logo_guid);
+			if (is_array($tmp_logo->subimages)) {
+				$current_filename=''; 	// If you upload the correct width image it goes in the database twice :o(
+				for($i=0; $i<count($tmp_logo->subimages); $i++) {
+					if (($tmp_logo->subimages[$i]['width']+0)==650) {
+						$tmp_logo_height=$tmp_logo->subimages[$i]['height'];
+						if ($current_filename != $tmp_logo->subimages[$i]['filename']) {
+							$current_filename = $tmp_logo->subimages[$i]['filename'];
+							$tmp_logo_filename='<img src="'.$site->root.'silo/images/'.$tmp_logo->subimages[$i]['filename'].'" alt="Website logo" />';
+							$html.='<div class="top-image" style="float: left; margin: 10px 0 0 76px;width: 650px;height:'.$tmp_logo_height.'px;">'.$tmp_logo_filename.'</div>';
+						}
+					}
+				}
+				//print "got file($tmp_logo_filename) height($tmp_logo_height)<br>\n";
+			}	
+		}
+	}
+	
+	/*
+	// Show the tag line
+	$html.='<p style="margin:0 auto;width:530px;height:64px;background-color:#FFF;font-size:230%;padding:20px 0 0 0px;vertical-align:center;color:#fff;">'.($site->properties['tagline']?$site->properties['tagline']:$site->title).'</p>';
+	*/
+
+	// Show main body text
+	$html.='
+<div style="margin:20px 0 0 76px;width:650px;padding:0;" class="section section-'.($this->layout==2?"top-":"normal-").$this->colour.' section-'.$this->colour.'">
+	'.$this->getBodyText().'
+</div>
+	';
+	
+	if ($this->layout==1) {
+	
+		// Add html for links section
+		if ($this->html_text2) {
+			$html.='
+	<div id="section2" class="section-links section-links-'.$this->colour.'" style="margin:20px 0 0 76px;width:610px;" >
+		'.$this->getBodyText(2).'
+	</div>';
+		}
+
+	}
+
+	else if ($this->layout==2) {
+
+		// Add html for section 2
+		if ($this->html_text2) {
+			$html.='
+	<div id="section2" class="section section-'.$this->colour.'" style="margin:20px 0 0 76px;width:650px;padding:0;" >
+		'.$this->getBodyText(2).'
+	</div>';
+		}
+
+	
+		// Add html for section 4
+		if ($this->html_text4) {
+			$html.='
+<div id="section4" class="section section-box-'.$this->colour.'" style="margin:20px 20px 0 76px;width:315px;padding:0;" >
+	'.$this->getBodyText(4).'
+</div>';
+		}
+	
+		// Add html for section 5
+		if ($this->html_text5) {
+			$html.='
+<div id="section5" class="section section-box-'.$this->colour.'" style="margin:20px 0 0;width:315px;padding:0;clear:none;" >
+	'.$this->getBodyText(5).'
+</div>';
+		}
+	
+		// Add html for section 6
+		if ($this->html_text6) {
+			$html.='
+<div id="section6" class="section section-'.$this->colour.'" style="margin:20px 0 0 76px;width:650px;padding:0;" >
+	'.$this->getBodyText(6).'
+</div>';
+		}
+	
+	}
+
+	// Add digest html
+	if ($this->html_text3=="DIGEST" && $this->digestHTML) {
+		$html.='
+<div id="section3" class="section3" style="margin:20px 0 0 76px;width:650px;padding:0;" >
+	'.$this->digestHTML.'
+</div>';
+	}
+
+	return $html;
+}
+
+public function getHTMLfooter() {
+	global $site;
+	//$host = SERVER_NAME;
+	$host = $site->url."/".$this->sitelang;
+
+	if ($this->status=='N') $view_in_browser = $this->labels['EMAIL_SEE']['txt'].' <a href="'.$site->root.$site->name."/".$site->lang.'/newsletter/?id='.$this->id.'">'.$this->labels['CLICK_HERE']['txt'].'</a>';
+
+	$html = '
+<div class="footer" style="margin:20px 0 0 76px;width:650px;padding:0px;font-size:90%;padding:30px 0 0;background:url(\''.$site->root.'img/email/footer-top.png\') no-repeat;">
+	<p>BEN - Motor and Allied Trades Benevolent Fund. Registered Office: Lynwood, Sunninghill, Berkshire SL5 0AJ.  A Charity Registered in England and Wales (no. 297877) and Scotland (no. SC039842).  A Company Limited by Guarantee in England and Wales.  Registered Company no. 2163894. Registered Social Landlord no. LH 3766.</p>
+	<p>'.str_replace("@@SITENAME@@", $site->title, $this->labels['EMAIL_UNSUB1']['txt']).' '.$this->labels['EMAIL_UNSUB2']['txt'].' <a href="http://unsubs:email=xxx">'.$this->labels['EMAIL_UNSUBLINK']['txt'].'</a></p>
+	<!-- 
+	<p>'.$this->labels['EMAIL_NOSPAM']['txt'].' <a href="'.$site->root.$site->name."/".$site->lang.'/privacy-policy">'.$this->labels['privacy']['txt'].'.</a></p>
+	<p>'.$this->labels['FOOTER_MSG1']['txt'].$view_in_browser.'</p>
+	-->
+</div>';
+
+	$html.= '
+<div class="footer" style="margin:10px 0 0 76px; width:650px;padding:30px 0 0;">
+	<p style="padding:0;padding-right:20px;font-size:90%;margin:0;text-align:right;">'.$this->labels['siteby']['txt'].' <a style="" href="http://www.ichameleon.com?ref='.$site->name.'">Chameleon Interactive</a></p>
+	<p style="padding:0;padding-right:20px;font-size:90%;margin:0;text-align:right;">'.$this->labels['powered']['txt'].' <a style="" href="http://demo.treelinecms.com">Treeline</a></p>
+</div>	
+';
+
+	$html.='</div><div style="float:none;clear:both;width: 746px;"><!-- some mail clients can\'t unfloat stuff --></div>';
+
+
+	return $html;
+}	
+
+
+
+
+
+
+
+
+
+
+public function convertImages($content){
+	// add full web address to all images so they appear in email clients
+	$content = str_replace('src="/silo','src="http://'.SERVER_NAME.'/silo',$content);
+	return $content;
+}
+
+public function convertLinks($content){
+	// add full web address to all site links to they work in email clients
+	$content = str_replace('href="/','href="http://'.SERVER_NAME.'/',$content);
+	return $content;
+}
+
+public function setSubject() {
+	global $site;
+	$msg = "set Subject(".$this->subject.")";
+	if (!$this->subject) $msg.="No subject found \n";
+	/*
+	$data = array("SITENAME"=>$site->title);
+	if (preg_match("/@@(.*)@@/", $this->subject, $reg)) {
+		$msg.="replace (".$reg[1].") with (".$data[$reg[1]].") \n";
+		$this->subject = str_replace("@@".$reg[1]."@@", $data[$reg[1]], $this->subject);
+	}
+	$msg.="sub = (".$this->subject.") return true \n";
+	//mail("phil.redclift@ichameleon.com", "wtf do I need to do this", $msg);
+	*/
+	return true;
+}
+
+// Set all subscriber specific data here.
+public function setData($data, $s, $dbg=false) {
+	if ($dbg) $this->msg[]="got keys (".print_r($data, true).")";
+	//print "got s($s)<br>\n";
+	$s = preg_replace(array_keys($data), array_values($data), $s);
+	if ($dbg) $this->msg[]="created s($s)";
+	return $s;
+}
+
+public function getBodyText($section=1){
+	// convert body text/email content into usual content
+	switch($section) {
+		case 2 : $body = $this->html_text2; break;
+		case 3 : $body = $this->html_text3; break;
+		case 4 : $body = $this->html_text4; break;
+		case 5 : $body = $this->html_text5; break;
+		case 6 : $body = $this->html_text6; break;
+		case 1 : 
+		default : $body = $this->html_text; break;
+	}
+	$body = $this->convertLinks($body); 
+	$body = $this->convertImages($body);
+	//$body = nl2br($body);
+	return $body;
+}
+
+
+public function getHTMLEmail($footer=true){
+	// Return the HTML for this email. Header+Body+Footer
+	$content = $this->getHTMLheader();
+	if ($footer) $content.=$this->getHTMLfooter();
+	return($content);
+}
+
+
+	public function getPlainEmail($footer=true){
+	// Return the Plain text for this email
+		global $site;
+		$host = SERVER_NAME."/".$this->sitename."/".$this->sitelang;
+		$content = '
+
+'.$this->plain_text.'
+'.$this->plain_text2.'
+'.$this->plain_text3.'
+';
+		if ($footer) {
+			$content .= str_replace("@@SITENAME@@", $site->title, $this->labels['EMAIL_UNSUB1']['txt']).' 
+'.$this->labels['EMAIL_UNSUB2']['txt'].' http://unsubs:email=xxx
+'.$this->labels['EMAIL_NOSPAM']['txt'].' '.$site->link.'privacy-policy
+'.$this->labels['FOOTER_MSG1']['txt'];
+			/*
+			$content.='
+This email is only sent to subscribers of '.$site->name.' email news. If you believe you have received
+this email in error, please visit http://'.$host.'/enewsletters/?action=unsubscribe
+to change your registration details.
+
+We never spam. Read our privacy policy at http://'.$host.'/privacy-policy/
+
+';
+			*/
+		}
+		return $content;
+	}
+	
+
+// Check if any pages need to be included and get an HTML page sumamry.
+public function compileDigestPageHTML($digest) {
+	global $db;
+	$this->digestHTML = '';
+	$query = "SELECT p.title, c.content FROM newsletter_digest_pages ndp
+		LEFT JOIN pages p ON p.guid = ndp.guid
+		LEFT JOIN content c ON p.guid = c.parent
+		WHERE ndp.digest_id = $digest 
+		AND c.placeholder = 'content'
+		AND p.date_published <> '0000-00-00 00:00:00'
+		AND p.date_published IS NOT NULL
+		AND c.revision_id = 0
+		";
+	//print "$query<br>\n";
+	if ($results = $db->get_results($query)) {
+		foreach ($results as $result) {
+			$this->digestHTML .='<h3>'.$result->title.'</h3>';
+			$this->digestHTML .= limitWords($result->content, 200);
+		}
+	}
+	if ($this->digestHTML) $this->digestHTML = "<h2>Latest content from the website</h2>";
+	return true;
+}
+	
+
+	public function drawPreferences($msv){
+		global $db, $labels, $page;
+		
+		$query = "SELECT * FROM newsletter_preferences n
+			WHERE deleted != 1 AND site_id = $msv
+			ORDER BY preference_title ASC";
+		//echo $query;
+		$results = $db->get_results($query);
+
+		if($results){
+			$html = '<fieldset class="border">
+<p style="font-size:100%;">To receive email updates on what\'s happening at BEN, please let us know what type of information you\'d prefer to receive by checking the boxes below. Make sure you select \'General news &amp; information\' to receive <a href="'.$site->link.'/media/media-centre/e-newsletters/">BEN e-news</a> our email newsletter.</p>
+';
+			//$html .= '<legend>'.$labels['prefer']['txt'].'</legend>'."\n";
+			foreach($results as $result){
+				$checked='';
+				if (is_array($_POST['preference'])) {
+					$checked=in_array($result->preference_id, $_POST['preference'])?"checked ":"";
+				}
+				$allpref.=$result->preference_id.",";
+				$html.='<input class="checkbox" style="float:left;clear:left;" type="checkbox" '.$checked.'id="'.str_replace(' ','_',$result->preference_title).'" name="preference[]" value="'.$result->preference_id.'" />'."\n";
+				$html.='<label class="checklabel" for="'.str_replace(' ','_',$result->preference_title).'">'.$result->preference_title.'</label><br />'."\n";
+			}
+			$checked=($_POST['all']==1)?"checked ":"";
+			$checked='';
+			// Only show the all box if we are on the website
+			if ($page->getTemplate()=="newsletters.php") {
+				$html.='<input class="checkbox" style="float:left;clear:left;" '.$checked.' type="checkbox" id="All" name="all" value="1" />
+<label for="All" class="checklabel">'.$labels['recall']['txt'].'</label><br />
+<input type="hidden" name="allpref" value="'.$allpref.'" />
+';
+			}
+			$html.='</fieldset>'."\n";
+		}
+		return $html;
+	}
+
+
+	public function updatePreferences($member_id) {
+		global $db, $site;
+		$total_set=0;
+		if ($member_id>0 && $site->id>0) {
+
+			// Remove all preferences for this user from this site
+			$query = "DELETE FROM newsletter_user_preferences 
+				WHERE member_id=".$member_id."
+				AND preference_id IN (SELECT preference_id FROM newsletter_preferences WHERE site_id=".$site->id.")";
+			//print "$query<br>\n";
+			$db->query($query);
+
+			$query = "INSERT INTO member_changes (member_id, msv) values ($member_id, ".($site->id+0).")";
+			$db->query($query);	// if this fails they are probably already in there.
+
+			// Create an array of preferences required
+			if ($_POST['all']) {
+				$apref=explode(",", $_POST['allpref']);
+			}
+			else if (is_array($_POST['preference'])) {
+				foreach ($_POST['preference'] as $pref) {
+					$apref[]=$pref;
+				}
+			}
+			
+			if (is_array($apref)) {
+				unset($_POST['preference']);
+				foreach ($apref as $pref) {
+					//print "Add preference $pref<br>\n";
+					$_POST['preference'][]=$pref;
+					if ($pref) {
+						//print "add preference ($pref) to member($member_id)<br>\n";
+						$query = "INSERT INTO newsletter_user_preferences (member_id, preference_id) 
+							VALUES($member_id, $pref)";
+						//print "$query<br>\n";
+						if ($db->query($query)) {
+							$total_set++;
+						}
+					}
+				}
+			}
+			return $total_set;
+		}
+	
+		// These values should not really be important as this will only happen 
+		// if there is a bug.
+		if (!$member_id) return -1;
+		if (!$site->id) return -2;
+		return -3;
+	}
+
+	public function drawMailPreferences($msv){
+		global $db, $labels;
+		
+				$query = "SELECT * FROM store_mail_groups smg 
+					WHERE site_id = $msv 
+					ORDER BY name ASC";
+				//echo $query;
+				$results = $db->get_results($query);
+	
+				if($results){
+					echo '<fieldset class="border">'."\n";
+					echo '<legend>'.$labels['mailprefer']['txt'].'</legend>'."\n";
+					foreach($results as $result){
+						//print "check if id(".$result->id.") is in ";
+						//print_r($_POST['mail_group']);
+						//print "<br>";
+						$checked='';
+						if (is_array($_POST['mail_group'])) {
+							$checked=in_array($result->id, $_POST['mail_group'])?"checked ":"";
+						}
+						$mailallpref.=$result->id.",";
+						echo '<input class="checkbox" style="float:left;clear:left;" type="checkbox" id="'.str_replace(' ','_',$result->name).'" '.$checked.'name="mail_group[]" value="'.$result->id.'" />'."\n";
+						echo '<label class="checklabel" for="'.str_replace(' ','_',$result->name).'">'.$result->name.'</label><br />'."\n";
+					}
+					$checked=($_POST['mailall']==1)?"checked ":"";
+					echo '<input class="checkbox" style="float:left;clear:left;" type="checkbox" id="All" '.$checked.'name="mailall" value="1" />'."\n";
+					echo '<label for="All" class="checklabel">'.$labels['recall']['txt'].'</label><br />'."\n";
+					echo '<input type="hidden" name="mailallpref" value="'.$mailallpref.'" />';	// Dont like it but need to remove preference somehow
+					echo '</fieldset>'."\n";
+				}
+	}
+	
+	// Function draws all preference as html for mail merging....
+	public function listPreferences($email='', $member_id='') {
+		//print "lp($email, $member_id)<br>";
+		global $db, $site;
+		$field="0";
+		$email_html = $post_html = '';
+		
+		if ($email>'') {
+			$field="m.email='$email' ";
+		}
+		else {
+			if (!$member_id) $member_id=$_SESSION['member_id'];
+			$field="m.member_id=".$member_id." ";
+		}
+		// Email preferences
+		$query = "SELECT n.preference_title as name, s.title, n.site_id
+			FROM newsletter_preferences n
+			LEFT JOIN newsletter_user_preferences nup ON nup.preference_id=n.preference_id
+			LEFT JOIN members m on nup.member_id=m.member_id
+			LEFT JOIN sites_versions sv on n.site_id=sv.msv
+			LEFT JOIN sites s on sv.microsite=s.microsite
+			WHERE n.deleted != 1 AND $field
+			ORDER BY n.site_id, n.preference_title ASC";
+		//print "$query<br>";
+		if ($results=$db->get_results($query)) {
+			foreach($results as $result) {
+				if ($cursite!=$result->title) {
+					$cursite=$result->title;
+					if ($email_html) $email_html.="</ul>";
+					if ($result->site_id>1) $email_html.="<p><strong>".$result->title."</strong></p>";
+					$email_html.="<ul>";
+				}
+				$email_html.="<li>".$result->name."</li>";
+			}
+		}
+		if ($email_html) $email_html="<strong>You have selected to receive the following email communications from ".$site->name."</strong>".$email_html."</ul>";
+		else $email_html="You have elected to receive no information by email";
+
+		/*
+		// Mail preferences
+		$query = "SELECT smg.name, sab.post_code, s.title FROM store_mail_groups smg 
+			LEFT JOIN store_mail_members smm on smg.id=smm.mail_group
+			LEFT JOIN members m on smm.member_id = m.member_id
+			LEFT JOIN sites_versions sv on smg.site_id=sv.msv
+			LEFT JOIN sites s on sv.microsite=s.microsite
+			LEFT JOIN store_address_book sab ON smm.addr_id=sab.addr_id
+			WHERE $field
+			ORDER BY site_id, smm.addr_id, smg.name";
+		//print "$query<br>";
+		if ($results=$db->get_results($query)) {
+			foreach($results as $result) {
+				if ($cursite!=$result->title) {
+					$cursite=$result->title;
+					if ($post_html) $post_html.="</ul>";
+					$post_html.="<p><strong>".$result->title."</strong></p><ul>";
+				}
+				$post_html.="<li>".$result->name.($result->post_code?" to postcode ".$result->post_code:"")."</li>";
+			}
+		}
+		
+		if ($post_html) $post_html="<h4>You have selected to receive postal updates regarding</h4><ul>".$post_html."</ul>";
+		else $post_html="<p>You have elected to receive no information by post</p>";
+		*/
+		return $email_html.$post_html;
+
+	}
+	
+	
+	public function drawCountrySelect($current) {
+		global $db;
+		$html='';
+		$query="select country_id, title from store_countries order by title";
+		if ($results=$db->get_results($query)) {
+			foreach($results as $result) {
+				$html.='<option value="'.$result->country_id.'"'.(($result->country_id==$current)?"selected":"").'>'.$result->title.'</option>';
+			}
+		}
+		return $html;
+	}
+	
+	public function drawAdminPreferences($id, $msv, $exclude=array()){
+		global $db;
+
+		//print "dAP($id, $msv)<br>\n";				
+				
+		$temp = ($id > 0? ", IF(np.newsletter_id=".$id.",1,0) as flag" : " ");
+		
+		if (count($exclude)) $exwhere = "AND n.preference_id NOT IN (".implode(",",$exclude).") ";
+		//print "got exwhere($exwhere) ex(".print_r($exclude, true).")<br>\n";
+
+		if ($id){
+			$query = "SELECT n.preference_id, n.preference_title ".$temp."
+				FROM newsletter_preferences n 
+				LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id 
+				WHERE n.preference_id NOT IN 
+					(
+					SELECT n.preference_id FROM newsletter_preferences n 
+					LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id 
+					WHERE np.newsletter_id=".$id."
+					) 
+				AND n.deleted!=1 
+				$exwhere
+				AND n.site_id = $msv 
+
+				UNION 
+
+				SELECT n.preference_id, n.preference_title ".$temp." 
+				FROM newsletter_preferences n 
+				LEFT JOIN newsletter_send_preferences np ON n.preference_id=np.preference_id 
+				WHERE np.newsletter_id=".$id." 
+				AND n.deleted!=1
+				$exwhere
+
+				ORDER BY preference_id ";
+					
+		} 
+		else {
+			$query = "SELECT * FROM newsletter_preferences n 
+				WHERE deleted != 1 
+				AND site_id = $msv
+				$exwhere
+				ORDER BY preference_title ASC ";
+		}
+	
+		//print "$query<br>\n";
+		$results = $db->get_results($query);
+		
+		if($results){
+			foreach($results as $result){
+				if ($result->flag == 1){
+					$html.='<input type="checkbox" class="checkbox" id="'.$result->preference_title.'" name="preference[]" value="'.$result->preference_id.'" checked="checked" />';
+				} else {
+					$html.='<input type="checkbox" class="checkbox" id="'.$result->preference_title.'" name="preference[]" value="'.$result->preference_id.'" />';
+				}
+				$html.='<label for="'.$result->preference_title.'" class="checklabel">'.$result->preference_title.':</label><br />'."\n";
+			}
+			return $html;
+		}
+	}
+	
+	
+	
+	// Man this dude just keeps growing,
+	public function sendText($email, $title, $data, $footer=true) {
+
+		global $db, $site;
+		
+		//print "sT($email, $title, data, $footer)<br>\n";
+		//include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+		include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+
+		$result=false;
+		unset($this->msg);
+		$this->msg[] = "sT($email, $title, data, $footer)";
+		
+		// Add any relevant default data to the array
+		if (!$data['SITENAME']) $data['SITENAME'] = $site->title;
+		
+		$from=$subject=$strHTMLEmail=$strHTMLPlain='';
+		if (!$this->validateEmail($email)) {
+			$this->msg[]="send text function sent an invalid email addy($email, $title, data not included...)";
+		}
+		
+		// Select the send text for this microsite 
+		// 		or select send text for the main site.
+		$query="SELECT id FROM newsletter n 
+			WHERE text3='$title' 
+			AND (msv = ".($site->id+0)." OR msv=1)
+			AND status='S'
+			ORDER BY msv DESC
+			LIMIT 1";
+		$this->msg[]="$query \n";
+		//print "$query<br>";
+		if (!$row=$db->get_row($query)) {
+			//print "failed send mail";
+			$this->msg[]="failed to locate follow up email to send to $email";
+		}
+		else {
+			// Email checks out, send the test mail
+			//print "sending sendText to ($email)<br>";
+			$this->loadByID($row->id);
+			if ($this->validate()) {
+	
+				$page=new Page();
+				$this->labels=$page->getTranslations($site->id, $site->language);
+	
+				// Check if we need to generate a PDF invoice / recipt and include the link to this
+				$this->msg[]="Check if we need to create an invoice(".$data['invoice'].")";
+				if ($data['invoice']) {
+					$atmp = explode("|", $data['invoice']);
+					foreach ($atmp as $tmp) {
+						$tmpDueDate = $data['FINAL-PAY-DATE'];
+						if ($tmp=="INVOICE10") {
+							generateEventPDF("INVOICE90", $data['EVENT-ORDER-REF'], $data['FINAL-PAY-DATE']);
+							$tmpDueDate = $data['TEN-PC-DUE-DATE'];
+						}
+						$tmp_inv = generateEventPDF($tmp, $data['EVENT-ORDER-REF'], $tmpDueDate);
+						$tmp_inv_type = strtolower(substr($tmp, 0, 7));
+						if ($tmp_inv) {
+							$data['INVOICE-LINK'].='Click here to <a href="'.$tmp_inv.'">download full PDF '.$tmp_inv_type.'</a><br />';
+						}
+						else $this->msg[]="Failed to create event ".$tmp_inv_type;
+					}
+				}
+				
+				// Need to hide html_text2 and 3 when collecting body html
+				// Save em all just in case we need to reenstate em once they all changed
+				/*
+				$tmp1=$this->html_text; 
+				$tmp2=$this->html_text2; $this->html_text2='';
+				$tmp3=$this->html_text3; $this->html_text3='';
+				$tmpp1=$this->plain_text; 
+				$tmpp2=$this->plain_text2; $this->plain_text2='';
+				$tmpp3=$this->plain_text3; $this->plain_text3='';
+				*/
+				// Dont appear to need em again so just kill em for now
+				$this->html_text2=''; $this->html_text3='';
+				$this->plain_text2=''; $this->plain_text3='';
+
+				$relation=array();
+				foreach ($data as $k=>$v) {
+					$relation['/@@'.$k.'@@/']=$v; 
+				}
+				
+				//print "got keys (".print_r($relation).")<br>\n";
+				//print "got text(".$this->html_text.")<br>";
+				$this->html_text = preg_replace(array_keys($relation), array_values($relation), $this->html_text);
+				$this->plain_text = preg_replace(array_keys($relation), array_values($relation), $this->plain_text);
+				$this->subject = preg_replace(array_keys($relation), array_values($relation), $this->subject);
+				//print "got text2(".$this->html_text.")<br>";
+	
+				$strHTMLEmail = $this->getHTMLEmail($footer);
+				$strHTMLPlain = $this->getPlainEmail($footer);
+
+				// Add an unsub link replacer for the footer if we have one
+				if ($footer) {
+					$tmp = array('/href="http:\/\/unsubs:email=xxx"/'=>'href="'.$site->root.'/enewsletters/?action=unsubscribe&email='.$email.'"');
+					$this->msg[] = "Add unsub email to footer";
+					$strHTMLEmail = $this->setData($tmp, $strHTMLEmail);
+				}
+			
+				// Need to fix placeholders in content next
+				//print "send from($from) subject($subject)<br>";
+				$tmp_contact_email = $site->contact['email']?$site->contact['email']:$site->getConfig("contact_recipient_email");
+				$from = $site->name.'<'.$tmp_contact_email.'>';
+				$mail = new htmlMimeMail();
+				$mail->setFrom($from);
+				//$mail->setBcc("phil.redclift@ichameleon.com");
+				$mail->setReturnPath($from);
+				$mail->setSubject($this->subject);
+				$mail->setHtml($strHTMLEmail, $strHTMLPlain, null);
+				$mail->is_built = false;
+				$result = $mail->send(array($email));
+				
+				$this->msg[]="Sent text[$result] to ".$email;
+				if (substr($title, 0, "5")=="FFFFFF") {
+					$this->msg[]="Send copy to phil";
+					$mail->send(array("phil.redclift@ichameleon.com"));
+				}
+				else {
+					//print "send message to ($email)<br>\n";
+					// Stop sending copy emails when successful....
+					unset($this->msg);
+				}
+			}
+			else $this->msg[]="email content is not valid";
+		}
+				
+		// Probably should have a loggin facility to we can trace all sendText calls....
+		// we cant really do anything on failure as this process could be run in lots of places....
+		if ($this->msg) $this->mailMsg("phil.redclift@ichameleon.com", $site->name." send text summary");
+		return $result;	
+	}
+	
+	private function mailMsg($to, $subject) {
+		global $site;
+		$headers = "From: ".$site->title." <".$site->name."@ichameleon.com>\n";
+		$headers.= "\n";
+		
+		//print "to($to) send ".print_r($this->msg, true)."<br>\n";
+		if (is_array($this->msg)) {
+			foreach ($this->msg as $m) {
+				$msg.=$m."\n";
+			}
+		}
+		else $msg.=$this->msg."\n";
+		if ($msg) {
+			//print "Sending now.<br>\n";
+			mail($to, $subject, $msg, $headers);
+		}
+	}
+}
+
+
+?>

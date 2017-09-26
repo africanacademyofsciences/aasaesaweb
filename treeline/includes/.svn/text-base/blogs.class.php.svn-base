@@ -1,0 +1,687 @@
+<?php
+
+class Blog {
+
+	public $msv;
+	public $member_id;
+	
+	public $term; //// our search term...
+	public $totalresults;
+	public $perpage;
+	public $thispage;
+	public $totalpages;
+	public $tag;
+	public $from;
+	public $to;
+	public $type;
+	public $resources;
+	public $allresults;
+	public $filetype;
+	
+	public $edit_id;
+	public $edit_title;
+	public $edit_text;
+	
+	private $page;
+
+	public $abuse, $errmsg;
+	
+	public function __construct($member_id=0, $term=false){
+	
+		global $db, $page, $site;
+		$this->page = $page; // to prevent any alterations affecting later functions that may rely of this data.
+		$this->type = $type;
+		
+		$this->member_id=$member_id;
+		$this->msv = $site->id;
+		
+		$this->setTerm($term);
+		$this->setPage(1);	
+		$this->setPerPage(5);
+		
+		$this->abuse = new Abuse();
+		$this->errmsg = array();
+		
+		$query .= "SELECT b.id, b.title FROM blogs b 
+			LEFT JOIN members m ON b.member_id=m.member_id 
+			LEFT JOIN member_access ma ON m.member_id=ma.member_id AND b.msv=ma.msv
+			WHERE b.msv=".$this->msv." 
+			AND ma.blog_allowed=1
+			AND b.suspended=0 
+			/* AND b.revision_id=0 */
+			";
+
+		//print "total - $query GROUP BY m.member_id<br>\n";
+		$this->allresults = $db->get_results( $query );
+		
+		if( $this->getTerm() ){
+			if ($this->getTerm()=="member") {
+				$query.=" AND m.member_id=".$_GET['id']." ";
+			}
+			else $query.= " AND (concat(m.firstname, ' ',m.surname) LIKE '%". $this->getTerm() ."%' 
+							OR b.title LIKE '%". $this->getTerm() ."%') ";
+		}
+		$query.=" GROUP BY m.member_id ";
+		//echo '<br />'. nl2br($query) .'<br />';
+		//print "$query<br>\n";
+		
+		$search = $db->get_results( $query );  //// removed -- 'AND p.hidden=0'
+		//print_r($search);
+		//echo '<br />total: '. $db->num_rows .'<br />';
+		$this->setTotal($db->num_rows);	
+		$this->setTotalPages($db->num_rows);	
+		$db->flush();
+
+	
+		// If we have a member id then see if they have a currently open blog
+		if ($_SESSION['member_id']>0) {
+			$query="SELECT ma.blog_allowed as bloggable,
+				b.id, b.title, b.text, b.revision_id
+				FROM member_access ma
+				LEFT OUTER JOIN blogs b ON (b.msv=ma.msv AND b.member_id=ma.member_id)
+				WHERE ma.msv=".$this->msv." 
+				AND ma.member_id=".$this->member_id." 
+				GROUP BY b.id
+				ORDER BY b.revision_id DESC, b.date_added 
+				LIMIT 1";
+			//print "$query<br>\n";
+			if ($row = $db->get_row($query)) {
+				if ($row->revision_id==1) {
+					$this->edit_id=$row->id;
+					$this->edit_title = $row->title;
+					$this->edit_text = $row->text;
+				}
+				$this->member_bloggable = $row->bloggable;
+				//print "set title to (".$this->edit_title.")<br>\n";
+			}
+		}
+	}
+
+	public function getFileType(){
+		return $this->filetype;
+	}
+
+	public function setFileType($filetype){
+		$this->filetype = $filetype;
+	}
+
+	public function getTag(){
+		return $this->tag;
+	}
+
+	public function setTag($tag){
+		$this->tag = $tag;
+	}
+
+	public function setPerPage($num){
+		$this->perpage = $num;
+	}
+
+	public function getPerPage(){
+		return $this->perpage;
+	}
+
+	public function setTerm($term){
+		$this->term = $term;
+	}
+
+	public function getTerm(){
+		return $this->term;
+	}
+
+	public function setTotal($count){
+		$this->totalresults = $count;
+	}
+
+	public function getTotal(){
+		return $this->totalresults;
+	}
+
+	public function getPage(){
+		return $this->thispage;
+	}
+
+	public function setPage($page){
+		$this->thispage = $page;
+	}
+
+	public function setTotalPages($total){
+		$this->totalpages = ceil($this->getTotal()/$this->getPerPage());
+	}
+
+	public function getTotalPages(){
+		return $this->totalpages;
+	}
+
+	// 2nd Feb 2009 - Phil Redclift
+	// Create a new blog record
+	public function create() {
+		global $db, $site;
+		if (!$_SESSION['member_id']) return 0;
+		$query="INSERT INTO blogs (msv, member_id, date_added, title)
+			VALUES(".$this->msv.", ".$_SESSION['member_id'].", NOW(), 'New blog title')";
+		//print "$query<br>\n";
+		if ($db->query($query)) return $db->insert_id;
+	}
+	
+	// 2nd Feb 2009 - Phil REdclift
+	// Insert a new blog record if we dont have one on the go then update it.
+	public function update() {
+		global $db;
+		
+		$title=$db->escape(cleanField($_POST['blogtitle'], 1, '<p><strong><em><h3><a><span><img>'));
+		$text = $db->escape(cleanField($_POST['blogtext'], 1, '<p><strong><em><h3><a><span><img>'));
+
+		// First check they have entered valid data for this blog
+		if (!$title) $message[]="You must enter a blog title";
+		if (!$text) $message[]="You must enter some blog text";
+		$query = "SELECT id FROM blogs WHERE member_id=".$this->member_id." AND msv=".$this->msv." AND revision_id<1 AND title='".$title."'";
+		//print "$query<br>\n";
+		if ($db->get_var($query)) $message[]="You already have a blog by this title";
+
+		if (!$this->edit_id) $this->edit_id = $this->create();
+		if (!$message) {
+			$query="UPDATE blogs SET title='".$title."', text='".$text."' WHERE id=".$this->edit_id;
+			//print "$query<br>\n";
+			$db->query($query);
+			if (!$db->last_error) return 0;
+			else $message[]="Failed to update blog record";
+		}
+		return $message;
+	}
+	
+	// 3rd Feb 2009 - Phil Redclft
+	// Update
+	public function publish() {
+		global $db, $site;
+		// Check the current dude/site have a publishable blog
+		if ($db->get_var("SELECT id FROM blogs WHERE msv=".$this->msv." AND member_id=".$this->member_id." AND revision_id=1")) {
+			$db->query("UPDATE blogs SET revision_id=revision_id-1 WHERE msv=".$this->msv." AND member_id=".$this->member_id);
+			$db->query("UPDATE blogs SET date_added=NOW() WHERE msv=".$this->msv." AND member_id=".$this->member_id." AND revision_id=0");
+			$this->edit_id=0;
+			$this->edit_title='';
+			$this->edit_text='';
+			return true;
+		}
+		return false;
+	}
+
+	// 12th Feb 20009 - Phil Redclift
+	// Delete a blog entry permenantly
+	public function delete($blog_id) {
+		global $db;
+		if ($blog_id>0) {
+			$query="UPDATE blogs SET suspended=-2 WHERE id=".$blog_id;
+			return $db->query($query);
+		}
+		return false;
+	}
+	
+	public function suspend($blog_id, $suspend=true) {
+		global $db;
+		if ($blog_id>0) {
+			$query = "UPDATE blogs SET suspended=".($suspend?-1:0)." WHERE id=".$blog_id;
+			$db->query($query);
+			return true;
+		}
+		return false;
+	}
+
+	
+	// 12th Feb 2009 - Phil Redclift
+	// Collect relevant blogs from the database
+	public function getBlogsList($page=1, $cat='', $search='') {
+		global $db, $site;
+		//print "gBL($page, $cat, $search)<br>\n";
+		
+		if ($cat=="abuse") $where.="AND abuse=1 ";
+		else if ($cat=="author" && $search) $where.="AND concat(m.firstname, ' ', m.surname) LIKE '%$search%' ";
+		else if ($cat=="title" && $search) $where.="AND b.title LIKE '%$search%' ";
+		
+		$order = "ORDER BY b.date_added DESC ";
+		
+		$query = "SELECT b.id as blog_id, b.title, b.abuse,
+			b.member_id, ma.blog_allowed,
+			concat(m.firstname, ' ', m.surname) as author, 
+			concat(m2.firstname, ' ', m2.surname) as reporter,
+			b.suspended,
+			IF (b.revision_id=1,'pending',IF(b.suspended=-1,'suspended','live')) AS `status`
+			FROM blogs b
+			LEFT JOIN members m ON b.member_id=m.member_id
+			LEFT OUTER JOIN members m2 on b.abuse=m.member_id
+			LEFT OUTER JOIN member_access ma ON m.member_id=ma.member_id AND b.msv=ma.msv
+			WHERE b.msv=".$site->msv." 
+			AND b.suspended>-2 ";
+		//print "$query<br>\n";
+		$query.= $where;
+		//print "actually get blogs - $query<br>\n";
+		$db->query($query);
+		$this->setTotal($db->num_rows);	
+		$this->setTotalPages($db->num_rows);	
+		$db->flush();
+
+		$this->setPage($page);
+		//print "PerPage(".$this->getPerPage().") page(".$this->getPage().")<br>\n";
+		
+		$this->from = $this->getPerPage()*($this->getPage()-1);
+		$this->to = $this->getPerPage()*$this->getPage();
+		$limits = "LIMIT ".getQueryLimits($this->getPerPage(), $this->thispage);
+
+		$query.= $order.$limits;
+		//print "$query<br>\n";
+		
+		return $db->get_results($query);
+	
+	}
+	// 12th Feb 2009 - Phil Redclift
+	// Draw a list of blogs with optional search 
+	public function drawBlogsList($page, $cat, $search) { 
+		global $help;
+		$html = '';
+		if ($results = $this->getBlogsList($page, $cat, $search)) {
+		
+			foreach ($results as $result) {
+	
+				if ($result->suspended) $suspendlink = '<a '.$help->drawInfoPopup("Un-suspend this blog").' class="publish" href="/treeline/blogs/?bid='.$result->blog_id.'&amp;action=unsuspend">Un-suspend</a>';
+				else $suspendlink = '<a '.$help->drawInfoPopup("Suspend this blog").' class="suspend" href="/treeline/blogs/?bid='.$result->blog_id.'&amp;action=suspend">Suspend</a>';
+				$deletelink = '<a '.$help->drawInfoPopup("Delete this blog").' class="delete" href="/treeline/blogs/?bid='.$result->blog_id.'&amp;action=delete">Delete</a>';
+
+				$member_name = "not found";
+				$member_link = '';
+				$member_info = 'There is no member '.($result->member_id+0);
+				if ($result->author>'') {
+					$member_name=$result->author;
+					$member_link='<a href="/treeline/members/?id='.$result->member_id.'&amp;action=edit">'.$member_name.'</a>';
+					$member_info="Click to edit member info";
+					if (!$result->blog_allowed) $member_info.='<br>This member is <b>not allowed</b> to blog<br>This post will not appear on the website.';
+				}
+				
+				$html.='<tr>
+	<td>'.$result->title.'</td>
+	<td nowrap '.$help->drawInfoPopup($member_info).'>'.($member_link?$member_link:$member_name).'</td>
+	<td>'.$result->status.'</td>
+	<td nowrap class="action">
+	'.$suspendlink.'
+	'.$deletelink.'
+	</td>
+<tr>
+';
+
+			}
+			if ($html) {
+				$html = '<table class="tl_list">
+<caption>'.getShowingXofX($this->getPerPage(), $this->thispage, sizeof($results), $this->getTotal()).'</caption>
+<tr>
+	<th scope="col">Blog title</th>
+	<th scope="col" nowrap>Author</th>
+	<th scope="col" nowrap>Status</th>
+	<td scope="col">Manage blog</th>
+</tr>
+</thead>
+<tbody>
+'.$html.'
+</tbody>
+</table>
+'.drawPagination($this->getTotal(), $this->getPerPage(), $this->thispage, "?keywords=".$search."&amp;category=".$cat).'
+';
+			}
+			return $html;
+			
+		}
+		return;
+			
+	}
+	
+	public function doBlogSearch($thispage,$orderBy='date_added',$orderDir='desc'){
+		global $db, $site;
+		$this->setPage($thispage);
+		$this->from = $this->getPerPage()*($this->getPage()-1);
+		$this->to = $this->getPerPage()*$this->getPage();
+						
+		$query .= "SELECT b.id, b.title, b.date_added,
+			date_format(b.date_added, '%j %m %Y') as added,
+			concat(m.firstname, ' ', m.surname) AS name,
+			m.member_id, ma.id as access_id
+			FROM blogs b 
+			LEFT JOIN members m ON b.member_id=m.member_id 
+			LEFT JOIN member_access ma ON m.member_id=ma.member_id AND b.msv=ma.msv
+			WHERE b.msv=".$this->msv." 
+			AND ma.blog_allowed=1 
+			AND b.suspended=0 
+			";
+			
+		//print "\n $query<br>\n";
+		$this->allresults = $db->get_results( $query."GROUP BY m.member_id");
+		
+		if( $this->getTerm() ){
+			if ($this->getTerm()=="member") {
+				$query.=" AND m.member_id=".$_GET['id']." ";
+			}
+			else $query.= " AND (concat(m.firstname, ' ',m.surname) LIKE '%". $this->getTerm() ."%' 
+							OR b.title LIKE '%". $this->getTerm() ."%') ";
+		}
+		$query .= " GROUP BY m.member_id ";
+		$query .= " ORDER BY b.". $orderBy ." ". $orderDir;
+		$query .= " LIMIT ". $this->from .",". $this->getPerPage();
+		
+		//print "\n RUN \n $query<br>\n";
+		
+		//echo '<br /><br />'. nl2br($query) .'<br />';
+	
+		if($results = $db->get_results( $query ) ){ 
+			$db->flush();
+			return $results;
+		}else{
+			return false;
+		}
+
+	}
+	
+
+
+
+	public function drawBlogResults($p=1, $orderBy='last_updated', $orderDir='desc'){
+		global $labels, $page, $db;
+		//print "dBR($p, $orderBy, $orderDir)<br>\n";
+		$htm.='';
+		if($results = $this->doBlogSearch($p, $orderBy, $orderDir) ){
+		
+			foreach($results as $result) {
+				//print_r($result);
+				$blogimg = "/silo/upload/mem-".$result->access_id.".jpg";
+				if (!file_exists($_SERVER['DOCUMENT_ROOT'].$blogimg)) {
+					print "file(".$_SERVER['DOCUMENT_ROOT'].$blogimg.") does not exist<br>\n";
+					$blogimg = "/img/layout/blog-default.png";
+				}
+				$sz = getimagesize($_SERVER['DOCUMENT_ROOT'].$blogimg);
+					
+				$html .= '<li class = "blogger">
+	<div class="blogtop"></div>
+	<div class="blogmid">
+		<div class="mypic top-rounded" style="background:url(\''.$blogimg.'\') no-repeat;">
+			<div class="mypicbot" style="margin-top:'.($sz[1]-10).'px;" ></div>
+		</div>
+		<ul class="myblogs" style="" >
+			<li class="myname">'.$result->name.'</li>
+			';
+				// Get most recent 3 posts for this blogger
+				$query = "SELECT b.id, b.title 
+					FROM blogs b 
+					WHERE member_id = ".$result->member_id." 
+					AND b.revision_id < 1
+					AND b.suspended >=0
+					ORDER BY b.revision_id DESC
+					LIMIT 3
+					";
+				//print "$query<br>\n";
+				if ($blogresults = $db->get_results($query)) {
+					foreach ($blogresults as $blogresult) {
+						$html.='<li><a href="'.$page->drawLinkByGUID($page->getGUID()).'?bid='.$blogresult->id.'&amp;keywords='.$this->getTerm().'">'.highlightSearchTerms($blogresult->title, $this->getTerm(), 'strong', 'keywords').'</a></li>';
+					}
+				}
+				$html.='
+	</div>
+	<div class="blogbot"></div>
+</li>';
+				/*
+				<ul class="fileinfo">
+					<li class="left">Date</li>
+					<li class="right">'.date('jS F Y', getDateFromTimestamp($result->date_added) ) .'</li>
+				</ul>
+				*/
+			}
+			if ($html) {
+				$html = '<ul id="serp" class="links">'.$html.'</ul>';
+				$html .= $this->getPagination($p, $page->drawLinkByGUID($page->getGUID())."?filter=".$orderBy."&amp;order=".$orderDir);	
+			}
+			unset($results);
+			return $html;
+		}
+		return false;
+	}
+
+
+
+	public function drawTotal(){
+		global $labels;
+		$to = ($this->getTotal()<$this->to)? $this->getTotal() : $this->to;
+		//print "total(".$this->getTotal().") from(".$this->from.") to($to)<br>\n";
+		if($this->getTotal()==1 && $this->getTerm()) $msg = $labels['SEARCHFOR']['txt'].' <strong>'. $this->getTerm() .'</strong> '.$labels['RETURNED']['txt'].' 1 '.$labels['RESULT']['txt'];
+		else $msg = $labels['SHOWING']['txt'].' '. ($this->from+1) .' - '. $to .' '.$labels['OF']['txt'].' '. $this->getTotal();
+
+		return $msg;
+	}
+	
+
+	public function loadBlog($id) {
+		global $db, $site;
+		$query = "SELECT b.member_id, b.title, b.`text`, 
+			IF (b.revision_id=1,'pending',IF(b.suspended=-1,'suspended','live')) AS `status`,
+			concat(m.firstname, ' ', m.surname) as fullname, m.email,
+			ma.id as access_id, 
+			mp.profile_text, mp.blog_comments
+			FROM blogs b
+			LEFT JOIN members m ON b.member_id=m.member_id
+			LEFT JOIN member_access ma on ma.member_id = m.member_id AND ma.msv=".$site->id."
+			LEFT JOIN member_profile mp ON mp.access_id = ma.id
+			WHERE b.id=".$id."
+			AND ma.`status` <> 'X'
+			AND suspended>-2";
+		//print "$query<br>\n";
+		$row = $db->get_row($query);
+		if ($row) {
+			$this->blog['id']=$id;
+			$this->blog['title']=$row->title;
+			$this->blog['content']=$row->text;
+			$this->blog['status']=$row->status;
+			$this->blog['blogger_id']=$row->member_id;
+			$this->blog['blogger_access_id']=$row->access_id;
+			$this->blog['blogger_email'] = $row->email;
+			$this->blog['blogger_name']=$row->fullname;
+			$this->blog['blogger_profile'] = $row->profile_text;
+			$this->blog['allow_comments'] = $row->blog_comments;
+			$this->blog['banner_html'] = $row->blog_banner;
+			//print "Loaded blog(".print_r($this->blog, true).")<br>\n";
+			return true;
+		}
+		return false;
+		
+	}
+
+	public function drawListByBlogger($blogger_id) {
+		global $db, $site;
+		$query = "SELECT id, title,
+			IF (revision_id=1,'pending',IF(suspended=-1,'suspended','live')) AS `status`
+			FROM blogs 
+			WHERE member_id=$blogger_id AND msv=".$site->id."
+			AND suspended>-2";
+		//print "$query<br>\n";
+		return $this->drawList($db->get_results($query));
+	}
+	
+	public function drawListByID($blog_id, $exclude=false) {
+		global $db, $site;
+		//print "dLBID($blog_id, $exclude)<br>\n";
+		$query = "SELECT b1.id, b1.title,
+			IF(b1.revision_id=1,'pending','live') AS `status` 
+			FROM blogs b1
+			LEFT JOIN blogs b2 ON b1.member_id=b2.member_id AND b1.msv=b2.msv
+			WHERE b1.msv=".$site->id." AND b1.suspended=0	
+			AND b2.id=$blog_id ";
+		if ($exclude) $query.="AND b1.id <> $blog_id";
+		//print "$query<Br>\n";
+		return $this->drawList($db->get_results($query), true);
+	}
+	
+	public function drawList($data, $onlylive=false, $format="li") {
+		$html='';
+		if ($format=="li") { $open="<li>"; $close="</li>"; }
+		if(is_array($data)) {
+			foreach ($data as $result) {
+				if (!$onlylive) $status=$result->status!="live"?' (<span class="'.$result->status.'">'.$result->status.'</span>)':'';
+				$html.=$open.'<a href="?bid='.$result->id.'&keywords='.$this->getTerm().'">'.$result->title.$status.'</a>'.$close."\n";
+			}
+		}
+		return $html;		
+	}
+	
+	public function getPagination($page,$url=''){
+		global $site;
+		
+		$url.='&amp;keywords='.$this->getTerm();
+		if ($_GET['id']) $url.="&amp;id=".$_GET['id'];
+		
+		$totalpages = $this->getTotalPages();
+		if($totalpages>1){
+			$html = '<ul class="pagination"> ';
+			if( ($totalpages >= 5) && ($page >3)){
+				$html .= ' <li><a href="'.$url.'&amp;p=1" title="View the first page of results" class="nextprevious bookend">First</a></li>'."\n";
+			}
+			if( $page > 1 ){
+				$previousclass = 'bookend';
+			} else{
+				$previousclass = 'inactive bookend';
+			}
+			$html .= ' <li class="'.$previousclass.'"><a href="'.$url.'&amp;p='. ($page-1) .'" title="View the previous page of results" class="nextprevious bookend">Previous</a> </li>'."\n";
+			for($i=1;$i<=$totalpages;$i++){
+				if($page == $i){
+					$class = ' class="selected"';
+				}else{
+					$class ='';
+				}
+				$html .= '<li'.$class.'><a href="'.$url.'&amp;p='. $i .'" title="View page '.$i.' of results">'. $i .'</a></li>'."\n";
+			}
+
+			if( ($totalpages > 1) && ($page < $totalpages)){
+				$html .= '<li class="bookend"><a href="'.$url.'&amp;p='. ($page+1) .'" title="View the next page of results"  class="nextprevious">Next</a></li>'."\n";
+			}
+
+			if( ($totalpages >= 5) && ($page < ($totalpages-1))){
+				$html .= '<li class="bookend"><a href="'.$url.'&amp;p='. $totalpages .'"  title="View the last page of results"class="nextprevious">Last</a></li>'."\n";
+			}
+			$html .= '</ul>';
+			return $html;
+		}else{
+			return false;
+		}
+	}
+
+	public function addComment() {
+		global $db;
+		if (!$_POST['fullname']) $this->errmsg[] = "You must enter your name";
+		if (!$_POST['email']) $this->errmsg[] = "You must enter your email address";
+		if ($_POST['email'] && !is_email($_POST['email'])) $this->errmsg[] ="You did not enter a valid email address";
+		if (!$_POST['comment']) $this->errmsg[]="You must enter the comment text";
+		if (!count($this->errmsg)) {
+			$query = "INSERT INTO 
+				blogs_comments (blog_id, comment, member_id, email, name)
+				VALUES
+				(
+				  ".($_POST['bid']+0).", '".$db->escape(censor($_POST['comment']))."', 
+				  ".($_SESSION['member_id']+0).", '".$db->escape($_POST['email'])."',
+				  '".($db->escape($_POST['fullname']))."'
+				)
+				";
+			//print "$query<br>\n";
+			$db->query($query);
+			if ($db->last_error) {
+				$this->errmsg[]="Failed to add your comment to this blog";
+				//$this->errmsg[]=$db->last_error;
+			}
+			else {
+				include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+				include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+				include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+				$data = array("BLOG-TITLE"=>$this->blog['title']);
+				$newsletter = new Newsletter();
+				$newsletter->sendText($this->blog['blogger_email'], "BLOG-COMMENT", $data);
+				return true;
+			}
+		}
+		return false;
+	}	
+
+	public function vetComments($member_id) {
+		global $db, $site;
+		//print "vC($member_id)<br>\n";
+		$query = "SELECT bc.id as comment_id, bc.comment as comment, bc.name as commentor,
+			b.title,
+			if (bc.`status`=1,'New',if(bc.`status`=0,'Live','Deleted')) as `status` 
+			FROM blogs_comments bc
+			LEFT JOIN blogs b
+			ON b.id=bc.blog_id
+			WHERE b.member_id = $member_id
+			AND b.msv=".$site->id."
+			ORDER by b.revision_id DESC
+			";
+		//print "$query<br>\n";
+		if ($results = $db->get_results ($query)) {
+			?>
+            <form method="post">
+            <fieldset>
+            	<input type="hidden" name="action" value="save-comments" />
+                <table border="0" cellpadding="2" cellspacing="0">
+                <thead>
+                <tr>
+                    <th style="text-align:left;">Commentor name</th>
+                    <th style="text-align:left;">Comment</th>
+                    <th style="text-align:center;">New</th>
+                    <th style="text-align:center;">Live</th>
+                    <th style="text-align:center;">Deleted</th>
+                </tr>
+                </thead>
+                <tbody>
+				<?php
+                foreach($results as $result) {
+                    //print_r($result);
+					if ($curblog!=$result->title) {
+						print '<tr style="margin-bottom:10px;"><td colspan="5"><h3>'.$result->title.'</h3></td></tr>';
+						$curblog=$result->title;
+					}
+                    ?>
+                        <tr style="margin-bottom:4px;">
+                            <td><?=$result->commentor?></td>
+                            <td><?=$result->comment?></td>
+                            <td style="text-align:center;"><input type="radio" name="stat<?=$result->comment_id?>" <?=($result->status=='New'?'checked="checked"':'')?> disabled="disabled" value="1" /></td>
+                            <td style="text-align:center;"><input type="radio" name="stat<?=$result->comment_id?>" <?=($result->status=='Live'?'checked="checked"':'')?> value="0" /></td>
+                            <td style="text-align:center;"><input type="radio" name="stat<?=$result->comment_id?>" <?=($result->status=='Deleted'?'checked="checked"':'')?> value="-1" /></td>
+                       </tr>
+                    <?php
+                }
+                ?>
+                </tbody>
+                </table>
+            </fieldset>
+            <fieldset style="padding-top:15px;">	
+            	<label for="f_submit" style="visibility:hidden;">Submit</label>
+            	<input id="f_submit" type="submit" value="Update comments" />
+            </fieldset>
+            </form>
+            <?php
+		}
+	}	
+
+	public function drawComments() {
+		global $db;
+		if ($this->blog['allow_comments']) {
+			$query = "SELECT name, comment, date_format(added, '%D %b %Y') as added_date
+				FROM blogs_comments 
+				WHERE blog_id=".($this->blog['id']+0)." 
+				AND `status`=0 ORDER BY added";
+			//print "$query<br>\n";
+			if ($results = $db->get_results($query)) {
+				foreach($results as $result) {
+					?>
+                    <div class="blog_comment">
+                    	<p>Comment by: <?=$result->name?> <?=$result->added_date?></p>
+                    	<p><?=$result->comment?></p>
+                    </div>
+                    <?php
+				}
+			}
+		}
+	}
+
+}
+
+?>

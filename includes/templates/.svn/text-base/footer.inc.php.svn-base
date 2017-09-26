@@ -1,0 +1,75 @@
+</div>
+
+<?php 
+	$tagsHTML=$tags->drawTags($pageGUID, "linklist"); 
+?>
+
+    <div id="tags">
+    
+        <div id="tagsinfo">
+            <?php 
+            if ($tagsHTML) { 
+                ?>
+                <p>
+                <strong><?=$page->drawLabel('tags4page','Tags on this page')?></strong><br />
+                <!-- <a href="<?=$site->link?>tags/"><?=$page->drawLabel("tagcloud", "Tag Cloud")?></a> -->
+                </p>
+                <?php 
+            } 
+            ?>
+        </div>
+        
+        <div id="tagslist">
+            <?php 
+            // show placeholder tags in edit mode: This needs moving to the class 
+            if($mode == 'edit') { 
+                ?>
+                <ul id="tags_inner">
+                    <li>Tags on this page</li>
+                    <li><a href="#" title="unclickable">tag placeholder</a></li>
+                    <li><a href="#" title="unclickable">tag placeholder</a></li>
+                    <li><a href="#" title="unclickable">tag placeholder</a></li>
+                    <li class="last"><a href="#" title="unclickable">tag placeholder</a></li>
+                </ul>
+                <?php 
+            } 
+            else { 
+                if (!$tag_type) $tag_type=1; // default to page
+                if( isset($tags) && is_object($tags) ){
+                    echo $tagsHTML;
+                }
+            } 
+            ?>
+        </div>			
+    </div>
+        
+
+    <div id="footer">
+        <div id="copyright">
+        	<?php if (is_object($footer)) { ?>
+	            <div style="<?=($page->getMode()=="edit"?" height:130px;":"")?>"><?=$footer->draw()?></div>
+            <?php } ?>
+            <p>
+            	<a href="<?=$site->link?>terms-and-conditions/"><?=$page->drawLabel('terms','Terms and conditions')?></a> 
+                <a href="<?=$site->link?>privacy-policy/"><?=$page->drawLabel('privacy','Privacy policy')?></a>
+            </p>
+        </div>
+        <div id="footerMenu">
+            <p>
+				<?=$page->drawLabel('siteby','Site designed by')?> <a href="http://www.ichameleon.com?ref=<?=$site->name?>" rel="external" title="Visit the Chameleon Interactive website">Chameleon Interactive</a> 
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <?=$page->drawLabel('powered','Powered by')?> <a href="http://demo.treelinecms.com" rel="external" title="View Treeline in action">Treeline CMS</a>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<?php 
+include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/editModeBottom.inc.php'); 
+include($_SERVER['DOCUMENT_ROOT'].'/includes/templates/commonJSBottom.inc.php'); 
+include($_SERVER['DOCUMENT_ROOT']."/includes/templates/stats.inc.php"); 
+?>
+
+</body>
+</html>

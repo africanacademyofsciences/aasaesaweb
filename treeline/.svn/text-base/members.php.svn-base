@@ -1,0 +1,389 @@
+<?php
+
+//ini_set("display_errors", "yes");
+//error_reporting(E_ALL);
+
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.init.php");
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/member.class.php");
+
+	$member = new Member();
+
+	$guid = read($_REQUEST,'guid','');
+		
+	$message = read($_REQUEST,'message','');
+	$feedback = read($_REQUEST,'feedback','');
+	
+	$member_id = $memberId = read($_REQUEST,'id',NULL);
+	$action = read($_REQUEST,'action',NULL);
+	$search = read($_REQUEST,'q',NULL);
+	$status = read($_REQUEST,'status','');
+	
+	$orderBy = read($_REQUEST,'sort',NULL); // sort query/results
+	$currentPage = read($_REQUEST,'p',1); // pagination value
+	$perPage = read($_REQUEST,'show',6);
+	
+	$feedback="error";
+	$nextsteps='';
+
+	//print "got memberID($memberId) member_id($member_id)<br>\n";
+	
+	if ($_SERVER['REQUEST_METHOD']=="POST") {
+		
+		// Add new member
+		if($action == 'create' || $action == 'add'){
+			if ($member->add('admin')) {
+				$message[]="New member has been created";
+				$feedback="success";
+				$action="edit";
+				$notify_msg="Your membership has been created";	// For the notify email?
+				$member_id = $member->new_member_id;
+			}
+			else $message = $member->errmsg;
+		}
+		
+		// Edit member
+		else if($action == 'edit'){
+			if ($member->edit($member_id, 'admin')) {
+				$message[]="Member details updated";
+				$feedback="success";
+				$action="";
+				$notify_msg="Your membership data has been updated";
+			}
+			else $message[] = $member->errmsg;
+		}
+
+		else if ($action == "delete") {
+			$member->delete($memberId);
+			//$notify_msg="Your membership has been suspended";
+		}
+		
+		// Send a message to the (new) member with their details.
+		if ($notify_msg) {
+			//print "Got a notify message ($member_id)<br>\n";
+			include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/newsletter.class.php');
+			include_once($_SERVER['DOCUMENT_ROOT']."/treeline/newsletters/newsinc.php");
+			include_once($_SERVER['DOCUMENT_ROOT'].'/treeline/newsletters/includes/email/htmlMimeMail.php');
+			$result=$member->getById($member_id);
+			if ($result->email) {
+				$sendParams = array("EMAIL"=>$result->email,
+					"NOTIFY_MSG"=>$notify_msg, 
+					"MEMBER_DATA"=>"Name: ".$result->firstname." ".$result->surname."<br />
+Password: ".$result->password."<br />
+".($result->bloggable?"Blogging ok: yes":"")."<br />
+"
+				);
+				//print_r($sendParams);
+				$newsletter=new Newsletter();
+				$newsletter->sendText($result->email, "MEMBER-DATA", $sendParams);
+			}
+			$member_id=0;
+		}
+	
+	}
+	
+	$css = array('forms','tables'); // all CSS needed by this page
+	$extraCSS = ''; // extra on page CSS
+	
+	$js = array('showHideAddress'); // all external JavaScript needed by this page
+	$extraJS = ''; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Members: '.ucwords($action) : 'Members';
+	$pageTitle = ($action) ? 'Members: '.ucwords($action) : 'Members';
+	
+	$pageClass = 'members';
+	
+	// Get list of subscribed events
+	if ($member_id>0) {
+		$query = "select e.guid, p.title, 
+			ee.member_id, ee.sponsorship 
+			from events e 
+			left join event_entry ee on e.guid=ee.event_guid 
+			left join pages p on e.guid=p.guid
+			where p.date_published is not null and ee.member_id=".$member_id;
+		//print "$query<br>";
+		if ($results=$db->get_results($query)) {
+			foreach($results as $result) {
+				$event_html.='<li>'.$result->title.' sponsorship £'.number_format($result->sponsorship,2).' <a href="/treeline/events/?m_id='.$result->member_id.'&action=sponsor&fund-guid='.$result->guid.'">add sponsorship</a></li>';
+			}
+		}
+	}
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+
+<div id="primarycontent">
+<div id="primary_inner">
+<?php 
+	///print "got message($message) r(".print_r($message, true).")<br>\n";
+	echo drawFeedback($feedback, $message);
+	if ($nextsteps) echo treelineList($nextsteps, "Next steps", "blue");
+
+	// *************************************************************
+	//print "got member id($member_id)<br>\n";
+	if($member_id) { 
+
+		if ($result = $member->loadByID($member_id)) {
+
+			// Default = Show member details.
+			if(!$action){ 
+				?>
+				<!-- MEMBER DETAILS -->
+				<div class="vcard">
+                    <h3 class="fn"><?=$result->firstname?> <?=$result->surname?></h3>
+                    <p><?=($result->further_info) ? nl2br($result->further_info) : '<em>This member hasn\'t added any additional information about themselves.</em>'?></p>
+                    <!--
+                    <p class="addr">
+                        <span class="street-address"><?=$result->address1?></span><br />
+                        <?php if($result->address2) { ?>
+                        <span class="locality"><?=$result->address2?></span><br />
+                        <?php } ?>
+                        <?php if($result->address3) { ?>
+                        <span class="region"><?=$result->address3?></span><br />
+                        <?php } ?>
+                        <?php if($result->postal_code) { ?>
+                        <span class="postal-code"><?=$result->postal_code?></span>
+                        <?php } ?>
+                    </p>
+                    -->
+                    <p class="tel">Password: <span class="value"><?=$result->password?></span></p>
+                    <p class="tel">Telephone: <span class="value"><?=$result->telephone?></span></p>
+                    <p>Email: <a href="mailto:<?=$result->email?>" class="email"><?=$result->email?></a></p>
+				</div>
+			  
+				<hr />
+
+				<!-- THINGS TO DO WITH THIS MEMBER -->
+                <h3 class="fn">Options for this member</h3>
+                <ul class="menu">
+                    <li><a href="/treeline/events/?m_id=<?=$result->member_id?>&amp;action=book">Book this member on an event</a></li>
+                    <li><a href="/treeline/members/?id=<?=$result->member_id?>&amp;action=edit">Edit member data</a></li>
+                    <li><a href="/treeline/newsletters/subsedit/?id=<?=$result->member_id?>&amp;action=edit">Manage subscriptions</a></li>
+                    <!-- <li>Option 2</li> -->
+                </ul>
+				<hr />
+
+				<?php
+					if ($event_html) {
+					?>
+						<!-- EVENTS HISTORY -->
+						<h3 class="fn">Events taken part in</h3>
+						<ul class="menu">
+							<?=$event_html?>
+						</ul>
+						<hr />
+					<?php
+				}
+				?>
+
+				<p><a href="/treeline/members/">View all members</a></p>
+				
+				<?php
+			}
+			// We have an action and a member ID
+			// so lets see what we need to do
+			else{
+				if($action == 'edit'){ // Edit item
+					// FORM
+					include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/ajax/addEditMember.php');
+				}
+				else if($action =='delete'){ // Delete item
+					// FORM
+					include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/ajax/deleteMember.php');
+				}
+				else if($action =='approve'){ // Delete item
+					// FORM
+					include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/ajax/approveMember.php');
+				}
+				else if($action =='image'){ // Upload image
+					// FORM
+					include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/ajax/uploadImage.php');
+				}
+			}
+
+		}
+		// Member not found
+		else { 
+			?>
+			<p>That member does not exist.</p>
+			<p><a href="/treeline/members/">View all members</a></p>
+			<?php
+		}
+            
+	}
+
+	// *************************************************************
+	// No member ID check what global actions we can perform..
+	else {
+		 
+		if($action == 'create'){ // Create item
+			 // FORM
+			include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/ajax/addEditMember.php');
+		}
+		else if($action == 'download'){
+			$results = $member->getAllForCSV($orderBy, $search, $status);
+			include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/ajax/membersCSV.inc.php');
+		}
+		else if($action == 'labels'){
+			$results = $member->getAll($orderBy, $search, $status, $currentPage);
+			include($_SERVER['DOCUMENT_ROOT'].'/treeline/members/includes/membersLabels.inc.php');
+		}
+		// No ID and nothing to do so default action is to show all members
+		else{ 
+			$page_html='
+			<p><a href="?action=create">Add a new member</a></p>
+			<form id="filterForm" action="/treeline/members/" method="post">
+			<fieldset>
+				<label for="q">Search for:</label>
+				<input type="text" name="q" id="q" value="'.$search.'" /><br />
+				<label for="sort">Sort by:</label>
+				<select name="sort" id="sort">
+				'.drawOrderByDropDownOptions($orderBy).'
+				</select><br />
+				<fieldset class="buttons">
+					<input type="submit" class="submit" name="submitFilter" value="Filter" />
+				</fieldset>
+			</fieldset>
+			</form>
+			';
+			echo treelineBox($page_html, "Find members", "blue");
+			
+			$total = $member->getTotal($search, $status);
+			
+			$results = $member->getAll($orderBy, $search, $status, $currentPage, $perPage);
+			if($results){ // results exists
+				?>
+				<p><a href="?action=download&amp;q=<?=$search?>&amp;sort=<?=$orderBy?>&amp;refresh=1">Download these members</a></p>
+				<table class="tl_list">
+				<caption><?php echo getShowingXofX($perPage, $currentPage, sizeof($results), $total); ?> Members</caption>
+				<thead>
+					<tr>
+						<th scope="col">Member name</th>
+						<th scope="col">Email address</th>
+						<th scope="col">Manage member</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php
+				foreach($results as $result){ // loop through and show results
+					$mem_name = $result->firstname." ".$result->surname;
+					if (!$mem_name) $mem_name="No name"; 
+					?>
+					<tr>
+					<td><?=$mem_name?></td>
+					<td><?=$result->email?></td>
+					<td class="action">
+                        <a class="preview" href="?id=<?=$result->member_id; ?>" title="Preview">Preview this member</a>
+                        <a class="edit" href="?id=<?=$result->member_id?>&amp;action=edit" title="Edit">Edit this member</a>
+                        <a class="delete" href="?id=<?=$result->member_id?>&amp;action=delete" title="Delete">Delete this member</a>
+                    </td>
+					</tr>
+				<?php
+				} 
+				?>
+				</tbody>
+				</table>
+				<?php
+				echo drawNewPagination($total, $perPage, $currentPage, "/treeline/members/?q=$search&amp;sort=$orderBy");
+			}
+			else{ // results
+				?><p>There are no members</p><?php
+			}
+		}
+	}
+	?>
+    </div>
+</div>
+
+<?php 
+include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); 
+
+
+function drawOrderByDropDownOptions($current = 'surname_az', $type = 'members'){
+
+	//
+	if($type == 'members'){
+		$options = array(
+		'surname_az' => 'Surname (A-Z)',
+		'surname_za' => 'Surname (Z-A)',
+		'firstname_az' => 'First name (A-Z)',
+		'firstname_za' => 'First name (Z-A)',
+		'email_az' => 'Email (A-Z)',
+		'email_za' => 'Email (Z-A)',
+		);
+	}
+	else{
+		$options = array(
+		'title_az' => 'Name (A-Z)',
+		'title_za' => 'Name (Z-A)',
+		'newest' => 'Date added (newest)',
+		'oldest' => 'Date added (oldest)'
+		);
+	}
+	
+	$html = '';
+	
+	foreach($options as $value => $text){
+		unset($preSelected);
+		
+		if($current == $value){
+			$preSelected = ' selected="selected"';
+		}
+		$html .= '<option value="'.$value.'"'.$preSelected.'>'.$text.'</option>'."\n";
+	}
+	
+	return $html;
+}
+
+function drawStatusDropDownOptions($current = 'all'){
+	//
+	return "";
+	
+	$options = array(
+	'all' => 'All',
+	'approved' => 'Approved members',
+	'unapproved' => 'Unapproved members'
+	);
+	
+	$html = '';
+	
+	foreach($options as $value => $text){
+		unset($preSelected);
+		
+		if($current == $value){
+			$preSelected = ' selected="selected"';
+		}
+		$html .= '<option value="'.$value.'"'.$preSelected.'>'.$text.'</option>'."\n";
+	}
+	
+	return $html;
+}
+
+function drawPreferencesCheckboxes($options, $current = NULL){
+	//
+	global $db;
+	$html = '';
+	
+	if($current){
+		foreach($current as $pref => $value){
+			$currentArray[] = $value;
+		}
+	}
+	
+	
+	foreach($options as $option){
+		unset($preSelected);
+		
+		if(is_array($currentArray) && in_array($option->preference_id, $currentArray)){
+			$preSelected = ' checked="checked"';
+		}
+		$html .= '<input type="checkbox" class="checkbox" name="preference[]" id="preference_'.$option->preference_id.'" value="'.$option->preference_id.'"'.$preSelected.' />'."\n".'
+		<label for="preference_'.$option->preference_id.'" class="checklabel" >'.$option->preference_title.'</label><br />'."\n";
+	}
+	
+	return $html;
+}
+
+?>
+	
+    

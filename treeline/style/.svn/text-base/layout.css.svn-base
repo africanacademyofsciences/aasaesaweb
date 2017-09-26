@@ -1,0 +1,62 @@
+
+div#holder{
+	
+}
+
+	div#header{
+
+	}
+	
+		div#header h1{
+			
+		}
+		
+			div#header h1 a{
+				
+			}
+		
+		div#header ul#globalnav{
+			
+		}
+		
+			div#header ul#globalnav li{
+				
+			}
+			
+		
+	
+	div#midholder{
+		
+	}
+	
+		div#sidebar{
+			
+		}
+		
+		div#sidebar ul{
+			
+		}
+		
+			div#sidebar ul li{
+				
+			}
+			
+				div#sidebar ul li a{
+					
+				}
+				
+					div#sidebar ul li a:hover{
+						
+					}
+					
+		div#primarycontent{
+			
+		}
+		
+		div#secondarycontent{
+			
+		}
+	
+	div#footer{
+		
+	}

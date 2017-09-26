@@ -1,0 +1,240 @@
+<?
+
+	include($_SERVER['DOCUMENT_ROOT'] . "/treeline/includes/treeline.init.php");
+
+	$action = read($_REQUEST,'action','');
+	if (!$action) header("Location: /treeline/");
+	$guid = read($_REQUEST,'guid','');
+
+	$message = read($_REQUEST,'message',false);
+	$feedback = read($_GET,'feedback','generic');
+	//$config = array();
+
+	$image = new Image();
+	
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+		
+		if ($action == 'create') {
+
+		} 
+		
+		// if we find 'config_' in the name of the variable, then set it here...
+		else if ($action == 'edit') {
+			foreach($_POST as $name => $value ){
+				//echo $name .' -> '. $value .'<br />';
+				if( preg_match('/config_/', $name) ){
+					$name = str_replace('config_','',$name);
+					//$config[$name] = $value;
+					//$treeline->config = $config;
+					if( $name=='title') {
+						if ($value && $value!=$_SESSION['treeline_user_site_title']){
+							$query = "UPDATE sites SET title = '".$db->escape($value)."' WHERE microsite=".$_SESSION['treeline_user_microsite_id'];
+							//print "update site title to ($value) q($query)<br>\n";
+							if ($db->query($query)) {
+								$_SESSION['treeline_user_site_title'] = $value;
+							}
+						}
+					}
+					else {
+						if($name=='name'){
+							$value = strtolower(preg_replace('\W','',$value));
+							$config_name = $value;
+						}
+						// what we need to do here is replace the variables in the treeline->config array then save it.
+						$treeline->setConfig($name,$value);
+					}
+				}
+			}
+			
+			if($treeline->saveConfig()){ // Changes saved
+				$message = "Changes saved";
+				$feedback="success";
+				//redirect('/treeline/?section=settings&feedback=success&message='.urlencode($message));
+			}
+			
+			
+		} 
+		else if ($action == 'delete') {
+		
+			// 
+		} 
+		else if ($action == "images") {
+		
+			$feedback="error";
+			$message = array();
+			
+			// Go through post data once to create the full list of sizes
+			foreach ($_POST as $k=>$v) {
+				//print "got $k=>$v<br>\n";
+				if (substr($k,0,5)=="imgsz") {
+					//print "found a size<br>\n";
+					$img_list.=substr($k,6).",";
+				}
+			}
+			//print "stage 1 ".$img_list."<br>\n";
+			
+			// Go through post data again to remove any items from the list that have been marked for deletion
+			foreach ($_POST as $k=>$v) {
+				if (substr($k,0,6)=="imgdel") {
+					//print "found a size to remove<br>\n";
+					$img_list = str_replace(substr($k,7).",", "", $img_list);
+				}
+			}
+			if ($img_list) $img_list=substr($img_list, 0, -1);
+			//print "stage 2 ".$img_list."<br>\n";
+			
+			// Write a new image sizes list.
+			$aList=explode(",",$img_list);
+			foreach ($aList as $index) {
+				if ($_POST['imgsz-'.$index]) 
+					$real_list.=$_POST['imgsz-'.$index].":".$_POST['imgdsc-'.$index].",";
+			}
+
+			// Add a new item to the list if one has been added
+			$new_size_ok = $image->sizeFormatOk($_POST['config_new_width'], $_POST['config_new_height'], $_POST['config_new_desc'], $_POST['config_new_crop']);
+			if ($new_size_ok==1) {
+				$new_size=($_POST['config_new_width']+0)."x".($_POST['config_new_crop']==1?"c":"").($_POST['config_new_height']+0);
+				//print "got new size($new_size) crop(".$_POST['config_new_crop'].")<br>\n";
+				$real_list.=$new_size.":".htmlentities($_POST['config_new_desc'], ENT_QUOTES, $site->properties['encoding']).",";
+			}
+			else if ($new_size_ok != '') $message[]=$new_size_ok;
+			
+			//print "got real_list($real_list) message count(".count($message).") m(".print_r($message, true).") m($message)<br>\n";
+			if ($real_list && !count($message)) {
+				if ($db->escape(substr($real_list,0,-1)) != $db->get_var("select value from config where name='image_sizes'")) {
+					$query = "update config set value='".$db->escape(substr($real_list,0,-1))."' where name='image_sizes'";
+					//print "$query<br>";
+					if (!$db->query($query)) {
+						$message[]="Could not update images sizes";
+					}
+					else {
+						$redirectURL = '/treeline/settings/?action=images&feedback=success&message='.urlencode("your changes have been saved");
+						//print "would redirect ($redirectURL)<br>\n";
+						redirect($redirectURL);
+					}
+				}
+				else $message[]="No changes where made";
+			}
+		}				
+	}
+
+	// PAGE specific HTML settings
+	
+	$css = array('forms'); // all CSS needed by this page
+	$extraCSS = '
+		div#primarycontent form fieldset span#siteURL{
+			float:left;
+			margin-top:7px;
+		}
+		
+		div#primarycontent form fieldset input#config_name {
+			width:10em;
+		}
+	'; // extra on page CSS
+	
+	$js = array('palate_preview'); // all external JavaScript needed by this page
+	$extraJS = '
+
+function warndel(chk) {
+	if (chk) {
+		alert("When you save changes this image size will be deleted permenantly \n\nPlease uncheck this box if you do not want this size to be removed.");	
+	}
+}
+	
+'; // extra on page JavaScript
+	
+	// Page title	
+	$pageTitleH2 = ($action) ? 'Settings : '.ucwords($action) : 'Settings';
+	$pageTitle = ($action) ? 'Settings : '.ucwords($action) : 'Settings';
+	
+	$pageClass = 'settings';
+	
+	include($_SERVER['DOCUMENT_ROOT'].'/treeline/includes/templates/header.inc.php');	
+?>
+<div id="primarycontent">
+<div id="primary_inner">
+<?php 
+	if($user->drawGroup() == 'Superuser') { 
+	
+		echo drawFeedback($feedback,$message);
+
+		if ($action == 'create') { //Create settings
+    
+		} 
+        else if ($action == 'edit') { // Edit settings 
+			$page_html = '
+            <form id="treeline" action="'.$_SERVER['PHP_SELF'].($DEBUG?'?debug':"").'" method="post">
+                <fieldset>
+                    <legend>Website configuration settings</legend>
+                    <input type="hidden" name="action" value="'.$action.'" />
+                    <input type="hidden" name="guid" value="'.$guid.'" />
+                    <p class="instructions">This section allows for the editing of some of Treeline\'s core configuration options.<br />Warning: Any changes made will affect the live website.</p>
+                    '.$treeline->drawEditableConfig().'
+                    <fieldset class="buttons">
+                        <input type="submit" class="submit" value="Save Changes" />
+                     </fieldset>
+                </fieldset>
+            </form>
+			';
+			echo treelineBox($page_html, "Website configuration settings", "blue");
+		} 
+        else if ($action == 'images') { // Edit settings 
+            if ($user->drawGroup() == "Superuser") {
+			?>
+            <form id="treeline" action="<?=$_SERVER['PHP_SELF']?><?php if ($DEBUG) echo '?debug'?>" method="post">
+            <fieldset>
+                <legend>Website library image sizes</legend>
+                <input type="hidden" name="action" value="<?=$action?>" />
+                <input type="hidden" name="guid" value="<?=$guid?>" />
+                <p class="instructions">This section allows for the editing of the images sizes available. You can have up to <?=$image->upload_max_sizes?> image sizes and any image may be up to <?=$image->upload_max_width?> pixels wide or <?=$image->upload_max_height?> pixels tall<br />
+                    Changes made here will ONLY affect images uploaded after the settings have been saved.<br />
+                    <br />
+					<strong>Warning:</strong> Large images reduced to very small images may lose some details as pixels must be removed. Small images enlarged to large images may look blotchy as pixels must be added. Stretching or squashing an image to fixed dimensions may distort the image</p>
+                    
+                <?php if (count($site->config['size']) < $image->upload_max_sizes) { ?>    
+                    <p>To add a new size please enter the dimensions required in the box below</p>
+                    <p>You can also enter some brief descriptive text for each image size to remind yourself of its purpose on the website. If you check the crop box your image will not be stretched/squashed to fit but a section with the required dimensions will be removed from the middle area of the image.</p>
+                    
+                    <label for="config_new_width">Image width:</label>
+                    <input type="text" name="config_new_width" id="config_new_width" value="<?=$_POST['config_new_width']?>" maxlength="5" /><br />
+                    <label for="config_new_height">Image height:</label>
+                    <input type="text" name="config_new_height" id="config_new_height" value="<?=$_POST['config_new_height']?>" maxlength="5" /><br />
+                    <label for="config_new_desc">Size description:</label>
+                    <input type="text" name="config_new_desc" id="config_new_desc" value="<?=$_POST['config_new_desc']?>" maxlength="30" /><br />
+                    <label for="config_new_crop">Crop image:</label>
+                    <input type="checkbox" class="right" name="config_new_crop" id="config_new_crop" <?=($_POST['config_new_crop']==1?'checked="checked"':"")?> value="1" /><br />
+    			<?php } else { ?>
+                	<h1>You have uploaded the maximum number of images sizes</h1>
+    			<?php } ?>
+				
+                <p style="clear:left;">Below you can update the description of any of the image sizes or you can tick the checkbox to remove them from the list. Removing an image size will not remove any actual images just the ability to create images at that size.</p>
+                <?=$image->drawConfigSizes()?>
+
+                <fieldset class="buttons">
+                    <button type="submit" class="submit">Save Changes</button>
+                 </fieldset>
+            </fieldset>
+            </form>
+			<?php 
+			}
+			else {
+				?>
+                <p>Changing image sizes is only available to superusers</p>
+                <?php
+			}
+		} 
+	} 
+	else{
+		?>
+        <div class="feedback error">
+            <h3>Warning</h3>
+            <p>Only superusers can edit this website's configuration settings</p>
+        </div>
+		<?php 
+	} 
+	?>
+    
+</div>
+</div>
+<?php include($_SERVER['DOCUMENT_ROOT']."/treeline/includes/templates/footer.inc.php"); ?>

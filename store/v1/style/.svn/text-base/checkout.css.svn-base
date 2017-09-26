@@ -1,0 +1,21 @@
+
+form.checkout {
+	border: 1px solid #000;
+	clear: left;
+}
+
+div#basket {
+}
+
+
+	
+	
+/* PAYPAL PAYMENT FORM */	
+form#f_paypal {
+}
+	form#f_paypal legend {
+	}
+
+
+
+

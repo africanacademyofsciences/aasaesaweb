@@ -1,0 +1,62 @@
+/* GENERAL WEBSITE LOOK AND FEEL */
+@import url("/style/global.css");
+
+/* WYSIWYG IFRAME CSS */
+body {
+	background: #FFF; 
+	padding: 5px;
+}
+h2, h3, h4, h5, h6, p, ul, ol, img, object, table, form {
+	background: #FFF;
+}
+
+h2, h3, h4, h5, h6{
+	padding: 0px 0px 10px;
+	margin: 0;
+}
+
+ul { 
+	list-style: disc;
+}
+
+p, ul, ol{
+	padding: 0px 0px 10px;
+	margin: 0;
+}
+/* CUSTOM STYLES */
+/*
+
+	COMMON CLASSES
+
+*/
+
+/* ACCESSIBILITY */
+
+.hide{
+	position: absolute;
+	top: -9999px;
+	left: -9999px;
+}
+
+
+.highlight	{
+	background:#F5F5F2;
+	border:1px solid #ADAF9A;
+	font-style:italic;
+	xfont-weight:bold;
+	padding: 5px 8px;
+	margin: 5px 0px;
+}
+span.highlight {
+	margin: 5px 10px;
+}
+.box {
+	background:#FFF;
+	border: 2px solid #CFDEF7;
+	margin: 5px 0px;
+	padding: 5px 8px;
+}
+span.box{
+	margin: 5px 10px;
+}
+

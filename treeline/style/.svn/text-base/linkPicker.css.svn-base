@@ -1,0 +1,309 @@
+/*********************** start styles *****************************/
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	margin: 0px !important;
+	padding: 0px !important;
+	background-color: #EDF1F1;
+}
+
+
+
+#header {
+	width: 100%;
+	height: 75px;
+	padding: 0;
+	margin: 0;
+	background: #EDF1F1 url('/treeline/img/linkpicker/bk-pop_top.gif') repeat-x;
+	/*border: 1px dashed #333;*/
+}
+
+#header h1 {
+	padding: 0px;
+	margin: 0px;
+	position: absolute;
+	top: 12px;
+	height: 35px;
+	color: #AB0D54;
+	background: url('/treeline/img/icons/treeline-icon.gif') no-repeat left;
+	padding-left: 45px;
+	margin-left: 10px;
+	/*border: 1px dashed #333;*/
+}
+
+.noshow {
+	display: none;
+	visibility: hidden;
+}
+
+/*********************** ERROR PANE *****************************/
+
+#error_list {
+	background: #AB0D54 url('/treeline/img/icons/icon_error.gif') 2px 2px no-repeat;
+	text-align: left;
+	padding: 2px;
+	padding-left: 25px;
+	color: #fff;
+}
+
+
+/*********************** CONTENT *****************************/
+
+#contentpane {
+	height: 430px;
+	padding: 0 10px;
+}
+
+#contentpane h2 {
+	color: #AB0D54;
+	font-size: 150%;
+	font-weight: bold;
+}
+
+#contentpane form{
+	margin: 1em 0;
+}
+
+#contentpane form fieldset {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+#contentpane form #exturl {
+	margin-bottom: 15px;
+}
+
+#contentpane form #linkwindow {
+	border: 0;
+	padding: 0;
+	margin-top: 15px;
+	text-align: center;
+}
+
+#contentpane form hr {
+	border: 1px dotted #ccc;
+}
+
+#contentpane form #linkwindow span {
+	text-align: center;
+}
+
+#contentpane form #extlink {
+	width: 16em;
+	border: 0;
+	background-color: #fff;
+}
+
+#contentpane form #extlinkwrap {
+	width: 23em;
+	background: #efefef;
+	border: 1px solid #999;
+	display: block;
+	font-size: 110%;
+	margin: 0 auto;
+	padding-left: 0.2em;
+	text-align: left;
+}
+
+#contentpane form #extlinkwrap input {
+	margin-left: 1em;
+}
+
+#contentpane form #extlinkwrap select {
+	float: none;
+	margin: 0;
+}
+
+#formwrap {
+	height: 430px;
+	text-align: center;
+}
+
+/***************** internal link specific ***********************/
+
+#intsection {
+	width: 20em;
+}
+
+#intpages {
+	border: thin solid #006;
+}
+
+#intpages table {
+	width: 440px;
+	/*border: thin solid #ccc;*/
+	text-align: left;
+	margin: 0 auto;
+	padding-right: 20px;
+}
+
+#intpages th {
+	font-size: 95%;
+	font-weight: bold;
+	color: #666;
+}
+
+.pagename {
+	width: 300px;
+}
+span.pagename {
+	text-indent: 1em;
+	font-weight: bold;
+}
+span.pagestatus, span.pagevisibility {
+	color: #999;
+}
+
+.pagestatus {
+	width: 70px;
+}
+
+.pagevisibility {
+	width: 50px;
+}
+
+#intpagelist {
+	width: 450px;
+	padding-right: 20px;
+	height: 332px;
+	border: thin solid #666;
+	overflow: scroll;
+	margin: 0 auto;
+	padding: 0;
+}
+
+
+
+#intpagelist span {
+	float: left;
+	width:95%;
+}
+#intpagelist span span {
+	width:auto;
+	margin-left:10px;
+}
+
+
+#intpagelist .row {
+	width: 100%;
+	line-height:  2em;
+	display: block;
+	float: left;
+	text-align: left;
+	border-top: 1px solid #efefef;
+}
+
+#intpagelist .pale {
+	background: #fff;
+	border-bottom: thin solid #dedede;
+}
+
+#intpagelist .dark {
+	background: #EFefF3;
+	border-bottom: 1px solid #ccc;
+}
+
+#intpagelist .row: hover {
+	background: #ccc;
+	border-top: 1px solid #333;
+	border-bottom: 1px solid #333;
+}
+
+#intpagelist .on {
+	background: #EFCEDD;
+	border-top: 1px solid  #F1CFD2;
+	border-bottom: 1px solid #D16D9A;
+}
+
+#intpagelist .on: hover {
+	background: #333;
+	color: #fff;
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+
+
+/********************** email link specific **********************/
+
+.labelwrap {
+	font-weight: bold;
+}
+
+#emaillinkform #formwrap {
+	width: 90%;
+	margin: 0 auto;
+}
+
+#emaillinkform fieldset {
+	margin: 0 auto;
+	padding-top: 25px;
+	text-align: left;
+}
+
+#emaillinkform input {
+	width: 150px;
+}
+
+.element_info {
+	font-size: 95%;
+	margin-left: 0.5em;
+}
+
+
+/********************** BUTTONS **********************/
+
+.btn {
+	width: 130px;
+	height: 18px !important;
+	font-size: 95%;
+	text-align: center;
+	border: 1px solid #999;
+	font-weight: bold;
+	color: #fff;
+}
+
+#prev_btn {
+	float: left;
+	background: url('/treeline/img/linkpicker/bk-btn.gif') repeat-x;
+	color: #000;
+}
+
+#next_btn, #intsection_btn, #intsection_btn_1 {
+	float: right;
+	background: url('/treeline/img/linkpicker/bk-btn-on.gif') repeat-x;
+	color: #fff !important;
+	border-color: #AB0D54;
+	line-height:100%;
+}
+
+#intsection_btn, #intsection_btn_1 {
+	float: none;
+	width: auto;
+	font-weight: bold;
+	height: 18px;
+	font-size: 95%;
+	text-align: center;
+}
+
+/*********************** FOOTER *****************************/
+
+#footerlinktext {
+	height: 20px;
+	/*border: 1px dashed #333;*/
+	padding: 0px;
+	width:450px;
+	margin: 5px auto;
+}
+#footerlinks {
+	height: 20px;
+	/*border: 1px dashed #333;*/
+	padding: 0px;
+	width:450px;
+	margin: 5px auto;
+}
+
+/********************************************* end styles ***************************************************/

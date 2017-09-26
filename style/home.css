@@ -1,0 +1,63 @@
+/* 
+
+	AMREF HOME PAGE CSS
+
+	Description: To be included on the AMREF Home page
+
+	written by: Phil Thompson phil.thompson@ichameleon.com
+	
+	last edited on: 20/08/2007
+	last edited by: Phil Thompson
+
+	Table of Contents
+	
+	h2
+	form elements
+		label
+		input
+		button
+	
+	Newsticker aka breadcrumb
+	Banner
+	Button1
+	Button2
+	Primary content
+		content1
+		content2
+		newsletters
+	Story
+		images
+		story
+		links
+		related stories
+	Secondary content
+		Ad
+		Media
+		News
+		Where we work
+	
+
+*/
+
+
+/* PRIMARY CONTENT */
+div#primarycontent{
+}
+div#breadcrumb{
+}
+
+@media (max-width: 767px) {
+	.carousel-background {
+		margin-bottom: 180px;
+	}
+}
+@media (min-width: 768px) {
+	.carousel-background {
+		margin-bottom: 74px;
+	}
+}
+
+div#tags{
+	display: none;
+}
+	

@@ -1,0 +1,80 @@
+<style type="text/css" media="screen, projection, print">
+	*{
+		background: #FFF !important;
+		border: none !important;
+		color: #000 !important;
+	}
+	
+	ul#menu, div#footer, h1#logo, p#userinfo, h2#pagetitle{
+		display: none;
+	}
+	
+	div#primarycontent, div#primary_inner{
+		float: left;
+		margin: 0;
+		padding: 0;
+		width: 800px;
+	}
+	
+	div#primary_inner div.label{
+		float: left;
+		font-size: 11pt;
+		margin: 0 115px 100px 0;
+		width: 340px;
+	}
+	
+		div#primary_inner div.label.even{
+			margin-right: 0;
+		}
+	
+		div.label h1{
+			font-size: 12pt;
+			padding: .25em 0;
+		}
+		
+		div.label h2{
+			font-size: 11pt;
+			padding: .25em 0 0;
+		}
+</style>
+<?php
+	$i = 0;
+	foreach($results as $result){
+	
+	$class = ($i%2 == 0) ? ' odd' : ' even';
+?>
+	<div class="label<?php echo $class; ?>">
+    	<h1><?php echo $result->firstname.' '.$result->surname; ?></h1>
+        <?php
+							$organisationDetails = $member->getOrganisationById($result->organisation);
+							// VCARD: Address/Contact Details
+						?>
+                        <?php if($organisationDetails->filename){ ?>
+                        <p class="organisationLogo"><img src="/silo/images/<?php echo $organisationDetails->filename; ?>" alt="" /></p>
+                        <?php } ?>
+                        <div class="vcard">
+                          <h2 class="org"><?php echo $organisationDetails->organisation_title; ?></h2>
+                          <p class="adr">
+                        <?php
+							if($result->sameaddress == 1){ // use organisation's address
+						?>
+                        	<span class="street-address"><?php echo $organisationDetails->organisation_address1; ?></span><br />
+                            <?php if($organisationDetails->organisation_address2 || $organisationDetails->organisation_address3){ ?>
+                            <span class="locality"><?php echo $organisationDetails->organisation_address2; ?> <?php echo $organisationDetails->organisation_address3; ?></span><br />
+                            <?php } ?>
+
+                            <span class="postal-code"><?php echo $organisationDetails->organisation_postal_code; ?></span>                           </p>
+                        <?php  } else { // show own address ?>
+                        	<span class="street-address"><?php echo $result->address1; ?></span><br />
+                            <?php  if($result->address2 || $result->address3){ ?>
+                            <span class="locality"><?php echo $result->address2; ?> <?php echo  $result->address3; ?></span><br />
+                            <?php }  ?>
+                            <span class="postal-code"><?php echo $result->postal_code; ?></span></p>
+  
+                        <?php } ?>
+                        </div>
+    </div>
+<?php
+	$i++;
+	}
+?>

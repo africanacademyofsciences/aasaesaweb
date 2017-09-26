@@ -1,0 +1,159 @@
+/*
+
+HELP SYSTEM CSS
+
+*/
+
+
+div#search_top {
+	background:url('/treeline/img/layout/search_top.gif') no-repeat;
+	height:15px;
+	width:425px;
+	margin-top:5px;
+}
+div#search_bot {
+	background:url('/treeline/img/layout/search_bot.gif') no-repeat;
+	height:15px;
+	width:425px;
+}
+
+
+
+form#search_form{
+	background:url('/treeline/img/layout/search_mid.gif') repeat-y;
+	width:405px;
+	padding:0px 0px 10px 20px;
+	margin:0;
+	border:0;
+}
+form#search_form fieldset {
+	border:0;
+	margin:0;
+	padding:0;
+}
+
+
+
+div#search_page_top {
+	background:url('/treeline/img/layout/search_page_top.gif') no-repeat;
+	height:11px;
+	width:500px;
+	margin-top:20px;
+}
+div#search_page_bot {
+	background:url('/treeline/img/layout/search_page_bot.gif') no-repeat;
+	height:11px;
+	width:500px;
+}
+div#tags_top {
+	background:url('/treeline/img/layout/tags_top.gif') top no-repeat;
+	height:15px;
+	width:500px;
+	margin-top:15px;
+}
+div#tags_mid {
+	width:460px;
+	padding:0px 20px;
+	background-color:#E4EBEB;
+}
+	div#tags_mid p.similar {
+		background:url('/treeline/img/layout/tags_hr.gif') bottom no-repeat;
+		padding-top:3px;
+	}
+div#tags_bot {
+	background:url('/treeline/img/layout/tags_bot.gif') no-repeat;
+	height:15px;
+	width:517px;
+}
+
+
+form#search_page_form{
+	background-color:#fff;
+	width:480px;
+	padding:0;
+	padding-left:20px;
+	margin:0;
+	border:0;
+}
+form#search_page_form fieldset {
+	border:0;
+	margin:0;
+	padding:0;
+}
+
+
+div.search_result {
+	width:497px;
+	background:url('/treeline/img/layout/search_bar.gif') no-repeat top;
+	padding-top:4px;
+	margin-bottom:4px;
+	float:left;
+	clear:both;
+}
+div.search_result span.right {
+	float:right;
+}
+div.search_result a {
+	float:left;
+}
+
+
+div#helptext h3 {
+	text-decoration: underline;
+}
+div#helptext span.link {
+	border-bottom: 1px dotted #0D9A0D;
+	color:#0D9A0D;
+}
+div#helptext p.link {
+	border-bottom: 1px dotted #0D9A0D;
+	color:#0D9A0D;
+}
+
+div#helptext span.button {
+	border: 1px solid #BEC6D9;
+	color:#666699;
+	background-color:#D0D8ED;
+	padding:0px 3px;
+}
+div#helptext p.button {
+	border: 1px solid #BEC6D9;
+	color:#666699;
+	background-color:#D0D8ED;
+	padding:0px;
+}
+
+div#helptext span.important {
+	border: 1px solid #D5D9D9;
+	background-color:#F5FACC;
+	color:#111;
+	padding:0px 3px;
+}
+div#helptext p.important {
+	border: 1px solid #D5D9D9;
+	background-color:#F5FACC;
+	color:#111;
+	padding:0px;
+}
+
+
+
+div.auto_complete {
+	border:1px solid #000000;
+}		
+
+ul.helplist {
+	text-align: left;
+	list-style-type:none;
+	margin:0;
+	padding:0;
+	background-color: #F3F7F7
+}
+ul.helplist li {
+	margin:0;
+	padding-left:5px;
+}
+ul.helplist li.selected {
+	background-color: #FFF
+}
+
